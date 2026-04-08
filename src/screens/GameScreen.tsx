@@ -12,18 +12,18 @@ import Game6Screen from '../games/game6/Game6Screen';
 type Props = NativeStackScreenProps<RootStackParamList, 'Game'>;
 
 export default function GameScreen({ navigation, route }: Props) {
-  const { coin, difficulty, gameId = 'game1' } = route.params;
+  const { coin, difficulty, gameId = 'game1', mode = 'cpu', coin2 } = route.params;
   const startTime = useRef(Date.now());
 
   useEffect(() => {
     startTime.current = Date.now();
-    logEvent('game_start', { gameId, difficulty, mode: 'cpu' });
+    logEvent('game_start', { gameId, difficulty, mode });
   }, [gameId, difficulty]);
 
   const handleGameEnd = (result: 'player' | 'cpu' | 'draw' | 'timeout') => {
     const duration = Date.now() - startTime.current;
     logEvent('game_end', { gameId, result, duration });
-    navigation.replace('Result', { result, coin, mode: 'cpu', gameId, difficulty });
+    navigation.replace('Result', { result, coin, mode, gameId, difficulty });
   };
 
   const handleBack = () => navigation.goBack();
@@ -66,6 +66,6 @@ export default function GameScreen({ navigation, route }: Props) {
     case 'game1':
     default:
       // Game1 reads params from navigation route
-      return <Game1Screen />;
+      return <Game1Screen mode={mode === 'local' ? 'local' : 'cpu'} coin2={coin2} />;
   }
 }

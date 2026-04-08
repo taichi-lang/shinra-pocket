@@ -30,6 +30,7 @@ interface MenuItem {
 
 const MENU_ITEMS: MenuItem[] = [
   { key: 'cpu', labelKey: 'menu.cpu', screen: 'GameSelect', params: { mode: 'cpu' }, primary: true },
+  { key: 'local', labelKey: 'menu.local', screen: 'GameSelect', params: { mode: 'local' }, primary: true },
   { key: 'online', labelKey: 'menu.online', screen: 'GameSelect', params: { mode: 'online' }, primary: true },
   { key: 'ranking', labelKey: 'menu.ranking', screen: 'Ranking' },
   { key: 'shop', labelKey: 'menu.shop', screen: 'Shop' },

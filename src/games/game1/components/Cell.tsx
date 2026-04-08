@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet, View } from 'react-native';
+import React, { useCallback } from 'react';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { COLORS, SIZES } from '../../../utils/theme';
 import { lightTap } from '../../../utils/haptics';
 import type { CellState, CoinType } from '../../../game/types';
@@ -46,22 +46,25 @@ const Cell: React.FC<CellProps> = ({
   else if (isValidTarget) borderColor = COLORS.blue;
   else if (isWinCell) borderColor = COLORS.gold;
 
+  const handlePress = useCallback(() => {
+    lightTap();
+    onPress(index);
+  }, [onPress, index]);
+
   return (
-    <TouchableOpacity
-      activeOpacity={0.7}
-      onPress={() => {
-        lightTap();
-        onPress(index);
-      }}
+    <Pressable
+      onPress={handlePress}
+      delayLongPress={300}
       accessibilityLabel={`マス ${index + 1}`}
       accessibilityRole="button"
-      style={[
+      style={({ pressed }) => [
         styles.cell,
         {
           width: cellSize,
           height: cellSize,
           backgroundColor: bgColor,
           borderColor,
+          opacity: pressed ? 0.7 : 1,
         },
       ]}
     >
@@ -74,7 +77,7 @@ const Cell: React.FC<CellProps> = ({
       ) : isValidTarget ? (
         <View style={styles.validDot} />
       ) : null}
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 

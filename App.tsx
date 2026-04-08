@@ -24,13 +24,13 @@ export type GameId = 'game1' | 'game2' | 'game3' | 'game4' | 'game5' | 'game6';
 export type RootStackParamList = {
   Splash: undefined;
   Menu: undefined;
-  GameSelect: { mode: 'cpu' | 'online' };
-  CoinSelect: { mode: 'cpu' | 'online'; gameId?: GameId };
-  Game: { coin: CoinType; difficulty: 'normal' | 'hard'; gameId?: GameId };
+  GameSelect: { mode: 'cpu' | 'local' | 'online' };
+  CoinSelect: { mode: 'cpu' | 'local' | 'online'; gameId?: GameId };
+  Game: { coin: CoinType; difficulty: 'normal' | 'hard'; gameId?: GameId; mode?: 'cpu' | 'local' | 'online'; coin2?: CoinType };
   Result: {
     result: 'player' | 'cpu' | 'draw' | 'timeout';
     coin: CoinType;
-    mode: 'cpu' | 'online';
+    mode: 'cpu' | 'local' | 'online';
     gameId?: GameId;
     difficulty?: 'normal' | 'hard';
   };

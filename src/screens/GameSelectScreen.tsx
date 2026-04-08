@@ -24,6 +24,8 @@ interface GameItem {
   emoji: string;
   /** Not available in online mode (game3 = 3-player, game6 = single-player puzzle) */
   onlineDisabled?: boolean;
+  /** Not available in local mode (game6 = single-player puzzle) */
+  localDisabled?: boolean;
 }
 
 const GAMES: GameItem[] = [
@@ -64,6 +66,7 @@ const GAMES: GameItem[] = [
     subtitle: t('game.game6.subtitle'),
     emoji: '\uD83E\uDDE9',
     onlineDisabled: true,
+    localDisabled: true,
   },
 ];
 
@@ -79,6 +82,16 @@ export default function GameSelectScreen({ navigation, route }: Props) {
       Alert.alert(
         t('gameSelect.onlineUnavailable'),
         t('gameSelect.onlineUnavailableMessage'),
+        [{ text: t('common.ok'), style: 'cancel' }],
+      );
+      return;
+    }
+
+    // In local mode, game6 (single-player) is unavailable
+    if (mode === 'local' && game.localDisabled) {
+      Alert.alert(
+        t('gameSelect.localUnavailable'),
+        t('gameSelect.localUnavailableMessage'),
         [{ text: t('common.ok'), style: 'cancel' }],
       );
       return;
@@ -122,7 +135,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
         </TouchableOpacity>
         <Text style={styles.title}>{t('gameSelect.title')}</Text>
         <Text style={styles.subtitle}>
-          {mode === 'online' ? t('gameSelect.online') : t('gameSelect.cpu')}
+          {mode === 'online' ? t('gameSelect.online') : mode === 'local' ? t('gameSelect.local') : t('gameSelect.cpu')}
         </Text>
         <Text style={styles.ticketBadge}>
           {'\uD83C\uDFAB'} {ticketLabel}
@@ -138,6 +151,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
           {GAMES.map((game) => {
             const locked = game.id === 'game6' && !isGame6Unlocked();
             const disabledOnline = mode === 'online' && game.onlineDisabled;
+            const disabledLocal = mode === 'local' && game.localDisabled;
 
             return (
               <TouchableOpacity
@@ -145,7 +159,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
                 style={[
                   styles.gameCard,
                   locked && styles.gameCardLocked,
-                  disabledOnline && styles.gameCardDisabled,
+                  (disabledOnline || disabledLocal) && styles.gameCardDisabled,
                 ]}
                 onPress={() => handleGamePress(game)}
                 activeOpacity={0.7}
@@ -157,7 +171,9 @@ export default function GameSelectScreen({ navigation, route }: Props) {
                     ? t('gameSelect.premiumOnly')
                     : disabledOnline
                       ? t('gameSelect.onlineUnavailable')
-                      : game.subtitle}
+                      : disabledLocal
+                        ? t('gameSelect.localUnavailable')
+                        : game.subtitle}
                 </Text>
                 {locked && (
                   <View style={styles.lockOverlay}>
