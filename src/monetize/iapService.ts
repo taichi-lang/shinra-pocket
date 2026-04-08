@@ -127,7 +127,7 @@ export async function initializeIAP(): Promise<void> {
 
     // Set up the global purchase listener
     InAppPurchases.setPurchaseListener(
-      ({ responseCode, results, errorCode }) => {
+      ({ responseCode, results, errorCode }: { responseCode: any; results: any; errorCode: any }) => {
         if (responseCode === IAPResponseCode.OK && results) {
           for (const purchase of results) {
             if (!purchase.acknowledged) {
@@ -144,7 +144,7 @@ export async function initializeIAP(): Promise<void> {
 
               // Finish the transaction (false = non-consumable / subscription)
               InAppPurchases.finishTransactionAsync(purchase, false).catch(
-                (err) =>
+                (err: any) =>
                   console.error(
                     '[IAPService] finishTransaction failed:',
                     err,
@@ -195,7 +195,7 @@ export async function getProducts(): Promise<IAPProduct[]> {
     if (responseCode === IAPResponseCode.OK && results && results.length > 0) {
       // Merge store details into our product definitions
       return PRODUCTS.map((product) => {
-        const storeItem = (results as IAPItemDetails[]).find(
+        const storeItem = (results as any[]).find(
           (r) => r.productId === product.id,
         );
         if (storeItem) {
@@ -286,7 +286,7 @@ export async function restorePurchases(): Promise<string[]> {
     const restored: string[] = [];
 
     if (responseCode === IAPResponseCode.OK && results) {
-      for (const purchase of results as InAppPurchase[]) {
+      for (const purchase of results as any[]) {
         // Check if this is our subscription and it's in a purchased/restored state
         if (
           purchase.productId === PREMIUM_SUBSCRIPTION.id &&

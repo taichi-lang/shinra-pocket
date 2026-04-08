@@ -90,9 +90,9 @@ interface AdServiceState {
   isInitialized: boolean;
   adsRemoved: boolean;
   interstitialShowCount: number;
-  interstitialAd: InterstitialAd | null;
+  interstitialAd: any | null;
   interstitialLoaded: boolean;
-  rewardedAd: RewardedAd | null;
+  rewardedAd: any | null;
   rewardedLoaded: boolean;
 }
 
@@ -161,7 +161,7 @@ export async function loadInterstitial(): Promise<boolean> {
       resolve(true);
     });
 
-    const unsubError = ad.addAdEventListener(AdEventType.ERROR, (error) => {
+    const unsubError = ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
       console.warn('[AdService] Interstitial load error:', error);
       state.interstitialLoaded = false;
       resolve(false);
@@ -242,7 +242,7 @@ export async function loadRewarded(): Promise<boolean> {
       resolve(true);
     });
 
-    const unsubError = ad.addAdEventListener(AdEventType.ERROR, (error) => {
+    const unsubError = ad.addAdEventListener(AdEventType.ERROR, (error: any) => {
       console.warn('[AdService] Rewarded ad load error:', error);
       state.rewardedLoaded = false;
       resolve(false);
@@ -279,7 +279,7 @@ export async function showRewarded(
 
       const unsubEarned = ad.addAdEventListener(
         RewardedAdEventType.EARNED_REWARD,
-        (reward) => {
+        (reward: any) => {
           rewarded = true;
           console.log('[AdService] Reward earned:', reward);
           onRewarded?.({
