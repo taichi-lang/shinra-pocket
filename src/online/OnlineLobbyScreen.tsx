@@ -30,6 +30,7 @@ type ParamList = {
   OnlineLobby: { coin: CoinType };
   OnlineGame: { coin: CoinType; roomId: string; playerId: string };
   Menu: undefined;
+  Shop: undefined;
 };
 
 type Props = NativeStackScreenProps<ParamList, 'OnlineLobby'>;
@@ -72,7 +73,7 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
         'チケット不足',
         'チケットが足りません。ショップで広告を見てチケットを獲得できます。',
         [
-          { text: 'ショップへ', onPress: () => navigation.goBack() },
+          { text: 'ショップへ', onPress: () => navigation.navigate('Shop') },
           { text: '閉じる', onPress: () => navigation.goBack() },
         ],
       );

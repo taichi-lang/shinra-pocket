@@ -244,9 +244,10 @@ const ModeSelect: React.FC<ModeSelectProps> = ({ onStart, onBack }) => {
 interface GameOverProps {
   state: Game6State;
   onRestart: () => void;
+  onBack?: () => void;
 }
 
-const GameOverScreen: React.FC<GameOverProps> = ({ state, onRestart }) => {
+const GameOverScreen: React.FC<GameOverProps> = ({ state, onRestart, onBack }) => {
   const insets = useSafeAreaInsets();
   return (
   <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
@@ -262,6 +263,11 @@ const GameOverScreen: React.FC<GameOverProps> = ({ state, onRestart }) => {
     <TouchableOpacity style={styles.actionBtn} onPress={onRestart}>
       <Text style={styles.actionBtnText}>もう一度</Text>
     </TouchableOpacity>
+    {onBack && (
+      <TouchableOpacity style={styles.gameOverBackBtn} onPress={onBack}>
+        <Text style={styles.gameOverBackBtnText}>メニューに戻る</Text>
+      </TouchableOpacity>
+    )}
   </View>
   );
 };
@@ -344,7 +350,7 @@ const Game6Screen: React.FC<Game6ScreenProps> = ({ onBack }) => {
   }
 
   if (state.phase === 'gameover') {
-    return <GameOverScreen state={state} onRestart={handleRestart} />;
+    return <GameOverScreen state={state} onRestart={handleRestart} onBack={onBack} />;
   }
 
   const config = DIFFICULTY_CONFIGS[state.difficulty];
@@ -699,6 +705,15 @@ const styles = StyleSheet.create({
   resultBox: { alignItems: 'center', marginVertical: 24 },
   resultLabel: { color: COLORS.textSecondary, fontSize: 14, marginTop: 12 },
   resultValue: { color: COLORS.gold, fontSize: 32, ...FONTS.heavy },
+  gameOverBackBtn: {
+    marginTop: 12,
+    paddingHorizontal: 28,
+    paddingVertical: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.textSecondary,
+  },
+  gameOverBackBtnText: { color: COLORS.textSecondary, fontSize: 16, ...FONTS.bold },
 });
 
 export default Game6Screen;

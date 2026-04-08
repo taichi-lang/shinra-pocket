@@ -53,6 +53,13 @@ export default function SerialCodeScreen({ navigation }: Props) {
   const getResultMessage = (): { text: string; color: string } | null => {
     if (!result) return null;
     if (result.success) {
+      // Dev codes have a custom message
+      if (result.devMessage) {
+        return {
+          text: result.devMessage,
+          color: COLORS.gold,
+        };
+      }
       return {
         text: `🎉 チケット ${result.tickets}枚 獲得！`,
         color: COLORS.gold,

@@ -7,7 +7,8 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { addBonusTickets } from './ticketStore';
+import { addBonusTickets, setSubscriber } from './ticketStore';
+import { setAdsRemoved } from './adService';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -20,10 +21,20 @@ interface SerialCode {
   maxRedemptions: number; // total allowed globally (0 = unlimited)
 }
 
+/** Developer promo code type — triggers special actions instead of just tickets. */
+type DevCodeAction = 'premium' | 'reset' | '99tickets';
+
+interface DevCode {
+  code: string;
+  action: DevCodeAction;
+}
+
 export interface RedeemResult {
   success: boolean;
   tickets?: number;
   error?: string;
+  /** Custom message for developer promo codes. */
+  devMessage?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -37,6 +48,13 @@ const BUILTIN_CODES: SerialCode[] = [
   { code: 'SHINRA2026', tickets: 10, expiresAt: '2026-12-31T23:59:59Z', maxRedemptions: 0 },
   { code: 'INSTAGRAM5', tickets: 5, expiresAt: '2026-06-30T23:59:59Z', maxRedemptions: 0 },
   { code: 'LAUNCH3', tickets: 3, expiresAt: '2026-05-31T23:59:59Z', maxRedemptions: 0 },
+];
+
+/** Developer promo codes — always work (no expiry, production-safe). */
+const DEV_CODES: DevCode[] = [
+  { code: 'DEVPREMIUM',   action: 'premium' },
+  { code: 'DEVRESET',     action: 'reset' },
+  { code: 'DEV99TICKETS', action: '99tickets' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -65,6 +83,45 @@ function findBuiltinCode(code: string): SerialCode | undefined {
   return BUILTIN_CODES.find((c) => c.code === code);
 }
 
+function findDevCode(code: string): DevCode | undefined {
+  return DEV_CODES.find((c) => c.code === code);
+}
+
+/**
+ * Execute a developer promo code action.
+ * Dev codes can be redeemed multiple times (no "already redeemed" check).
+ */
+async function executeDevCode(devCode: DevCode): Promise<RedeemResult> {
+  switch (devCode.action) {
+    case 'premium':
+      await setSubscriber(true);
+      setAdsRemoved(true);
+      return {
+        success: true,
+        devMessage: '\u{1F511} 開発者モード: プレミアム有効化',
+      };
+
+    case 'reset':
+      await setSubscriber(false);
+      setAdsRemoved(false);
+      return {
+        success: true,
+        devMessage: '\u{1F504} リセット完了: 無料ユーザーに戻りました',
+      };
+
+    case '99tickets':
+      await addBonusTickets(99);
+      return {
+        success: true,
+        tickets: 99,
+        devMessage: '\u{1F3AB} 99枚のボーナスチケットを獲得！',
+      };
+
+    default:
+      return { success: false, error: 'invalid' };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -79,6 +136,12 @@ export async function redeemCode(rawCode: string): Promise<RedeemResult> {
 
   if (!code) {
     return { success: false, error: 'invalid' };
+  }
+
+  // Dev codes bypass normal redemption flow (can be used multiple times)
+  const devCode = findDevCode(code);
+  if (devCode) {
+    return executeDevCode(devCode);
   }
 
   // Check if already redeemed on this device
