@@ -18,15 +18,31 @@
  */
 
 import { Platform } from 'react-native';
-import MobileAds, {
-  InterstitialAd,
-  RewardedAd,
-  AdEventType,
-  RewardedAdEventType,
-  BannerAdSize,
-  TestIds,
-} from 'react-native-google-mobile-ads';
 import { earnAdTicket } from './ticketStore';
+
+// Lazy-load react-native-google-mobile-ads to avoid crash in Expo Go
+let MobileAds: any = null;
+let InterstitialAd: any = null;
+let RewardedAd: any = null;
+let AdEventType: any = {};
+let RewardedAdEventType: any = {};
+let BannerAdSize: any = {};
+let TestIds: any = { BANNER: '', INTERSTITIAL: '', REWARDED: '' };
+let _adsAvailable = false;
+
+try {
+  const ads = require('react-native-google-mobile-ads');
+  MobileAds = ads.default;
+  InterstitialAd = ads.InterstitialAd;
+  RewardedAd = ads.RewardedAd;
+  AdEventType = ads.AdEventType;
+  RewardedAdEventType = ads.RewardedAdEventType;
+  BannerAdSize = ads.BannerAdSize;
+  TestIds = ads.TestIds;
+  _adsAvailable = true;
+} catch {
+  console.warn('[AdService] react-native-google-mobile-ads not available (Expo Go)');
+}
 
 // ---------------------------------------------------------------------------
 // Ad Unit IDs
