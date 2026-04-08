@@ -307,15 +307,9 @@ export function movePiece(state: Game5State, from: Position, to: Position): Game
   // Check if opponent is in check
   newState.isCheck = isInCheck(newBoard, nextTurn);
 
-  // Check for checkmate
+  // Check for checkmate only — no stalemate/draw (CEO指示)
   if (isCheckmate(newState, nextTurn)) {
-    newState.winner = state.turn; // current player wins
-    newState.phase = 'gameover';
-  }
-
-  // Check for stalemate
-  if (isStalemate(newState, nextTurn)) {
-    newState.winner = 'draw';
+    newState.winner = state.turn;
     newState.phase = 'gameover';
   }
 
@@ -361,13 +355,9 @@ export function dropPiece(
 
   newState.isCheck = isInCheck(newBoard, nextTurn);
 
+  // Checkmate only — no stalemate/draw (CEO指示)
   if (isCheckmate(newState, nextTurn)) {
     newState.winner = state.turn;
-    newState.phase = 'gameover';
-  }
-
-  if (isStalemate(newState, nextTurn)) {
-    newState.winner = 'draw';
     newState.phase = 'gameover';
   }
 

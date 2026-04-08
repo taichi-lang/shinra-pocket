@@ -44,11 +44,6 @@ const PIECE_VALUE: Record<PieceType, number> = {
 function evaluate(state: Game5State, aiSide: Side): number {
   if (state.winner === aiSide) return 10000;
   if (state.winner === opponent(aiSide)) return -10000;
-  if (state.winner === 'draw') return 0;
-
-  // Penalize positions where opponent is stalemated (draw is bad when ahead)
-  if (isStalemate(state, opponent(aiSide))) return 0;
-  if (isStalemate(state, aiSide)) return 0;
 
   let score = 0;
 

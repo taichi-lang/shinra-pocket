@@ -208,8 +208,6 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     ? '勝利！'
     : gameState.winner === cpuSide
     ? '敗北...'
-    : gameState.winner === 'draw'
-    ? '引き分け'
     : '';
 
   return (
@@ -218,10 +216,10 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
       <View style={styles.header}>
         {onBack && (
           <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-            <Text style={styles.backText}>{'\u2190'} \u623B\u308B</Text>
+            <Text style={styles.backText}>← 戻る</Text>
           </TouchableOpacity>
         )}
-        <Text style={styles.title}>\u65E5\u6708\u306E\u6226\u3044</Text>
+        <Text style={styles.title}>日月の戦い</Text>
       </View>
 
       {/* Turn / Status */}
@@ -274,7 +272,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
 
       {/* AI thinking indicator */}
       {mode === 'cpu' && !isPlayerTurn && gameState.phase !== 'gameover' && (
-        <Text style={styles.thinkingText}>CPU\u601D\u8003\u4E2D...</Text>
+        <Text style={styles.thinkingText}>CPU思考中...</Text>
       )}
 
       {/* Controls */}
@@ -286,7 +284,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
 
       {/* Move count */}
       <Text style={styles.moveCount}>
-        \u624B\u6570: {gameState.moveCount}
+        手数: {gameState.moveCount}
       </Text>
 
       {/* Game Over Overlay */}
@@ -296,22 +294,12 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
             <Text
               style={[
                 styles.resultText,
-                gameState.winner === 'draw'
-                  ? styles.resultTextDraw
-                  : mode === 'cpu' && gameState.winner === cpuSide
+                mode === 'cpu' && gameState.winner === cpuSide
                   ? styles.resultTextLoss
                   : undefined,
               ]}
             >
-              {mode === 'cpu'
-                ? gameState.winner === playerSide
-                  ? '勝利！'
-                  : gameState.winner === cpuSide
-                  ? '敗北...'
-                  : '引き分け'
-                : gameState.winner === 'draw'
-                ? '引き分け'
-                : winnerLabel}
+              {gameState.winner === playerSide ? '勝利！' : '敗北...'}
             </Text>
             <View style={styles.overlayButtonRow}>
               <TouchableOpacity onPress={handleReset} style={styles.overlayButton}>

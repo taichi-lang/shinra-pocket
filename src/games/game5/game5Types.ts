@@ -62,7 +62,7 @@ export interface Game5State {
   sunHand: PieceType[];   // captured pieces held by sun
   moonHand: PieceType[];  // captured pieces held by moon
   phase: GamePhase;
-  winner: Side | 'draw' | null;
+  winner: Side | null;
   isCheck: boolean;
   positionHistory: string[];  // kept for compatibility (unused)
   selectedPos: Position | null;
