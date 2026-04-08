@@ -48,7 +48,7 @@ export const MancalaBoard: React.FC<MancalaBoardProps> = ({
           coins={board.pitL}
           enabled={false}
           isGoal
-          label="PIT"
+          label="得点"
           highlight={highlightSlot === 'pitL'}
         />
 
@@ -91,7 +91,7 @@ export const MancalaBoard: React.FC<MancalaBoardProps> = ({
           coins={board.pitR}
           enabled={false}
           isGoal
-          label="PIT"
+          label="得点"
           highlight={highlightSlot === 'pitR'}
         />
       </View>

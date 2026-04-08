@@ -31,7 +31,7 @@ interface RankEntry {
 }
 
 const GAME_TABS = [
-  { key: 'game1', label: 'コインバトル' },
+  { key: 'game1', label: '三目並べ' },
   { key: 'game2', label: '一騎打ち' },
   { key: 'game3', label: '三つ巴' },
   { key: 'game4', label: 'パタパタ' },

@@ -98,8 +98,8 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 13,
     ...FONTS.bold,
-    marginRight: 10,
-    width: 70,
+    marginRight: 8,
+    width: 90,
   },
   piecesRow: {
     flexDirection: 'row',
