@@ -390,11 +390,13 @@ describe('serializePosition', () => {
     expect(s1).toBe(s2);
   });
 
-  it('produces different string after a move', () => {
+  it('returns empty string (deprecated / repetition removed per CEO指示)', () => {
     const state = createInitialState();
     const before = serializePosition(state);
     const after = movePiece(state, pos(0, 0), pos(1, 1));
     const afterStr = serializePosition(after);
-    expect(before).not.toBe(afterStr);
+    // serializePosition is deprecated — always returns ''
+    expect(before).toBe('');
+    expect(afterStr).toBe('');
   });
 });

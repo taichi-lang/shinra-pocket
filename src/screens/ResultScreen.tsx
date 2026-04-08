@@ -80,7 +80,7 @@ export default function ResultScreen({ navigation, route }: Props) {
           style={styles.primaryButton}
           onPress={() => {
             lightTap();
-            navigation.replace('Game', { coin, difficulty, gameId });
+            navigation.replace('Game', { coin, difficulty, gameId, mode });
           }}
           activeOpacity={0.8}
         >
@@ -96,7 +96,7 @@ export default function ResultScreen({ navigation, route }: Props) {
 
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => { lightTap(); navigation.navigate('CoinSelect', { mode }); }}
+          onPress={() => { lightTap(); navigation.navigate('CoinSelect', { mode, gameId }); }}
           activeOpacity={0.7}
         >
           <Text style={styles.secondaryButtonText}>コイン選択に戻る</Text>

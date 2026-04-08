@@ -52,6 +52,7 @@ export default function GameScreen({ navigation, route }: Props) {
         <Game4Screen
           difficulty={difficulty}
           onExit={handleBack}
+          onGameEnd={handleGameEnd}
         />
       );
     case 'game5':
@@ -59,6 +60,7 @@ export default function GameScreen({ navigation, route }: Props) {
         <Game5Screen
           difficulty={difficulty}
           onBack={handleBack}
+          onGameEnd={handleGameEnd}
         />
       );
     case 'game6':

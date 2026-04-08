@@ -37,7 +37,7 @@ export default function SettingsScreen({ navigation }: Props) {
 
   const subscribed = isSubscriptionActive();
   const tickets = getTotalTickets();
-  const ticketLabel = tickets === Infinity ? '\u221E' : `${tickets}`;
+  const ticketLabel = tickets === Infinity ? '∞' : `${tickets}`;
 
   // Load sound preferences from AsyncStorage
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function SettingsScreen({ navigation }: Props) {
           onPress={() => navigation.goBack()}
           style={[styles.backButton, { top: insets.top + 10 }]}
         >
-          <Text style={styles.backText}>{'\u2190'} {language === 'ja' ? '戻る' : 'Back'}</Text>
+          <Text style={styles.backText}>← {language === 'ja' ? '戻る' : 'Back'}</Text>
         </TouchableOpacity>
         <Text style={styles.title}>{t('settings.title')}</Text>
       </View>
@@ -208,7 +208,7 @@ export default function SettingsScreen({ navigation }: Props) {
             <View style={styles.settingRow}>
               <Text style={styles.settingLabel}>{t('settings.tickets')}</Text>
               <Text style={styles.settingValue}>
-                {'\uD83C\uDFAB'} {ticketLabel}{language === 'ja' ? '枚' : ''}
+                {'🎫'} {ticketLabel}{language === 'ja' ? '枚' : ''}
               </Text>
             </View>
           </View>
@@ -235,7 +235,7 @@ export default function SettingsScreen({ navigation }: Props) {
               onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
             >
               <Text style={styles.linkText}>{t('settings.privacy')}</Text>
-              <Text style={styles.linkArrow}>{'\u203A'}</Text>
+              <Text style={styles.linkArrow}>{'›'}</Text>
             </TouchableOpacity>
             <View style={styles.divider} />
             <TouchableOpacity
@@ -243,7 +243,7 @@ export default function SettingsScreen({ navigation }: Props) {
               onPress={() => Linking.openURL(TERMS_URL)}
             >
               <Text style={styles.linkText}>{t('settings.terms')}</Text>
-              <Text style={styles.linkArrow}>{'\u203A'}</Text>
+              <Text style={styles.linkArrow}>{'›'}</Text>
             </TouchableOpacity>
           </View>
         </View>

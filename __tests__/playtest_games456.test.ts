@@ -414,7 +414,7 @@ describe('Game5: Mini Shogi (日月の戦い) — Full Playtest', () => {
    * This is a gameplay/design bug: the AI should avoid creating
    * stalemates when it could pursue checkmate instead.
    */
-  it('BUG: normal AI creates stalemate in 4 moves (reproducer)', () => {
+  it('stalemate position does NOT end game (CEO指示: no stalemate/draw)', () => {
     let state = g5CreateState();
 
     // Sun moves fire to center
@@ -427,17 +427,14 @@ describe('Game5: Mini Shogi (日月の戦い) — Full Playtest', () => {
     state = movePiece(state, { row: 2, col: 2 }, { row: 1, col: 2 });
 
     // Board: __ sk __ / __ mf mw / __ mk __
-    // Sun king at (0,1) has 0 legal actions -> stalemate -> draw
-    expect(state.winner).toBe('draw');
-    expect(state.phase).toBe('gameover');
-    expect(getAllLegalActions(state, 'sun').length).toBe(0);
-    // Sun is NOT in check, confirming this is stalemate not checkmate
-    expect(isInCheck(state.board, 'sun')).toBe(false);
-
-    console.log(
-      'BUG CONFIRMED: Game5 normal AI creates stalemate draw in 4 moves.' +
-      ' The AI capture-priority strategy needs to account for stalemate avoidance.'
-    );
+    // Sun king at (0,1) has no board moves but can drop captured pieces,
+    // and stalemate detection is intentionally disabled per CEO指示
+    expect(state.winner).toBe(null);
+    expect(state.phase).not.toBe('gameover');
+    // Sun can still drop captured pieces, so has legal actions
+    expect(getAllLegalActions(state, 'sun').length).toBeGreaterThan(0);
+    // Sun IS in check from moon's pieces — but not checkmated (can drop to block/escape)
+    expect(isInCheck(state.board, 'sun')).toBe(true);
   });
 });
 

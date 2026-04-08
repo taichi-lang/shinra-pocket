@@ -45,7 +45,7 @@ export default function MenuScreen({ navigation }: Props) {
       setTickets(getTotalTickets());
     }, [])
   );
-  const ticketLabel = tickets === Infinity ? '\u221E' : `${tickets}${t('menu.tickets') || '枚'}`;
+  const ticketLabel = tickets === Infinity ? '∞' : `${tickets}${t('menu.tickets') || '枚'}`;
 
   const handlePress = (item: MenuItem) => {
     if (item.primary) {
@@ -64,7 +64,7 @@ export default function MenuScreen({ navigation }: Props) {
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <Text style={styles.title}>SHINRA POCKET</Text>
         <Text style={styles.subtitle}>{t('menu.selectGame')}</Text>
-        <Text style={styles.ticketBadge}>{'\uD83C\uDFAB'} {ticketLabel}</Text>
+        <Text style={styles.ticketBadge}>{'🎫'} {ticketLabel}</Text>
       </View>
 
       <ScrollView

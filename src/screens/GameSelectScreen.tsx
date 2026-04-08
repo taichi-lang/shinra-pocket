@@ -34,38 +34,38 @@ const GAMES: GameItem[] = [
     id: 'game1',
     title: t('game.game1.title'),
     subtitle: t('game.game1.subtitle'),
-    emoji: '\uD83E\uDE99',
+    emoji: '🪙',
   },
   {
     id: 'game2',
     title: t('game.game2.title'),
     subtitle: t('game.game2.subtitle'),
-    emoji: '\u2694\uFE0F',
+    emoji: '⚔️',
   },
   {
     id: 'game3',
     title: t('game.game3.title'),
     subtitle: t('game.game3.subtitle'),
-    emoji: '\uD83D\uDD31',
+    emoji: '🔱',
     onlineDisabled: true,
   },
   {
     id: 'game4',
     title: t('game.game4.title'),
     subtitle: t('game.game4.subtitle'),
-    emoji: '\uD83E\uDEF3',
+    emoji: '🫳',
   },
   {
     id: 'game5',
     title: t('game.game5.title'),
     subtitle: t('game.game5.subtitle'),
-    emoji: '\u2600\uFE0F',
+    emoji: '☀️',
   },
   {
     id: 'game6',
     title: t('game.game6.title'),
     subtitle: t('game.game6.subtitle'),
-    emoji: '\uD83E\uDDE9',
+    emoji: '🧩',
     onlineDisabled: true,
     localDisabled: true,
   },
@@ -81,7 +81,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
       setTickets(getTotalTickets());
     }, [])
   );
-  const ticketLabel = tickets === Infinity ? '\u221E' : `${tickets}${t('menu.tickets') || '枚'}`;
+  const ticketLabel = tickets === Infinity ? '∞' : `${tickets}${t('menu.tickets') || '枚'}`;
 
   const handleGamePress = (game: GameItem) => {
     // In online mode, game3 (3-player) and game6 (single-player) are unavailable
@@ -120,6 +120,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
         coin: 'fire',
         difficulty: 'normal',
         gameId: game.id,
+        mode,
       });
       return;
     }
@@ -145,7 +146,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
           {mode === 'online' ? t('gameSelect.online') : mode === 'local' ? t('gameSelect.local') : t('gameSelect.cpu')}
         </Text>
         <Text style={styles.ticketBadge}>
-          {'\uD83C\uDFAB'} {ticketLabel}
+          {'🎫'} {ticketLabel}
         </Text>
       </View>
 
@@ -184,7 +185,7 @@ export default function GameSelectScreen({ navigation, route }: Props) {
                 </Text>
                 {locked && (
                   <View style={styles.lockOverlay}>
-                    <Text style={styles.lockIcon}>{'\uD83D\uDD12'}</Text>
+                    <Text style={styles.lockIcon}>{'🔒'}</Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -277,7 +278,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   gameSubtitle: {
-    fontSize: 11,
+    fontSize: 12,
     color: COLORS.textSecondary,
     ...FONTS.regular,
     textAlign: 'center',

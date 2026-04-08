@@ -36,6 +36,7 @@ interface Game5ScreenProps {
   difficulty?: Difficulty;
   playerSide?: Side;
   onBack?: () => void;
+  onGameEnd?: (result: 'player' | 'cpu' | 'draw' | 'timeout') => void;
 }
 
 export const Game5Screen: React.FC<Game5ScreenProps> = ({
@@ -43,6 +44,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
   difficulty = 'normal',
   playerSide = 'sun',
   onBack,
+  onGameEnd,
 }) => {
   const insets = useSafeAreaInsets();
   const [gameState, setGameState] = useState<Game5State>(createInitialState);
@@ -192,6 +194,16 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     },
     [gameState, isPlayerTurn]
   );
+
+  // ─── Notify parent on game end ───
+  useEffect(() => {
+    if (gameState.phase === 'gameover' && gameState.winner && onGameEnd) {
+      const timer = setTimeout(() => {
+        onGameEnd(gameState.winner === playerSide ? 'player' : 'cpu');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.phase, gameState.winner, playerSide, onGameEnd]);
 
   // ─── Reset ───
   const handleReset = useCallback(() => {

@@ -36,6 +36,7 @@ interface Game4ScreenProps {
   difficulty?: Difficulty;
   humanSide?: Player;
   onExit?: () => void;
+  onGameEnd?: (result: 'player' | 'cpu' | 'draw' | 'timeout') => void;
 }
 
 const Game4Screen: React.FC<Game4ScreenProps> = ({
@@ -43,6 +44,7 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
   difficulty = 'normal',
   humanSide = 'A',
   onExit,
+  onGameEnd,
 }) => {
   const insets = useSafeAreaInsets();
   const [state, setState] = useState<Game4State>(() =>
@@ -232,6 +234,21 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
     setInputLocked(false);
     setHighlightSlot(null);
   }, [mode, difficulty, humanSide]);
+
+  // Notify parent when game ends (for ResultScreen navigation)
+  useEffect(() => {
+    if (state.winner && onGameEnd) {
+      const timer = setTimeout(() => {
+        if (mode === 'cpu') {
+          onGameEnd(state.winner === humanSide ? 'player' : 'cpu');
+        } else {
+          // In local mode, player A winning counts as 'player'
+          onGameEnd(state.winner === 'A' ? 'player' : 'cpu');
+        }
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [state.winner, mode, humanSide, onGameEnd]);
 
   // Determine input enabled
   const inputEnabled =

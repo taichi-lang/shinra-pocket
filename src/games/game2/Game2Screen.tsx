@@ -495,6 +495,11 @@ export default function Game2Screen({
             <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
               <Text style={styles.resetBtnText}>もう一度</Text>
             </TouchableOpacity>
+            {onBack && (
+              <TouchableOpacity style={styles.backBtn2} onPress={onBack}>
+                <Text style={styles.backBtn2Text}>戻る</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       )}
@@ -698,5 +703,18 @@ const styles = StyleSheet.create({
     color: COLORS.bg,
     fontSize: 16,
     ...FONTS.heavy,
+  },
+  backBtn2: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.textSecondary,
+  },
+  backBtn2Text: {
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    ...FONTS.bold,
   },
 });

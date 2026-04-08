@@ -54,18 +54,18 @@ export default function SerialCodeScreen({ navigation }: Props) {
     if (!result) return null;
     if (result.success) {
       return {
-        text: `\uD83C\uDF89 \u30C1\u30B1\u30C3\u30C8 ${result.tickets}\u679A \u7372\u5F97\uFF01`,
+        text: `🎉 チケット ${result.tickets}枚 獲得！`,
         color: COLORS.gold,
       };
     }
     switch (result.error) {
       case 'already_redeemed':
-        return { text: '\u3053\u306E\u30B3\u30FC\u30C9\u306F\u65E2\u306B\u4F7F\u7528\u6E08\u307F\u3067\u3059', color: COLORS.orange };
+        return { text: 'このコードは既に使用済みです', color: COLORS.orange };
       case 'expired':
-        return { text: '\u3053\u306E\u30B3\u30FC\u30C9\u306F\u671F\u9650\u5207\u308C\u3067\u3059', color: COLORS.red };
+        return { text: 'このコードは期限切れです', color: COLORS.red };
       case 'invalid':
       default:
-        return { text: '\u7121\u52B9\u306A\u30B3\u30FC\u30C9\u3067\u3059', color: COLORS.red };
+        return { text: '無効なコードです', color: COLORS.red };
     }
   };
 
@@ -79,11 +79,11 @@ export default function SerialCodeScreen({ navigation }: Props) {
       {/* Header */}
       <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Text style={styles.backText}>{'\u2190'} \u623B\u308B</Text>
+          <Text style={styles.backText}>← 戻る</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>{'\uD83C\uDF81'} \u30B7\u30EA\u30A2\u30EB\u30B3\u30FC\u30C9</Text>
+        <Text style={styles.title}>🎁 シリアルコード</Text>
         <Text style={styles.subtitle}>
-          SNS\u3067\u914D\u5E03\u3055\u308C\u305F\u30B3\u30FC\u30C9\u3092\u5165\u529B\u3057\u3066\u30C1\u30B1\u30C3\u30C8\u3092\u7372\u5F97\u3057\u3088\u3046
+          SNSで配布されたコードを入力してチケットを獲得しよう
         </Text>
       </View>
 
@@ -91,7 +91,7 @@ export default function SerialCodeScreen({ navigation }: Props) {
       <View style={styles.inputArea}>
         <TextInput
           style={styles.input}
-          placeholder={'\u30B3\u30FC\u30C9\u3092\u5165\u529B'}
+          placeholder={'コードを入力'}
           placeholderTextColor={COLORS.textMuted}
           value={code}
           onChangeText={(t) => {
@@ -114,7 +114,7 @@ export default function SerialCodeScreen({ navigation }: Props) {
           {loading ? (
             <ActivityIndicator color={COLORS.bg} size="small" />
           ) : (
-            <Text style={styles.redeemBtnText}>{'\u30B3\u30FC\u30C9\u3092\u4F7F\u3046'}</Text>
+            <Text style={styles.redeemBtnText}>コードを使う</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     ...FONTS.heavy,
   },
   subtitle: {
-    fontSize: 13,
+    fontSize: 14,
     color: COLORS.textSecondary,
     marginTop: 10,
     textAlign: 'center',
