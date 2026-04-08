@@ -6,3 +6,5 @@ dist/
 .expo/
 server/node_modules/
 server/dist/
+server/firebase-admin-sdk.json
+*-firebase-adminsdk-*.json
