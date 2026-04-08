@@ -1,0 +1,480 @@
+// ============================
+// Game5: 日月の戦い — Main Screen
+// ============================
+
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import { COLORS, SIZES, FONTS } from '../../utils/theme';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  Game5State,
+  Position,
+  PieceType,
+  Side,
+  Difficulty,
+  GameMode,
+  SIDE_EMOJI,
+} from './game5Types';
+import {
+  createInitialState,
+  getValidMoves,
+  getValidDropsForPiece,
+  movePiece,
+  dropPiece,
+} from './game5Logic';
+import { getAIMove } from './game5AI';
+import ShogiBoard from './components/ShogiBoard';
+import HandPieces from './components/HandPieces';
+
+interface Game5ScreenProps {
+  mode?: GameMode;
+  difficulty?: Difficulty;
+  playerSide?: Side;
+  onBack?: () => void;
+}
+
+export const Game5Screen: React.FC<Game5ScreenProps> = ({
+  mode = 'cpu',
+  difficulty = 'normal',
+  playerSide = 'sun',
+  onBack,
+}) => {
+  const insets = useSafeAreaInsets();
+  const [gameState, setGameState] = useState<Game5State>(createInitialState);
+  const [showCheckAlert, setShowCheckAlert] = useState(false);
+  const aiThinking = useRef(false);
+  const gameStateRef = useRef(gameState);
+  gameStateRef.current = gameState;
+
+  const cpuSide: Side = playerSide === 'sun' ? 'moon' : 'sun';
+  const isPlayerTurn =
+    mode === 'local' || gameState.turn === playerSide;
+
+  // ─── Check alert ───
+  useEffect(() => {
+    if (gameState.isCheck && gameState.phase !== 'gameover') {
+      setShowCheckAlert(true);
+      const timer = setTimeout(() => setShowCheckAlert(false), 1500);
+      return () => clearTimeout(timer);
+    }
+    setShowCheckAlert(false);
+  }, [gameState.isCheck, gameState.moveCount]);
+
+  // ─── AI turn ───
+  useEffect(() => {
+    if (mode !== 'cpu') return;
+    if (gameState.turn !== cpuSide) return;
+    if (gameState.phase === 'gameover') return;
+    if (aiThinking.current) return;
+
+    aiThinking.current = true;
+    const timer = setTimeout(() => {
+      try {
+        const action = getAIMove(gameStateRef.current, cpuSide, difficulty);
+        setGameState(prev => {
+          if (action.kind === 'move') {
+            return movePiece(prev, action.from, action.to);
+          } else {
+            return dropPiece(prev, action.piece, action.to);
+          }
+        });
+      } catch {
+        // No legal moves - shouldn't happen if checkmate detected properly
+      }
+      aiThinking.current = false;
+    }, 600);
+
+    return () => {
+      clearTimeout(timer);
+      aiThinking.current = false;
+    };
+  }, [gameState.turn, gameState.phase, mode, cpuSide, difficulty]);
+
+  // ─── Board cell press ───
+  const handleCellPress = useCallback(
+    (pos: Position) => {
+      if (gameState.phase === 'gameover') return;
+      if (!isPlayerTurn) return;
+
+      const { board, selectedPos, selectedHandPiece, validMoves } = gameState;
+      const cell = board[pos.row][pos.col];
+
+      // If a hand piece is selected and this is a valid drop target
+      if (selectedHandPiece !== null) {
+        const isValidDrop = validMoves.some(
+          p => p.row === pos.row && p.col === pos.col
+        );
+        if (isValidDrop) {
+          setGameState(prev => dropPiece(prev, selectedHandPiece, pos));
+          return;
+        }
+        // Deselect hand piece if clicking elsewhere
+        setGameState(prev => ({
+          ...prev,
+          selectedHandPiece: null,
+          validMoves: [],
+          phase: 'select',
+        }));
+        // Fall through to possibly select a board piece
+      }
+
+      // If a board piece is selected and clicking a valid move target
+      if (selectedPos !== null) {
+        const isValidTarget = validMoves.some(
+          p => p.row === pos.row && p.col === pos.col
+        );
+        if (isValidTarget) {
+          setGameState(prev => movePiece(prev, selectedPos, pos));
+          return;
+        }
+      }
+
+      // Select own piece on the board
+      if (cell && cell.side === gameState.turn) {
+        const moves = getValidMoves(board, pos);
+        setGameState(prev => ({
+          ...prev,
+          selectedPos: pos,
+          selectedHandPiece: null,
+          validMoves: moves,
+          phase: 'move',
+        }));
+        return;
+      }
+
+      // Deselect
+      setGameState(prev => ({
+        ...prev,
+        selectedPos: null,
+        selectedHandPiece: null,
+        validMoves: [],
+        phase: 'select',
+      }));
+    },
+    [gameState, isPlayerTurn]
+  );
+
+  // ─── Hand piece press ───
+  const handleHandPiecePress = useCallback(
+    (pieceType: PieceType) => {
+      if (gameState.phase === 'gameover') return;
+      if (!isPlayerTurn) return;
+
+      // Toggle selection
+      if (gameState.selectedHandPiece === pieceType) {
+        setGameState(prev => ({
+          ...prev,
+          selectedHandPiece: null,
+          selectedPos: null,
+          validMoves: [],
+          phase: 'select',
+        }));
+        return;
+      }
+
+      const drops = getValidDropsForPiece(
+        gameState.board,
+        gameState.turn,
+        pieceType
+      );
+      setGameState(prev => ({
+        ...prev,
+        selectedHandPiece: pieceType,
+        selectedPos: null,
+        validMoves: drops,
+        phase: 'drop',
+      }));
+    },
+    [gameState, isPlayerTurn]
+  );
+
+  // ─── Reset ───
+  const handleReset = useCallback(() => {
+    setGameState(createInitialState());
+    aiThinking.current = false;
+  }, []);
+
+  // ─── Render ───
+  const turnLabel = gameState.turn === 'sun'
+    ? `${SIDE_EMOJI.sun} \u304A\u65E5\u69D8\u306E\u756A`
+    : `${SIDE_EMOJI.moon} \u6708\u306E\u756A`;
+
+  const winnerLabel = gameState.winner === 'sun'
+    ? `${SIDE_EMOJI.sun} \u304A\u65E5\u69D8\u306E\u52DD\u3061\uFF01`
+    : gameState.winner === 'moon'
+    ? `${SIDE_EMOJI.moon} \u6708\u306E\u52DD\u3061\uFF01`
+    : gameState.winner === 'draw'
+    ? '\u5F15\u304D\u5206\u3051\uFF08\u5343\u65E5\u624B\uFF09'
+    : '';
+
+  return (
+    <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
+      {/* Header */}
+      <View style={styles.header}>
+        {onBack && (
+          <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+            <Text style={styles.backText}>{'\u2190'} \u623B\u308B</Text>
+          </TouchableOpacity>
+        )}
+        <Text style={styles.title}>\u65E5\u6708\u306E\u6226\u3044</Text>
+      </View>
+
+      {/* Turn / Status */}
+      <View style={styles.statusRow}>
+        {gameState.phase === 'gameover' ? (
+          <Text style={styles.statusWinner}>{winnerLabel}</Text>
+        ) : (
+          <Text style={styles.statusTurn}>{turnLabel}</Text>
+        )}
+      </View>
+
+      {/* Check Alert */}
+      {showCheckAlert && (
+        <View style={styles.checkAlert}>
+          <Text style={styles.checkAlertText}>\u{2757} \u738B\u624B\uFF01</Text>
+        </View>
+      )}
+
+      {/* Moon hand (top) */}
+      <HandPieces
+        hand={gameState.moonHand}
+        side="moon"
+        isActive={gameState.turn === 'moon' && isPlayerTurn}
+        selectedPiece={
+          gameState.turn === 'moon' ? gameState.selectedHandPiece : null
+        }
+        onPiecePress={handleHandPiecePress}
+      />
+
+      {/* Board */}
+      <View style={styles.boardContainer}>
+        <ShogiBoard
+          board={gameState.board}
+          selectedPos={gameState.selectedPos}
+          validMoves={gameState.validMoves}
+          onCellPress={handleCellPress}
+        />
+      </View>
+
+      {/* Sun hand (bottom) */}
+      <HandPieces
+        hand={gameState.sunHand}
+        side="sun"
+        isActive={gameState.turn === 'sun' && isPlayerTurn}
+        selectedPiece={
+          gameState.turn === 'sun' ? gameState.selectedHandPiece : null
+        }
+        onPiecePress={handleHandPiecePress}
+      />
+
+      {/* AI thinking indicator */}
+      {mode === 'cpu' && !isPlayerTurn && gameState.phase !== 'gameover' && (
+        <Text style={styles.thinkingText}>CPU\u601D\u8003\u4E2D...</Text>
+      )}
+
+      {/* Controls */}
+      <View style={styles.controls}>
+        <TouchableOpacity onPress={handleReset} style={styles.resetBtn}>
+          <Text style={styles.resetText}>{'\u{1F504}'} 最初から</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Move count */}
+      <Text style={styles.moveCount}>
+        \u624B\u6570: {gameState.moveCount}
+      </Text>
+
+      {/* Game Over Overlay */}
+      {gameState.phase === 'gameover' && gameState.winner && (
+        <View style={styles.overlay}>
+          <View style={styles.resultBox}>
+            <Text
+              style={[
+                styles.resultText,
+                gameState.winner === 'draw'
+                  ? styles.resultTextDraw
+                  : mode === 'cpu' && gameState.winner === cpuSide
+                  ? styles.resultTextLoss
+                  : undefined,
+              ]}
+            >
+              {mode === 'cpu'
+                ? gameState.winner === playerSide
+                  ? '勝利！'
+                  : gameState.winner === cpuSide
+                  ? '敗北...'
+                  : '引き分け'
+                : gameState.winner === 'draw'
+                ? '引き分け'
+                : winnerLabel}
+            </Text>
+            <View style={styles.overlayButtonRow}>
+              <TouchableOpacity onPress={handleReset} style={styles.overlayButton}>
+                <Text style={styles.overlayButtonText}>もう一度</Text>
+              </TouchableOpacity>
+              {onBack && (
+                <TouchableOpacity onPress={onBack} style={styles.overlayButtonSecondary}>
+                  <Text style={styles.overlayButtonSecondaryText}>戻る</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.bg,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    width: '100%',
+  },
+  backBtn: {
+    marginRight: 12,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    minWidth: 44,
+    minHeight: 44,
+    justifyContent: 'center',
+  },
+  backText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+  },
+  title: {
+    color: COLORS.textPrimary,
+    fontSize: 22,
+    ...FONTS.heavy,
+  },
+  statusRow: {
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  statusTurn: {
+    color: COLORS.gold,
+    fontSize: 18,
+    ...FONTS.bold,
+  },
+  statusWinner: {
+    color: COLORS.red,
+    fontSize: 20,
+    ...FONTS.heavy,
+  },
+  checkAlert: {
+    backgroundColor: 'rgba(255, 50, 50, 0.2)',
+    borderColor: COLORS.red,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginBottom: 6,
+  },
+  checkAlertText: {
+    color: COLORS.red,
+    fontSize: 18,
+    ...FONTS.heavy,
+  },
+  boardContainer: {
+    marginVertical: 12,
+    alignItems: 'center',
+  },
+  thinkingText: {
+    color: COLORS.textSecondary,
+    fontSize: 14,
+    marginTop: 4,
+  },
+  controls: {
+    flexDirection: 'row',
+    marginTop: 16,
+    gap: 12,
+  },
+  resetBtn: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
+  },
+  resetText: {
+    color: COLORS.textPrimary,
+    fontSize: 15,
+    ...FONTS.bold,
+  },
+  moveCount: {
+    color: COLORS.textMuted,
+    fontSize: 12,
+    marginTop: 12,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 100,
+  },
+  resultBox: {
+    backgroundColor: COLORS.bg,
+    borderRadius: 20,
+    padding: 32,
+    borderWidth: 2,
+    borderColor: COLORS.gold,
+    alignItems: 'center',
+  },
+  resultText: {
+    color: COLORS.gold,
+    fontSize: 32,
+    ...FONTS.heavy,
+    marginBottom: 24,
+  },
+  resultTextLoss: {
+    color: '#ff4444',
+  },
+  resultTextDraw: {
+    color: COLORS.blue,
+  },
+  overlayButtonRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  overlayButton: {
+    backgroundColor: COLORS.gold,
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 10,
+  },
+  overlayButtonText: {
+    color: COLORS.bg,
+    fontSize: 16,
+    ...FONTS.heavy,
+  },
+  overlayButtonSecondary: {
+    paddingVertical: 10,
+    paddingHorizontal: 28,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.textSecondary,
+  },
+  overlayButtonSecondaryText: {
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    ...FONTS.bold,
+  },
+});
+
+export default Game5Screen;

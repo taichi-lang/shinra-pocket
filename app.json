@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Shinra Pocket",
+    "slug": "shinra-pocket",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0d0820"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shinrapocket.game",
+      "infoPlist": {
+        "UIBackgroundModes": []
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0d0820"
+      },
+      "package": "com.shinrapocket.game"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-asset",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-6631407651376127~3867342442",
+          "iosAppId": "ca-app-pub-6631407651376127~9613224221"
+        }
+      ],
+      "expo-in-app-purchases"
+    ]
+  }
+}

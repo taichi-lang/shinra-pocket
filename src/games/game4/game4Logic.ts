@@ -1,0 +1,165 @@
+// ============================================================
+// Game4: パタパタ (Mancala) — Core Game Logic
+// ============================================================
+
+import {
+  BoardState,
+  Player,
+  SowResult,
+  SowStep,
+  createInitialBoard,
+} from './game4Types';
+
+// ---------- Circulation order ----------
+// Each entry is a key into BoardState or a helper label.
+// Player A: A1(a0)->A2(a1)->A3(a2)->PIT_R->B3(b2)->B2(b1)->B1(b0)->PIT_L -> ...
+// Player B: B1(b0)->B2(b1)->B3(b2)->PIT_L->A3(a2)->A2(a1)->A1(a0)->PIT_R -> ...
+
+type Slot = 'a0' | 'a1' | 'a2' | 'pitR' | 'b2' | 'b1' | 'b0' | 'pitL';
+
+const CYCLE_A: Slot[] = ['a0', 'a1', 'a2', 'pitR', 'b2', 'b1', 'b0', 'pitL'];
+const CYCLE_B: Slot[] = ['b0', 'b1', 'b2', 'pitL', 'a2', 'a1', 'a0', 'pitR'];
+
+function getCycle(player: Player): Slot[] {
+  return player === 'A' ? CYCLE_A : CYCLE_B;
+}
+
+// ---------- Board helpers ----------
+
+/** Deep clone a board */
+export function cloneBoard(b: BoardState): BoardState {
+  return {
+    a: [...b.a] as [number, number, number],
+    b: [...b.b] as [number, number, number],
+    pitL: b.pitL,
+    pitR: b.pitR,
+  };
+}
+
+function getSlotValue(board: BoardState, slot: Slot): number {
+  switch (slot) {
+    case 'a0': return board.a[0];
+    case 'a1': return board.a[1];
+    case 'a2': return board.a[2];
+    case 'b0': return board.b[0];
+    case 'b1': return board.b[1];
+    case 'b2': return board.b[2];
+    case 'pitL': return board.pitL;
+    case 'pitR': return board.pitR;
+  }
+}
+
+function setSlotValue(board: BoardState, slot: Slot, value: number): void {
+  switch (slot) {
+    case 'a0': board.a[0] = value; break;
+    case 'a1': board.a[1] = value; break;
+    case 'a2': board.a[2] = value; break;
+    case 'b0': board.b[0] = value; break;
+    case 'b1': board.b[1] = value; break;
+    case 'b2': board.b[2] = value; break;
+    case 'pitL': board.pitL = value; break;
+    case 'pitR': board.pitR = value; break;
+  }
+}
+
+function incSlot(board: BoardState, slot: Slot): void {
+  setSlotValue(board, slot, getSlotValue(board, slot) + 1);
+}
+
+// ---------- Public API ----------
+
+/**
+ * Get valid pit indices (0-2) for the given player.
+ * A pit is valid if it has at least 1 coin.
+ */
+export function getValidPits(board: BoardState, player: Player): number[] {
+  const pits = player === 'A' ? board.a : board.b;
+  const valid: number[] = [];
+  for (let i = 0; i < 3; i++) {
+    if (pits[i] > 0) valid.push(i);
+  }
+  return valid;
+}
+
+/**
+ * Sow seeds from the chosen pit index (0-2) for the current player.
+ * Returns the new board, whether an extra turn is earned, and animation steps.
+ */
+export function sowSeeds(
+  board: BoardState,
+  player: Player,
+  pitIndex: number,
+): SowResult {
+  const newBoard = cloneBoard(board);
+  const cycle = getCycle(player);
+
+  // The starting slot in cycle
+  const startSlotId = player === 'A'
+    ? (`a${pitIndex}` as Slot)
+    : (`b${pitIndex}` as Slot);
+
+  // Pick up all coins
+  const coins = getSlotValue(newBoard, startSlotId);
+  if (coins === 0) {
+    return { board: newBoard, extraTurn: false, steps: [] };
+  }
+  setSlotValue(newBoard, startSlotId, 0);
+
+  // Find start position in cycle (the slot AFTER the picked-up slot)
+  const startIdx = cycle.indexOf(startSlotId);
+  const steps: SowStep[] = [];
+
+  let lastSlot: Slot = startSlotId;
+  for (let i = 0; i < coins; i++) {
+    const idx = (startIdx + 1 + i) % cycle.length;
+    const slot = cycle[idx];
+    incSlot(newBoard, slot);
+    lastSlot = slot;
+    steps.push({
+      target: slot,
+      boardAfter: cloneBoard(newBoard),
+    });
+  }
+
+  // Extra turn only if last coin landed in the player's OWN store pit
+  const ownPit: Slot = player === 'A' ? 'pitR' : 'pitL';
+  const extraTurn = lastSlot === ownPit;
+
+  return { board: newBoard, extraTurn, steps };
+}
+
+/**
+ * Check if the given player has won (all 3 of their pits are empty).
+ */
+export function checkWinner(board: BoardState): Player | null {
+  const aEmpty = board.a[0] === 0 && board.a[1] === 0 && board.a[2] === 0;
+  const bEmpty = board.b[0] === 0 && board.b[1] === 0 && board.b[2] === 0;
+
+  if (aEmpty) return 'A';
+  if (bEmpty) return 'B';
+  return null;
+}
+
+/**
+ * Check if current player gets extra turn based on last sow result.
+ */
+export function checkExtraTurn(result: SowResult): boolean {
+  return result.extraTurn;
+}
+
+/**
+ * Count total coins on one side.
+ */
+export function sideTotal(board: BoardState, player: Player): number {
+  const pits = player === 'A' ? board.a : board.b;
+  return pits[0] + pits[1] + pits[2];
+}
+
+/**
+ * Get the opponent of the given player.
+ */
+export function opponent(player: Player): Player {
+  return player === 'A' ? 'B' : 'A';
+}
+
+export { createInitialBoard };

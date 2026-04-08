@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shinra Pocket - Admin Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a1a;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1a1a3e 0%, #0d0d2b 100%);
+      border-bottom: 1px solid #2a2a5a;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h1 {
+      font-size: 20px;
+      color: #00d4ff;
+      letter-spacing: 1px;
+    }
+    .header .status {
+      font-size: 13px;
+      color: #888;
+    }
+    .header .status .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #00ff88;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── Auth overlay ── */
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .auth-box {
+      background: #1a1a3e;
+      border: 1px solid #2a2a5a;
+      border-radius: 12px;
+      padding: 32px;
+      text-align: center;
+      width: 360px;
+    }
+    .auth-box h2 { color: #00d4ff; margin-bottom: 16px; }
+    .auth-box input {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0d0d2b;
+      border: 1px solid #2a2a5a;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .auth-box button {
+      width: 100%;
+      padding: 10px;
+      background: #00d4ff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .auth-box button:hover { background: #00b8e0; }
+    .auth-error { color: #ff4444; font-size: 13px; margin-top: 8px; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      background: #111133;
+      border-bottom: 1px solid #2a2a5a;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #888;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+    .tab:hover { color: #ccc; }
+    .tab.active { color: #00d4ff; border-bottom-color: #00d4ff; }
+
+    /* ── Content ── */
+    .content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Stats cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #1a1a3e 0%, #151535 100%);
+      border: 1px solid #2a2a5a;
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .stat-card .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+    .stat-card .value { font-size: 32px; font-weight: 700; color: #00d4ff; margin-top: 4px; }
+    .stat-card .sub { font-size: 12px; color: #666; margin-top: 4px; }
+
+    /* ── Tables ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #111133;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      background: #1a1a3e;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #888;
+      border-bottom: 1px solid #2a2a5a;
+    }
+    td {
+      padding: 10px 16px;
+      font-size: 14px;
+      border-bottom: 1px solid #1a1a3e;
+    }
+    tr:hover td { background: #1a1a3e; }
+
+    /* ── Forms ── */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px 14px;
+      background: #0d0d2b;
+      border: 1px solid #2a2a5a;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 14px;
+    }
+    .form-group textarea { resize: vertical; min-height: 60px; }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary { background: #00d4ff; color: #000; }
+    .btn-primary:hover { background: #00b8e0; }
+    .btn-danger { background: #ff4444; color: #fff; }
+    .btn-danger:hover { background: #cc3333; }
+    .btn-success { background: #00ff88; color: #000; }
+    .btn-success:hover { background: #00cc6e; }
+    .btn-warning { background: #ffaa00; color: #000; }
+    .btn-warning:hover { background: #dd9500; }
+
+    .inline-flex { display: flex; gap: 8px; align-items: center; }
+    .section { margin-bottom: 32px; }
+    .section h3 { font-size: 16px; color: #ccc; margin-bottom: 12px; border-left: 3px solid #00d4ff; padding-left: 12px; }
+
+    .search-bar {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .search-bar input { flex: 1; }
+
+    .pagination {
+      display: flex; gap: 8px; justify-content: center; margin-top: 16px;
+    }
+    .pagination button {
+      padding: 6px 14px;
+      background: #1a1a3e;
+      border: 1px solid #2a2a5a;
+      border-radius: 6px;
+      color: #e0e0e0;
+      cursor: pointer;
+    }
+    .pagination button:hover { background: #2a2a5a; }
+    .pagination button:disabled { opacity: 0.4; cursor: default; }
+    .pagination span { line-height: 32px; color: #888; font-size: 13px; }
+
+    .toast {
+      position: fixed;
+      bottom: 24px; right: 24px;
+      background: #1a1a3e;
+      border: 1px solid #00d4ff;
+      border-radius: 8px;
+      padding: 12px 20px;
+      color: #e0e0e0;
+      font-size: 14px;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green { background: rgba(0,255,136,0.15); color: #00ff88; }
+    .badge-red { background: rgba(255,68,68,0.15); color: #ff4444; }
+    .badge-yellow { background: rgba(255,170,0,0.15); color: #ffaa00; }
+
+    .maintenance-toggle {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .toggle-switch {
+      position: relative;
+      width: 50px; height: 26px;
+      background: #333;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle-switch.on { background: #00d4ff; }
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 22px; height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      top: 2px; left: 2px;
+      transition: transform 0.3s;
+    }
+    .toggle-switch.on::after { transform: translateX(24px); }
+
+    .user-actions button {
+      padding: 4px 10px;
+      font-size: 12px;
+      margin-left: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .content { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Auth Overlay -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <h2>SHINRA POCKET</h2>
+    <p style="color:#888; margin-bottom:16px; font-size:13px;">Admin API Key</p>
+    <input type="password" id="apiKeyInput" placeholder="API Key" autofocus>
+    <button onclick="authenticate()">Login</button>
+    <div class="auth-error" id="authError"></div>
+  </div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <h1>SHINRA POCKET ADMIN</h1>
+  <div class="status">
+    <span class="dot" id="statusDot"></span>
+    <span id="statusText">接続中...</span>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">ダッシュボード</div>
+  <div class="tab" data-tab="users" onclick="switchTab('users')">ユーザー管理</div>
+  <div class="tab" data-tab="maintenance" onclick="switchTab('maintenance')">メンテナンス</div>
+  <div class="tab" data-tab="codes" onclick="switchTab('codes')">シリアルコード</div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- Dashboard Panel -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="label">総ユーザー数</div>
+        <div class="value" id="statTotalUsers">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">本日のアクティブ</div>
+        <div class="value" id="statActiveToday">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">総対戦数</div>
+        <div class="value" id="statTotalGames">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">オンライン</div>
+        <div class="value" id="statOnline">-</div>
+        <div class="sub">リアルタイム接続</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">サーバー稼働時間</div>
+        <div class="value" id="statUptime">-</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>サーバーアナウンス送信</h3>
+      <div class="form-group">
+        <label>メッセージ</label>
+        <input type="text" id="broadcastMsg" placeholder="アナウンス内容...">
+      </div>
+      <div class="form-group">
+        <label>タイプ</label>
+        <select id="broadcastType">
+          <option value="info">情報</option>
+          <option value="warning">警告</option>
+          <option value="maintenance">メンテナンス</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="sendBroadcast()">送信</button>
+    </div>
+  </div>
+
+  <!-- Users Panel -->
+  <div class="panel" id="panel-users">
+    <div class="search-bar">
+      <input type="text" id="userSearch" placeholder="ユーザー名で検索..." onkeydown="if(event.key==='Enter')searchUsers()">
+      <button class="btn btn-primary" onclick="searchUsers()">検索</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ユーザー名</th>
+          <th>レーティング</th>
+          <th>勝</th>
+          <th>敗</th>
+          <th>状態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody">
+        <tr><td colspan="6" style="text-align:center;color:#666">読み込み中...</td></tr>
+      </tbody>
+    </table>
+    <div class="pagination">
+      <button onclick="changePage(-1)" id="prevPageBtn" disabled>前へ</button>
+      <span id="pageInfo">1 / 1</span>
+      <button onclick="changePage(1)" id="nextPageBtn" disabled>次へ</button>
+    </div>
+  </div>
+
+  <!-- Maintenance Panel -->
+  <div class="panel" id="panel-maintenance">
+    <div class="section">
+      <h3>メンテナンスモード</h3>
+      <div class="maintenance-toggle">
+        <div class="toggle-switch" id="maintenanceToggle" onclick="toggleMaintenance()"></div>
+        <span id="maintenanceLabel">無効</span>
+      </div>
+      <div class="form-group">
+        <label>メンテナンスメッセージ</label>
+        <textarea id="maintenanceMsg" placeholder="メンテナンス中のメッセージ..."></textarea>
+      </div>
+      <button class="btn btn-warning" onclick="updateMaintenance()">更新</button>
+    </div>
+  </div>
+
+  <!-- Codes Panel -->
+  <div class="panel" id="panel-codes">
+    <div class="section">
+      <h3>シリアルコード作成</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label>コード</label>
+          <input type="text" id="codeInput" placeholder="SHINRA-2026">
+        </div>
+        <div class="form-group">
+          <label>チケット数</label>
+          <input type="number" id="codeTickets" placeholder="10" min="1">
+        </div>
+        <div class="form-group">
+          <label>有効期限</label>
+          <input type="datetime-local" id="codeExpires">
+        </div>
+        <div class="form-group">
+          <label>最大利用回数 (0 = 無制限)</label>
+          <input type="number" id="codeMaxRedemptions" placeholder="0" min="0">
+        </div>
+      </div>
+      <button class="btn btn-success" onclick="createCode()">コード作成</button>
+    </div>
+
+    <div class="section">
+      <h3>シリアルコード一覧</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>コード</th>
+            <th>チケット</th>
+            <th>使用数 / 上限</th>
+            <th>有効期限</th>
+            <th>状態</th>
+          </tr>
+        </thead>
+        <tbody id="codesTableBody">
+          <tr><td colspan="5" style="text-align:center;color:#666">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── State ──
+  let adminKey = localStorage.getItem('shinra_admin_key') || '';
+  let currentPage = 1;
+  let totalPages = 1;
+  let refreshInterval = null;
+
+  const API_BASE = window.location.origin + '/api/admin';
+
+  // ── Auth ──
+  function authenticate() {
+    adminKey = document.getElementById('apiKeyInput').value.trim();
+    if (!adminKey) return;
+
+    // Test the key with a stats request
+    apiFetch('/stats').then(data => {
+      if (data.error) {
+        document.getElementById('authError').textContent = 'API Keyが無効です';
+        return;
+      }
+      localStorage.setItem('shinra_admin_key', adminKey);
+      document.getElementById('authOverlay').style.display = 'none';
+      init();
+    }).catch(() => {
+      document.getElementById('authError').textContent = '接続エラー';
+    });
+  }
+
+  // Auto-login if key is stored
+  if (adminKey) {
+    apiFetch('/stats').then(data => {
+      if (!data.error) {
+        document.getElementById('authOverlay').style.display = 'none';
+        init();
+      }
+    }).catch(() => {});
+  }
+
+  // Listen for Enter on auth input
+  document.getElementById('apiKeyInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') authenticate();
+  });
+
+  // ── API Helper ──
+  async function apiFetch(path, options = {}) {
+    try {
+      const resp = await fetch(API_BASE + path, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+          ...(options.headers || {}),
+        },
+      });
+      return await resp.json();
+    } catch (err) {
+      console.error('API error:', err);
+      return { error: err.message };
+    }
+  }
+
+  // ── Init ──
+  function init() {
+    loadStats();
+    loadUsers();
+    loadMaintenance();
+    loadCodes();
+    document.getElementById('statusText').textContent = '接続済み';
+
+    // Auto-refresh every 30s
+    if (refreshInterval) clearInterval(refreshInterval);
+    refreshInterval = setInterval(loadStats, 30000);
+  }
+
+  // ── Tab switching ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+    document.getElementById(`panel-${tab}`).classList.add('active');
+  }
+
+  // ── Stats ──
+  async function loadStats() {
+    const data = await apiFetch('/stats');
+    if (data.error) return;
+
+    document.getElementById('statTotalUsers').textContent = data.totalUsers.toLocaleString();
+    document.getElementById('statActiveToday').textContent = data.activeToday.toLocaleString();
+    document.getElementById('statTotalGames').textContent = data.totalGames.toLocaleString();
+    document.getElementById('statOnline').textContent = data.onlineUsers.toLocaleString();
+    document.getElementById('statUptime').textContent = formatUptime(data.serverUptime);
+  }
+
+  function formatUptime(seconds) {
+    const d = Math.floor(seconds / 86400);
+    const h = Math.floor((seconds % 86400) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (d > 0) return `${d}d ${h}h`;
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+  }
+
+  // ── Users ──
+  async function loadUsers(page = 1, search = '') {
+    currentPage = page;
+    const params = new URLSearchParams({ page: String(page), limit: '20' });
+    if (search) params.set('search', search);
+
+    const data = await apiFetch('/users?' + params.toString());
+    if (data.error) return;
+
+    totalPages = Math.max(1, Math.ceil(data.total / data.limit));
+    document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`;
+    document.getElementById('prevPageBtn').disabled = currentPage <= 1;
+    document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+
+    const tbody = document.getElementById('usersTableBody');
+    if (data.users.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#666">ユーザーが見つかりません</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.users.map(u => `
+      <tr>
+        <td>${escHtml(u.displayName)}</td>
+        <td>${u.rating}</td>
+        <td>${u.wins}</td>
+        <td>${u.losses}</td>
+        <td>${u.isBanned
+          ? '<span class="badge badge-red">BAN</span>'
+          : '<span class="badge badge-green">正常</span>'}</td>
+        <td class="user-actions">
+          ${u.isBanned
+            ? `<button class="btn btn-success" onclick="unbanUser('${u.playerId}')">解除</button>`
+            : `<button class="btn btn-danger" onclick="banUser('${u.playerId}', '${escHtml(u.displayName)}')">BAN</button>`}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function searchUsers() {
+    const search = document.getElementById('userSearch').value.trim();
+    loadUsers(1, search);
+  }
+
+  function changePage(delta) {
+    const search = document.getElementById('userSearch').value.trim();
+    loadUsers(currentPage + delta, search);
+  }
+
+  async function banUser(playerId, name) {
+    const reason = prompt(`${name} をBANする理由:`);
+    if (reason === null) return;
+
+    const data = await apiFetch('/ban', {
+      method: 'POST',
+      body: JSON.stringify({ playerId, reason }),
+    });
+    if (data.success) {
+      showToast(`${name} をBANしました`);
+      searchUsers();
+    }
+  }
+
+  async function unbanUser(playerId) {
+    const data = await apiFetch('/unban', {
+      method: 'POST',
+      body: JSON.stringify({ playerId }),
+    });
+    if (data.success) {
+      showToast('BANを解除しました');
+      searchUsers();
+    }
+  }
+
+  // ── Maintenance ──
+  let maintenanceEnabled = false;
+
+  async function loadMaintenance() {
+    const data = await apiFetch('/maintenance');
+    if (data.error) return;
+    maintenanceEnabled = data.enabled;
+    updateMaintenanceUI();
+    document.getElementById('maintenanceMsg').value = data.message || '';
+  }
+
+  function toggleMaintenance() {
+    maintenanceEnabled = !maintenanceEnabled;
+    updateMaintenanceUI();
+  }
+
+  function updateMaintenanceUI() {
+    const toggle = document.getElementById('maintenanceToggle');
+    const label = document.getElementById('maintenanceLabel');
+    if (maintenanceEnabled) {
+      toggle.classList.add('on');
+      label.textContent = '有効';
+      label.style.color = '#ff4444';
+    } else {
+      toggle.classList.remove('on');
+      label.textContent = '無効';
+      label.style.color = '#888';
+    }
+  }
+
+  async function updateMaintenance() {
+    const message = document.getElementById('maintenanceMsg').value.trim();
+    const data = await apiFetch('/maintenance', {
+      method: 'POST',
+      body: JSON.stringify({ enabled: maintenanceEnabled, message }),
+    });
+    if (!data.error) {
+      showToast(maintenanceEnabled ? 'メンテナンスモード: 有効' : 'メンテナンスモード: 無効');
+    }
+  }
+
+  // ── Broadcast ──
+  async function sendBroadcast() {
+    const message = document.getElementById('broadcastMsg').value.trim();
+    const type = document.getElementById('broadcastType').value;
+    if (!message) return;
+
+    const data = await apiFetch('/broadcast', {
+      method: 'POST',
+      body: JSON.stringify({ message, type }),
+    });
+    if (data.success) {
+      showToast('アナウンスを送信しました');
+      document.getElementById('broadcastMsg').value = '';
+    }
+  }
+
+  // ── Serial Codes ──
+  async function loadCodes() {
+    const data = await apiFetch('/serial-codes');
+    if (data.error) return;
+
+    const tbody = document.getElementById('codesTableBody');
+    if (data.codes.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#666">コードなし</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.codes.map(c => {
+      const expired = c.expiresAt && new Date(c.expiresAt) < new Date();
+      const maxReached = c.maxRedemptions > 0 && c.currentRedemptions >= c.maxRedemptions;
+      let statusBadge = '<span class="badge badge-green">有効</span>';
+      if (expired) statusBadge = '<span class="badge badge-red">期限切れ</span>';
+      else if (maxReached) statusBadge = '<span class="badge badge-yellow">上限到達</span>';
+
+      return `
+        <tr>
+          <td><code style="color:#00d4ff">${escHtml(c.code)}</code></td>
+          <td>${c.tickets}</td>
+          <td>${c.currentRedemptions} / ${c.maxRedemptions === 0 ? '無制限' : c.maxRedemptions}</td>
+          <td>${c.expiresAt ? new Date(c.expiresAt).toLocaleString('ja-JP') : '-'}</td>
+          <td>${statusBadge}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  async function createCode() {
+    const code = document.getElementById('codeInput').value.trim();
+    const tickets = parseInt(document.getElementById('codeTickets').value, 10);
+    const expiresAt = document.getElementById('codeExpires').value || null;
+    const maxRedemptions = parseInt(document.getElementById('codeMaxRedemptions').value, 10) || 0;
+
+    if (!code || !tickets) {
+      showToast('コードとチケット数は必須です');
+      return;
+    }
+
+    const data = await apiFetch('/serial-codes', {
+      method: 'POST',
+      body: JSON.stringify({ code, tickets, expiresAt, maxRedemptions }),
+    });
+
+    if (data.success) {
+      showToast(`コード ${data.code} を作成しました`);
+      document.getElementById('codeInput').value = '';
+      document.getElementById('codeTickets').value = '';
+      document.getElementById('codeExpires').value = '';
+      document.getElementById('codeMaxRedemptions').value = '';
+      loadCodes();
+    }
+  }
+
+  // ── Utilities ──
+  function escHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+</script>
+
+</body>
+</html>
