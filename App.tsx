@@ -17,6 +17,7 @@ import OnlineGameScreen from './src/screens/OnlineGameScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import { initAnalytics } from './src/analytics/analyticsService';
 import { initCrashReporter } from './src/analytics/crashReporter';
+import { initTicketStore } from './src/monetize/ticketStore';
 import { CoinType } from './src/game/types';
 
 export type GameId = 'game1' | 'game2' | 'game3' | 'game4' | 'game5' | 'game6';
@@ -48,6 +49,7 @@ export default function App() {
   useEffect(() => {
     initCrashReporter();
     initAnalytics();
+    initTicketStore();
   }, []);
 
   return (

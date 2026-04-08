@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -8,14 +8,12 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
 import { RootStackParamList } from '../../App';
 import { COLORS, FONTS } from '../utils/theme';
 import { lightTap, mediumTap } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  getTotalTickets,
-  initTicketStore,
-} from '../monetize/ticketStore';
+import { getTotalTickets } from '../monetize/ticketStore';
 import { t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Menu'>;
@@ -40,12 +38,13 @@ const MENU_ITEMS: MenuItem[] = [
 
 export default function MenuScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const [tickets, setTickets] = useState(getTotalTickets());
 
-  useEffect(() => {
-    initTicketStore();
-  }, []);
-
-  const tickets = getTotalTickets();
+  useFocusEffect(
+    useCallback(() => {
+      setTickets(getTotalTickets());
+    }, [])
+  );
   const ticketLabel = tickets === Infinity ? '\u221E' : `${tickets}${t('menu.tickets') || '枚'}`;
 
   const handlePress = (item: MenuItem) => {

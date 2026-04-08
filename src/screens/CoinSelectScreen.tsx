@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import {
 } from '../monetize/ticketStore';
 import type { GameId, Difficulty, GameMode } from '../monetize/ticketTypes';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CoinSelect'>;
@@ -32,7 +33,14 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
   const [selected, setSelected] = useState<CoinType | null>(null);
   const [selected2, setSelected2] = useState<CoinType | null>(null);
   const [difficulty, setDifficulty] = useState<'normal' | 'hard'>('normal');
+  const [ticketCount, setTicketCount] = useState(getTotalTickets());
   const isLocal = mode === 'local';
+
+  useFocusEffect(
+    useCallback(() => {
+      setTicketCount(getTotalTickets());
+    }, [])
+  );
 
   const proceedToGame = () => {
     if (!selected) return;
@@ -120,7 +128,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
           {mode === 'online' ? 'オンライン対戦' : mode === 'local' ? 'ローカル対戦' : 'CPU対戦'}
         </Text>
         <Text style={styles.ticketBadge}>
-          {'\uD83C\uDFAB'} {getTotalTickets() === Infinity ? '\u221E' : `${getTotalTickets()}枚`}
+          🎫 {ticketCount === Infinity ? '∞' : `${ticketCount}枚`}
         </Text>
       </View>
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { RootStackParamList, GameId } from '../../App';
 import { COLORS, FONTS } from '../utils/theme';
 import { getTotalTickets, isGame6Unlocked } from '../monetize/ticketStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSelect'>;
@@ -73,7 +74,13 @@ const GAMES: GameItem[] = [
 export default function GameSelectScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
   const { mode } = route.params;
-  const tickets = getTotalTickets();
+  const [tickets, setTickets] = useState(getTotalTickets());
+
+  useFocusEffect(
+    useCallback(() => {
+      setTickets(getTotalTickets());
+    }, [])
+  );
   const ticketLabel = tickets === Infinity ? '\u221E' : `${tickets}${t('menu.tickets') || '枚'}`;
 
   const handleGamePress = (game: GameItem) => {
