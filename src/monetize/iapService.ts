@@ -7,15 +7,21 @@
  */
 
 import { Platform } from 'react-native';
-import * as InAppPurchases from 'expo-in-app-purchases';
-import {
-  IAPResponseCode,
-  InAppPurchaseState,
-  type IAPItemDetails,
-  type InAppPurchase,
-} from 'expo-in-app-purchases';
 import { setAdsRemoved } from './adService';
 import { setSubscriber } from './ticketStore';
+
+// Lazy-load expo-in-app-purchases to avoid crash in Expo Go
+let InAppPurchases: any = null;
+let IAPResponseCode: any = {};
+let InAppPurchaseState: any = {};
+try {
+  const iap = require('expo-in-app-purchases');
+  InAppPurchases = iap;
+  IAPResponseCode = iap.IAPResponseCode;
+  InAppPurchaseState = iap.InAppPurchaseState;
+} catch {
+  console.warn('[IAPService] expo-in-app-purchases not available (Expo Go)');
+}
 
 // ============================================================
 // Product Definitions
