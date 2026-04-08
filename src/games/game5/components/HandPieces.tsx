@@ -24,7 +24,7 @@ export const HandPieces: React.FC<HandPiecesProps> = ({
   onPiecePress,
 }) => {
   const isSun = side === 'sun';
-  const sideLabel = isSun ? '\u{2600}\u{FE0F} \u6301\u3061\u99D2' : '\u{1F319} \u6301\u3061\u99D2';
+  const sideLabel = isSun ? 'あなたの持ち駒' : '相手の持ち駒';
 
   // Group by type and count
   const counts: Partial<Record<PieceType, number>> = {};

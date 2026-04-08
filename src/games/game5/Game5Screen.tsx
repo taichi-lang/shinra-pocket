@@ -19,7 +19,6 @@ import {
   Side,
   Difficulty,
   GameMode,
-  SIDE_EMOJI,
 } from './game5Types';
 import {
   createInitialState,
@@ -202,15 +201,15 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
 
   // ─── Render ───
   const turnLabel = gameState.turn === 'sun'
-    ? `${SIDE_EMOJI.sun} \u304A\u65E5\u69D8\u306E\u756A`
-    : `${SIDE_EMOJI.moon} \u6708\u306E\u756A`;
+    ? 'あなたの番'
+    : 'CPUの番';
 
-  const winnerLabel = gameState.winner === 'sun'
-    ? `${SIDE_EMOJI.sun} \u304A\u65E5\u69D8\u306E\u52DD\u3061\uFF01`
-    : gameState.winner === 'moon'
-    ? `${SIDE_EMOJI.moon} \u6708\u306E\u52DD\u3061\uFF01`
+  const winnerLabel = gameState.winner === playerSide
+    ? '勝利！'
+    : gameState.winner === cpuSide
+    ? '敗北...'
     : gameState.winner === 'draw'
-    ? '\u5F15\u304D\u5206\u3051'
+    ? '引き分け'
     : '';
 
   return (
@@ -237,7 +236,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
       {/* Check Alert */}
       {showCheckAlert && (
         <View style={styles.checkAlert}>
-          <Text style={styles.checkAlertText}>\u{2757} \u738B\u624B\uFF01</Text>
+          <Text style={styles.checkAlertText}>王手！</Text>
         </View>
       )}
 
