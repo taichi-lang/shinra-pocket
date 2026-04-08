@@ -63,12 +63,6 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
     }
     heavyTap();
 
-    // Local mode skips ticket check
-    if (isLocal) {
-      proceedToGame();
-      return;
-    }
-
     const gid = (gameId ?? 'game1') as GameId;
     const diff = difficulty as Difficulty;
     const gmode = mode as GameMode;
