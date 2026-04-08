@@ -28,6 +28,11 @@
     "plugins": [
       "expo-asset",
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "shinrapocket-prod"
+      }
+    }
   }
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795784471537",
+    "project_id": "shinrapocket-prod",
+    "storage_bucket": "shinrapocket-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795784471537:android:ef8afb690421a12b9d1a50",
+        "android_client_info": {
+          "package_name": "com.shinrapocket.game"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCElKpOhjiFSO5hl-NSzngUtTzbtwAIio"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
