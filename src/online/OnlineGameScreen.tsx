@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { COLORS, SIZES } from '../utils/theme';
 import { useGameSocket } from './useGameSocket';
-import { CellState, CoinType, COINS, WIN_LINES, ADJACENTS } from '../game/types';
+import { CellState, CoinType, COINS, WIN_LINES } from '../game/types';
 import type { MatchState } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
@@ -81,8 +81,8 @@ export default function OnlineGameScreen({ navigation, route }: Props) {
           } else if (owner === 'me') {
             // Switch selection
             setSelectedCell(index);
-          } else if (board[index] === null && ADJACENTS[selectedCell]?.includes(index)) {
-            // Move to adjacent empty cell
+          } else if (board[index] === null) {
+            // Move to any empty cell
             sendMove({
               gameId: 'game1',
               type: 'move',
@@ -156,8 +156,7 @@ export default function OnlineGameScreen({ navigation, route }: Props) {
     const isValidTarget =
       phase === 'move' &&
       selectedCell !== null &&
-      board[index] === null &&
-      ADJACENTS[selectedCell]?.includes(index);
+      board[index] === null;
 
     const cellStyle: any[] = [styles.cell];
     if (isSelected) cellStyle.push(styles.cellSelected);

@@ -38,21 +38,17 @@ function getHand(state: Game5State, side: Side): PieceType[] {
   return side === 'sun' ? state.sunHand : state.moonHand;
 }
 
-/** Serialize board + hands + turn for repetition detection */
-export function serializePosition(state: Game5State): string {
-  const boardStr = state.board
-    .map(row =>
-      row.map(c => (c ? `${c.side[0]}${c.type[0]}` : '__')).join(',')
-    )
-    .join('/');
-  const sunH = [...state.sunHand].sort().join('');
-  const moonH = [...state.moonHand].sort().join('');
-  return `${boardStr}|${sunH}|${moonH}|${state.turn}`;
+/** @deprecated Kept for type compatibility; repetition detection removed. */
+export function serializePosition(_state: Game5State): string {
+  return '';
 }
 
 // ─── Initial State ───
 
 export function createInitialBoard(): Board {
+  // Symmetric / mirrored layout: Sun at top, Moon at bottom
+  // Sun:  fire - king - water  (row 0)
+  // Moon: water - king - fire  (row 2) — mirrored
   return [
     [
       { type: 'fire', side: 'sun' },
@@ -61,15 +57,15 @@ export function createInitialBoard(): Board {
     ],
     [null, null, null],
     [
-      { type: 'fire', side: 'moon' },
-      { type: 'king', side: 'moon' },
       { type: 'water', side: 'moon' },
+      { type: 'king', side: 'moon' },
+      { type: 'fire', side: 'moon' },
     ],
   ];
 }
 
 export function createInitialState(): Game5State {
-  const state: Game5State = {
+  return {
     board: createInitialBoard(),
     turn: 'sun',
     sunHand: [],
@@ -83,8 +79,6 @@ export function createInitialState(): Game5State {
     validMoves: [],
     moveCount: 0,
   };
-  state.positionHistory.push(serializePosition(state));
-  return state;
 }
 
 // ─── Find King ───
@@ -266,18 +260,8 @@ export function isStalemate(state: Game5State, side: Side): boolean {
   return !hasAnyLegalAction(state, side);
 }
 
-// ─── Repetition Detection (Sennichite) ───
-
-export function isThreefoldRepetition(positionHistory: string[]): boolean {
-  if (positionHistory.length < 5) return false;
-  const last = positionHistory[positionHistory.length - 1];
-  let count = 0;
-  for (const pos of positionHistory) {
-    if (pos === last) count++;
-    if (count >= 3) return true;
-  }
-  return false;
-}
+// ─── Repetition Detection (Sennichite) — REMOVED ───
+// CEO指示: 千日手はいらない
 
 // ─── Apply Actions ───
 
@@ -317,19 +301,8 @@ export function movePiece(state: Game5State, from: Position, to: Position): Game
     moveCount: state.moveCount + 1,
     isCheck: false,
     winner: null,
-    positionHistory: [...state.positionHistory],
+    positionHistory: [],
   };
-
-  // Record position for repetition
-  const posKey = serializePosition(newState);
-  newState.positionHistory.push(posKey);
-
-  // Check for threefold repetition
-  if (isThreefoldRepetition(newState.positionHistory)) {
-    newState.winner = 'draw';
-    newState.phase = 'gameover';
-    return newState;
-  }
 
   // Check if opponent is in check
   newState.isCheck = isInCheck(newBoard, nextTurn);
@@ -383,17 +356,8 @@ export function dropPiece(
     moveCount: state.moveCount + 1,
     isCheck: false,
     winner: null,
-    positionHistory: [...state.positionHistory],
+    positionHistory: [],
   };
-
-  const posKey = serializePosition(newState);
-  newState.positionHistory.push(posKey);
-
-  if (isThreefoldRepetition(newState.positionHistory)) {
-    newState.winner = 'draw';
-    newState.phase = 'gameover';
-    return newState;
-  }
 
   newState.isCheck = isInCheck(newBoard, nextTurn);
 

@@ -19,7 +19,7 @@ const en: Record<string, string> = {
   'menu.tickets': '',
 
   // Game titles & subtitles
-  'game.game1.title': 'Coin Board Battle',
+  'game.game1.title': 'Tic-Tac-Toe',
   'game.game1.subtitle': 'Control coins on a 3x3 board',
   'game.game2.title': 'Duel',
   'game.game2.subtitle': 'Stack to block your opponent',
@@ -88,7 +88,7 @@ const en: Record<string, string> = {
   'ranking.back': '← Back',
   'ranking.noData': 'No ranking data available',
   'ranking.noDataYet': 'No data yet',
-  'ranking.tab.game1': 'Coin Battle',
+  'ranking.tab.game1': 'Tic-Tac-Toe',
   'ranking.tab.game2': 'Duel',
   'ranking.tab.game3': 'Three-Way',
   'ranking.tab.game4': 'Patapata',

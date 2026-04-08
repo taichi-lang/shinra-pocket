@@ -177,28 +177,39 @@ describe('Move to adjacent cell', () => {
 });
 
 // ============================================================
-// 7. Move to non-adjacent cell (should fail)
+// 7. Move to any empty cell (no adjacency restriction)
 // ============================================================
-describe('Move to non-adjacent cell', () => {
-  it('rejects move from cell 0 to cell 8 (not adjacent)', () => {
+describe('Move to any empty cell', () => {
+  it('allows move from cell 0 to cell 8 (non-adjacent, empty)', () => {
+    const board = makeBoard(['P', null, null, null, null, null, null, null, null]);
     const from = 0;
     const to = 8;
-    const isAdjacent = ADJACENTS[from].includes(to);
-    expect(isAdjacent).toBe(false);
+    const isEmpty = board[to] === null;
+    expect(isEmpty).toBe(true);
+
+    board[to] = board[from];
+    board[from] = null;
+    expect(board[to]).toBe('player');
+    expect(board[from]).toBeNull();
   });
 
-  it('rejects move from cell 0 to cell 2 (not adjacent)', () => {
+  it('allows move from cell 0 to cell 2 (non-adjacent, empty)', () => {
+    const board = makeBoard(['P', null, null, null, null, null, null, null, null]);
     const from = 0;
     const to = 2;
-    const isAdjacent = ADJACENTS[from].includes(to);
-    expect(isAdjacent).toBe(false);
+    const isEmpty = board[to] === null;
+    expect(isEmpty).toBe(true);
+
+    board[to] = board[from];
+    board[from] = null;
+    expect(board[to]).toBe('player');
   });
 
-  it('rejects move from cell 6 to cell 2 (not adjacent)', () => {
-    const from = 6;
-    const to = 2;
-    const isAdjacent = ADJACENTS[from].includes(to);
-    expect(isAdjacent).toBe(false);
+  it('rejects move to occupied cell', () => {
+    const board = makeBoard(['P', 'C', null, null, null, null, null, null, null]);
+    const to = 1;
+    const isEmpty = board[to] === null;
+    expect(isEmpty).toBe(false);
   });
 });
 

@@ -25,16 +25,15 @@ export const PieceView: React.FC<PieceProps> = ({
   const borderColor = isSun
     ? selected ? '#fff' : '#ffcc00'
     : selected ? '#fff' : '#8888ff';
-  const sideEmoji = SIDE_EMOJI[piece.side];
-  const typeEmoji = piece.type === 'king' ? '' : PIECE_EMOJI[piece.type];
 
+  // King: show sun/moon icon. Regular pieces: show only type emoji (no sun/moon prefix).
   const label = piece.type === 'king'
-    ? sideEmoji
-    : `${sideEmoji}${typeEmoji}`;
+    ? SIDE_EMOJI[piece.side]
+    : PIECE_EMOJI[piece.type];
 
   const fontSize = piece.type === 'king'
     ? size * 0.5
-    : size * 0.32;
+    : size * 0.45;
 
   return (
     <View

@@ -36,10 +36,11 @@ export const Pit: React.FC<PitProps> = ({
   highlight = false,
 }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const glowAnim = useRef(new Animated.Value(0)).current;
+  const [isHighlighted, setIsHighlighted] = React.useState(false);
 
   useEffect(() => {
     if (highlight) {
+      setIsHighlighted(true);
       Animated.sequence([
         Animated.timing(scaleAnim, {
           toValue: 1.15,
@@ -51,37 +52,19 @@ export const Pit: React.FC<PitProps> = ({
           duration: 150,
           useNativeDriver: true,
         }),
-      ]).start();
-
-      Animated.sequence([
-        Animated.timing(glowAnim, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: false,
-        }),
-        Animated.timing(glowAnim, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: false,
-        }),
-      ]).start();
+      ]).start(() => {
+        setIsHighlighted(false);
+      });
     }
   }, [highlight, coins]);
-
-  const borderColor = glowAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [
-      enabled ? COLORS.cardBorderActive : COLORS.cardBorder,
-      COLORS.gold,
-    ],
-  });
 
   const content = (
     <Animated.View
       style={[
         isGoal ? styles.goalPit : styles.pit,
         enabled && !isGoal && styles.pitEnabled,
-        { transform: [{ scale: scaleAnim }], borderColor },
+        isHighlighted && styles.pitHighlighted,
+        { transform: [{ scale: scaleAnim }] },
       ]}
     >
       {label && (
@@ -131,6 +114,9 @@ const styles = StyleSheet.create({
   pitEnabled: {
     borderColor: COLORS.cardBorderActive,
     backgroundColor: 'rgba(255,215,0,0.08)',
+  },
+  pitHighlighted: {
+    borderColor: COLORS.gold,
   },
   goalPit: {
     width: GOAL_WIDTH,

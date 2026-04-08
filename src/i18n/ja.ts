@@ -19,7 +19,7 @@ const ja: Record<string, string> = {
   'menu.tickets': '枚',
 
   // Game titles & subtitles
-  'game.game1.title': 'コインボードバトル',
+  'game.game1.title': '三目並べ',
   'game.game1.subtitle': '3×3の盤面でコインを操れ',
   'game.game2.title': '一騎打ち',
   'game.game2.subtitle': 'スタックで相手を封じろ',
@@ -88,7 +88,7 @@ const ja: Record<string, string> = {
   'ranking.back': '← 戻る',
   'ranking.noData': 'ランキングデータがありません',
   'ranking.noDataYet': 'まだデータなし',
-  'ranking.tab.game1': 'コインバトル',
+  'ranking.tab.game1': '三目並べ',
   'ranking.tab.game2': '一騎打ち',
   'ranking.tab.game3': '三つ巴',
   'ranking.tab.game4': 'パタパタ',

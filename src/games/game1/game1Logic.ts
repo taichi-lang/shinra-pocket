@@ -1,15 +1,17 @@
 // Game1 Logic — Full game state management
 
 import type { CellState, GameState, GamePhase } from '../../game/types';
-import { ADJACENTS, createInitialGameState } from '../../game/types';
+import { createInitialGameState } from '../../game/types';
 import { checkWin, getWinLine, cpuPlace, cpuMove } from './game1AI';
 import type { Difficulty } from './game1Types';
 
 const MAX_PLACE_COUNT = 4;
 
-// === 有効な移動先を取得 ===
+// === 有効な移動先を取得（空きマスならどこでも移動可能） ===
 export function getValidMoves(board: CellState[], from: number): number[] {
-  return ADJACENTS[from].filter((to) => board[to] === null);
+  return board
+    .map((v, i) => (v === null && i !== from ? i : -1))
+    .filter((i) => i !== -1);
 }
 
 // === プレイヤーがコインを配置 ===
@@ -72,7 +74,7 @@ export function handleMove(
   if (state.board[from] !== 'player') {
     return state;
   }
-  if (!ADJACENTS[from].includes(to) || state.board[to] !== null) {
+  if (state.board[to] !== null) {
     return state;
   }
 
@@ -114,11 +116,9 @@ export function handleSelect(state: GameState, cellIndex: number): GameState {
     return state;
   }
 
-  // 選択済みのコインから移動先をタップ
+  // 選択済みのコインから移動先をタップ（空きマスならどこでも移動可能）
   if (state.selected !== null && state.board[cellIndex] === null) {
-    if (ADJACENTS[state.selected].includes(cellIndex)) {
-      return handleMove(state, state.selected, cellIndex);
-    }
+    return handleMove(state, state.selected, cellIndex);
   }
 
   return state;

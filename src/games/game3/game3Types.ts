@@ -91,6 +91,8 @@ export interface Game3State {
   // UI state
   selectedHandCoin: CoinNumber | null;
   selectedBoardCell: number | null;
+  /** The cell index of the last CPU action (for highlighting) */
+  lastCpuCell: number | null;
 }
 
 // === Initial state factory ===
@@ -114,6 +116,7 @@ export function createInitialGame3State(
     turnCount: 0,
     selectedHandCoin: null,
     selectedBoardCell: null,
+    lastCpuCell: null,
   };
 }
 
@@ -127,5 +130,5 @@ export interface Game3Config {
 export const DEFAULT_GAME3_CONFIG: Game3Config = {
   mode: 'vsCPU',
   difficulty: 'normal',
-  cpuDelay: 700,
+  cpuDelay: 5000,
 };

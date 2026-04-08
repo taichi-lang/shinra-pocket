@@ -22,7 +22,6 @@ import {
   dropPiece,
   getAllLegalActions,
   serializePosition,
-  isThreefoldRepetition,
 } from '../src/games/game5/game5Logic';
 
 // ============================================================
@@ -55,10 +54,10 @@ describe('createInitialState', () => {
     expect(state.board[0][0]).toEqual({ type: 'fire', side: 'sun' });
     expect(state.board[0][1]).toEqual({ type: 'king', side: 'sun' });
     expect(state.board[0][2]).toEqual({ type: 'water', side: 'sun' });
-    // Row 2: moon's fire, king, water
-    expect(state.board[2][0]).toEqual({ type: 'fire', side: 'moon' });
+    // Row 2: moon's water, king, fire (mirrored)
+    expect(state.board[2][0]).toEqual({ type: 'water', side: 'moon' });
     expect(state.board[2][1]).toEqual({ type: 'king', side: 'moon' });
-    expect(state.board[2][2]).toEqual({ type: 'water', side: 'moon' });
+    expect(state.board[2][2]).toEqual({ type: 'fire', side: 'moon' });
     // Row 1: empty
     expect(state.board[1].every(c => c === null)).toBe(true);
   });
@@ -381,24 +380,7 @@ describe('getAllLegalActions', () => {
 });
 
 // ============================================================
-// 10. Threefold Repetition
-// ============================================================
-describe('isThreefoldRepetition', () => {
-  it('returns false for short history', () => {
-    expect(isThreefoldRepetition(['a', 'b', 'a'])).toBe(false);
-  });
-
-  it('returns true when last position appears 3 times', () => {
-    expect(isThreefoldRepetition(['x', 'y', 'x', 'y', 'x'])).toBe(true);
-  });
-
-  it('returns false when last position appears only twice', () => {
-    expect(isThreefoldRepetition(['x', 'y', 'z', 'x', 'w'])).toBe(false);
-  });
-});
-
-// ============================================================
-// 11. serializePosition
+// 10. serializePosition (deprecated — repetition removed)
 // ============================================================
 describe('serializePosition', () => {
   it('produces consistent string for same state', () => {

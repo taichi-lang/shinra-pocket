@@ -64,7 +64,7 @@ export interface Game5State {
   phase: GamePhase;
   winner: Side | 'draw' | null;
   isCheck: boolean;
-  positionHistory: string[];  // for threefold repetition
+  positionHistory: string[];  // kept for compatibility (unused)
   selectedPos: Position | null;
   selectedHandPiece: PieceType | null;
   validMoves: Position[];

@@ -138,7 +138,9 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
         const action = getAIAction(state, difficulty);
         if (!action) return;
         const newState = executeTurn(state, action);
-        setGameState(newState);
+        // Track which cell the CPU acted on for highlighting
+        const cpuTargetCell = action.type === 'place' ? action.targetCell : action.toCell;
+        setGameState({ ...newState, lastCpuCell: cpuTargetCell });
 
         if (newState.phase === 'finished') {
           if (newState.winner) {
@@ -233,7 +235,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
             targetCell: cellIdx,
           };
           const newState = executeTurn(gameState, action);
-          setGameState(newState);
+          setGameState({ ...newState, lastCpuCell: null });
           handlePostTurn(newState);
           return;
         }
@@ -259,7 +261,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
             toCell: cellIdx,
           };
           const newState = executeTurn(gameState, action);
-          setGameState(newState);
+          setGameState({ ...newState, lastCpuCell: null });
           handlePostTurn(newState);
           return;
         }
@@ -368,6 +370,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
     winLine,
     selectedHandCoin,
     selectedBoardCell,
+    lastCpuCell,
   } = gameState;
 
   const isMyTurn = !isCPU(currentPlayer) && phase === 'playing';
@@ -422,6 +425,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
               const isWinCell = winLine?.includes(idx);
               const isSelected = selectedBoardCell === idx;
               const isValidTarget = validTargets.includes(idx);
+              const isCpuLastMove = lastCpuCell === idx;
               const owner = topOwner(cell);
               const num = topNumber(cell);
 
@@ -433,6 +437,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
                     isWinCell && styles.cellWin,
                     isSelected && styles.cellSelected,
                     isValidTarget && styles.cellValidTarget,
+                    isCpuLastMove && styles.cellCpuLastMove,
                   ]}
                   onPress={() => handleSelectBoardCell(idx)}
                   disabled={phase === 'finished'}
@@ -719,6 +724,11 @@ const styles = StyleSheet.create({
   cellValidTarget: {
     borderColor: 'rgba(255,255,255,0.4)',
     backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  cellCpuLastMove: {
+    borderColor: '#ff6622',
+    borderWidth: 2,
+    backgroundColor: 'rgba(255,102,34,0.12)',
   },
 
   // -- Cell content

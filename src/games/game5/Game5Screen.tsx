@@ -210,7 +210,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     : gameState.winner === 'moon'
     ? `${SIDE_EMOJI.moon} \u6708\u306E\u52DD\u3061\uFF01`
     : gameState.winner === 'draw'
-    ? '\u5F15\u304D\u5206\u3051\uFF08\u5343\u65E5\u624B\uFF09'
+    ? '\u5F15\u304D\u5206\u3051'
     : '';
 
   return (

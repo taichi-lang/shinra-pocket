@@ -1,4 +1,4 @@
-import { CellState, WIN_LINES, ADJACENTS } from './types';
+import { CellState, WIN_LINES } from './types';
 
 // === 勝利チェック ===
 export function checkWin(board: CellState[], who: CellState): boolean {
@@ -63,8 +63,7 @@ export function cpuBestMove(board: CellState[]): [number, number] | null {
 
   // 勝てるか？
   for (const from of mine) {
-    const adjEmpty = ADJACENTS[from].filter((i) => !board[i]);
-    for (const to of adjEmpty) {
+    for (const to of empty) {
       board[to] = 'cpu';
       board[from] = null;
       const win = checkWin(board, 'cpu');
@@ -77,17 +76,15 @@ export function cpuBestMove(board: CellState[]): [number, number] | null {
   // プレイヤーの勝ちをブロック
   const yours = board.map((v, i) => (v === 'player' ? i : -1)).filter((i) => i !== -1);
   for (const from of yours) {
-    const adjEmpty = ADJACENTS[from].filter((i) => !board[i]);
-    for (const to of adjEmpty) {
+    for (const to of empty) {
       board[to] = 'player';
       board[from] = null;
       const danger = checkWin(board, 'player');
       board[from] = 'player';
       board[to] = null;
       if (danger) {
-        // Find a CPU piece that can move to 'to' (must be adjacent)
-        const blocker = mine.find((m) => ADJACENTS[m].includes(to));
-        if (blocker !== undefined) return [blocker, to];
+        // Any CPU piece can move to 'to' (no adjacency restriction)
+        if (mine.length > 0) return [mine[0], to];
       }
     }
   }
@@ -95,8 +92,7 @@ export function cpuBestMove(board: CellState[]): [number, number] | null {
   // ランダム
   const moves: [number, number][] = [];
   for (const from of mine) {
-    const adjEmpty = ADJACENTS[from].filter((i) => !board[i]);
-    for (const to of adjEmpty) moves.push([from, to]);
+    for (const to of empty) moves.push([from, to]);
   }
   return moves.length ? moves[Math.floor(Math.random() * moves.length)] : null;
 }
@@ -113,7 +109,7 @@ function minimaxPlace(
 ): number {
   if (checkWinBoard(board, 'cpu')) return 10 - depth;
   if (checkWinBoard(board, 'player')) return depth - 10;
-  if (pp === 4 && cp === 4) return minimaxMove(board, true, 0, alpha, beta, 10);
+  if (pp === 4 && cp === 4) return minimaxMove(board, true, 0, alpha, beta, 4);
   if (depth >= 7) return scoreBoard(board);
 
   const empty = board.map((v, i) => (!v ? i : -1)).filter((i) => i !== -1);
@@ -150,7 +146,7 @@ function minimaxMove(
   depth: number,
   alpha: number,
   beta: number,
-  maxDepth: number = 10
+  maxDepth: number = 4
 ): number {
   if (checkWinBoard(board, 'cpu')) return 10 - depth;
   if (checkWinBoard(board, 'player')) return depth - 10;
@@ -165,8 +161,7 @@ function minimaxMove(
   if (isPlayerTurn) {
     let best = Infinity;
     for (const from of pieces) {
-      const adjEmpty = ADJACENTS[from].filter((i) => !board[i]);
-      for (const to of adjEmpty) {
+      for (const to of emptyIdxs) {
         board[to] = 'player';
         board[from] = null;
         best = Math.min(best, minimaxMove(board, false, depth + 1, alpha, beta, maxDepth));
@@ -180,8 +175,7 @@ function minimaxMove(
   } else {
     let best = -Infinity;
     for (const from of pieces) {
-      const adjEmpty = ADJACENTS[from].filter((i) => !board[i]);
-      for (const to of adjEmpty) {
+      for (const to of emptyIdxs) {
         board[to] = 'cpu';
         board[from] = null;
         best = Math.max(best, minimaxMove(board, true, depth + 1, alpha, beta, maxDepth));
@@ -221,11 +215,10 @@ export function cpuBestMoveHard(board: CellState[]): [number, number] | null {
   let bestScore = -Infinity;
   let bestMove: [number, number] | null = null;
   for (const from of mine) {
-    const adjEmpty = ADJACENTS[from].filter((i) => !board[i]);
-    for (const to of adjEmpty) {
+    for (const to of empties) {
       board[to] = 'cpu';
       board[from] = null;
-      const score = minimaxMove(board, true, 0, -Infinity, Infinity);
+      const score = minimaxMove(board, true, 0, -Infinity, Infinity, 4);
       board[from] = 'cpu';
       board[to] = null;
       if (bestMove === null || score > bestScore) {
