@@ -26,15 +26,7 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-asset",
-      [
-        "react-native-google-mobile-ads",
-        {
-          "androidAppId": "ca-app-pub-6631407651376127~3867342442",
-          "iosAppId": "ca-app-pub-6631407651376127~9613224221"
-        }
-      ],
-      "expo-in-app-purchases"
+      "expo-asset"
     ]
   }
 }
