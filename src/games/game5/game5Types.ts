@@ -69,6 +69,7 @@ export interface Game5State {
   selectedHandPiece: PieceType | null;
   validMoves: Position[];
   moveCount: number;
+  moveHistory: string[];  // track moves as strings; same move 3 times = forbidden
 }
 
 // === Piece display info ===

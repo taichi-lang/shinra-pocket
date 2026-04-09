@@ -15,6 +15,9 @@ import { getTotalTickets, isGame6Unlocked } from '../monetize/ticketStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { t } from '../i18n';
+import { CoinType } from '../game/types';
+
+const COIN_OPTIONS: CoinType[] = ['fire', 'water', 'swirl'];
 
 type Props = NativeStackScreenProps<RootStackParamList, 'GameSelect'>;
 
@@ -122,6 +125,13 @@ export default function GameSelectScreen({ navigation, route }: Props) {
         gameId: game.id,
         mode,
       });
+      return;
+    }
+
+    // Online mode: skip coin selection, assign random coin, go directly to lobby
+    if (mode === 'online') {
+      const randomCoin = COIN_OPTIONS[Math.floor(Math.random() * COIN_OPTIONS.length)];
+      navigation.navigate('OnlineLobby', { coin: randomCoin });
       return;
     }
 

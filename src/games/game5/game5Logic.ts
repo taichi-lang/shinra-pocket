@@ -38,6 +38,30 @@ function getHand(state: Game5State, side: Side): PieceType[] {
   return side === 'sun' ? state.sunHand : state.moonHand;
 }
 
+// ─── Move History Helpers ───
+
+function moveKey(from: Position, to: Position): string {
+  return `move:${from.row},${from.col}->${to.row},${to.col}`;
+}
+
+function dropKey(pieceType: PieceType, to: Position): string {
+  return `drop:${pieceType}:${to.row},${to.col}`;
+}
+
+/** Count how many times a move string appears in moveHistory */
+function countInHistory(history: string[], key: string): number {
+  let count = 0;
+  for (const h of history) {
+    if (h === key) count++;
+  }
+  return count;
+}
+
+/** Is this move already used 2 times (so a 3rd is forbidden)? */
+function isMoveExhausted(history: string[], key: string): boolean {
+  return countInHistory(history, key) >= 2;
+}
+
 /** @deprecated Kept for type compatibility; repetition detection removed. */
 export function serializePosition(_state: Game5State): string {
   return '';
@@ -78,6 +102,7 @@ export function createInitialState(): Game5State {
     selectedHandPiece: null,
     validMoves: [],
     moveCount: 0,
+    moveHistory: [],
   };
 }
 
@@ -168,14 +193,17 @@ function applyDropOnBoard(board: Board, piece: Piece, to: Position): Board {
 }
 
 /** Get legal moves for a piece (filtering out self-check) */
-export function getValidMoves(board: Board, from: Position): Position[] {
+export function getValidMoves(board: Board, from: Position, moveHistory: string[] = []): Position[] {
   const piece = board[from.row][from.col];
   if (!piece) return [];
 
   const raw = getRawMoves(board, from);
   return raw.filter(to => {
     const newBoard = applyMoveOnBoard(board, from, to);
-    return !isInCheck(newBoard, piece.side);
+    if (isInCheck(newBoard, piece.side)) return false;
+    // Filter out moves used 2 times already
+    if (isMoveExhausted(moveHistory, moveKey(from, to))) return false;
+    return true;
   });
 }
 
@@ -202,20 +230,23 @@ export function getValidDropPositions(board: Board, side: Side): Position[] {
 export function getValidDropsForPiece(
   board: Board,
   side: Side,
-  pieceType: PieceType
+  pieceType: PieceType,
+  moveHistory: string[] = []
 ): Position[] {
   const dropRow = side === 'sun' ? 0 : 2;
   const positions: Position[] = [];
   for (let c = 0; c < 3; c++) {
     if (board[dropRow][c] === null) {
+      const to = { row: dropRow, col: c };
       const newBoard = applyDropOnBoard(
         board,
         { type: pieceType, side },
-        { row: dropRow, col: c }
+        to
       );
-      if (!isInCheck(newBoard, side)) {
-        positions.push({ row: dropRow, col: c });
-      }
+      if (isInCheck(newBoard, side)) continue;
+      // Filter out drops used 2 times already
+      if (isMoveExhausted(moveHistory, dropKey(pieceType, to))) continue;
+      positions.push(to);
     }
   }
   return positions;
@@ -225,14 +256,14 @@ export function getValidDropsForPiece(
 
 /** Can the given side make any legal move or drop? */
 function hasAnyLegalAction(state: Game5State, side: Side): boolean {
-  const { board } = state;
+  const { board, moveHistory } = state;
 
   // Check if any piece can move
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < 3; c++) {
       const piece = board[r][c];
       if (piece && piece.side === side) {
-        const moves = getValidMoves(board, { row: r, col: c });
+        const moves = getValidMoves(board, { row: r, col: c }, moveHistory);
         if (moves.length > 0) return true;
       }
     }
@@ -241,8 +272,11 @@ function hasAnyLegalAction(state: Game5State, side: Side): boolean {
   // Check if any hand piece can be dropped
   const hand = getHand(state, side);
   if (hand.length > 0) {
-    const dropPositions = getValidDropPositions(board, side);
-    if (dropPositions.length > 0) return true;
+    const uniqueTypes = [...new Set(hand)];
+    for (const pt of uniqueTypes) {
+      const drops = getValidDropsForPiece(board, side, pt, moveHistory);
+      if (drops.length > 0) return true;
+    }
   }
 
   return false;
@@ -279,13 +313,15 @@ export function movePiece(state: Game5State, from: Position, to: Position): Game
   const newSunHand = [...state.sunHand];
   const newMoonHand = [...state.moonHand];
   if (captured && captured.type !== 'king') {
-    // Captured piece becomes the capturer's piece
     if (piece.side === 'sun') {
       newSunHand.push(captured.type);
     } else {
       newMoonHand.push(captured.type);
     }
   }
+
+  // Track move in history
+  const newMoveHistory = [...state.moveHistory, moveKey(from, to)];
 
   const nextTurn = opponent(state.turn);
   const newState: Game5State = {
@@ -302,13 +338,19 @@ export function movePiece(state: Game5State, from: Position, to: Position): Game
     isCheck: false,
     winner: null,
     positionHistory: [],
+    moveHistory: newMoveHistory,
   };
 
   // Check if opponent is in check
   newState.isCheck = isInCheck(newBoard, nextTurn);
 
-  // Check for checkmate only — no stalemate/draw (CEO指示)
+  // Check for checkmate
   if (isCheckmate(newState, nextTurn)) {
+    newState.winner = state.turn;
+    newState.phase = 'gameover';
+  }
+  // No legal moves (including due to 3-move limit) = loss
+  else if (!hasAnyLegalAction(newState, nextTurn)) {
     newState.winner = state.turn;
     newState.phase = 'gameover';
   }
@@ -336,6 +378,9 @@ export function dropPiece(
     if (idx !== -1) newMoonHand.splice(idx, 1);
   }
 
+  // Track drop in history
+  const newMoveHistory = [...state.moveHistory, dropKey(pieceType, to)];
+
   const nextTurn = opponent(state.turn);
   const newState: Game5State = {
     ...state,
@@ -351,12 +396,18 @@ export function dropPiece(
     isCheck: false,
     winner: null,
     positionHistory: [],
+    moveHistory: newMoveHistory,
   };
 
   newState.isCheck = isInCheck(newBoard, nextTurn);
 
-  // Checkmate only — no stalemate/draw (CEO指示)
+  // Checkmate
   if (isCheckmate(newState, nextTurn)) {
+    newState.winner = state.turn;
+    newState.phase = 'gameover';
+  }
+  // No legal moves (including due to 3-move limit) = loss
+  else if (!hasAnyLegalAction(newState, nextTurn)) {
     newState.winner = state.turn;
     newState.phase = 'gameover';
   }
@@ -368,7 +419,7 @@ export function dropPiece(
 
 export function getAllLegalActions(state: Game5State, side: Side): Action[] {
   const actions: Action[] = [];
-  const { board } = state;
+  const { board, moveHistory } = state;
 
   // Board moves
   for (let r = 0; r < 3; r++) {
@@ -376,7 +427,7 @@ export function getAllLegalActions(state: Game5State, side: Side): Action[] {
       const piece = board[r][c];
       if (piece && piece.side === side) {
         const from: Position = { row: r, col: c };
-        const moves = getValidMoves(board, from);
+        const moves = getValidMoves(board, from, moveHistory);
         for (const to of moves) {
           actions.push({ kind: 'move', from, to });
         }
@@ -388,7 +439,7 @@ export function getAllLegalActions(state: Game5State, side: Side): Action[] {
   const hand = getHand(state, side);
   const uniqueTypes = [...new Set(hand)];
   for (const pt of uniqueTypes) {
-    const drops = getValidDropsForPiece(board, side, pt);
+    const drops = getValidDropsForPiece(board, side, pt, moveHistory);
     for (const to of drops) {
       actions.push({ kind: 'drop', piece: pt, to });
     }

@@ -15,15 +15,24 @@ import { COLORS } from '../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameSocket } from './useGameSocket';
 import { getOrCreateToken } from './authService';
-import { CoinType, COINS } from '../game/types';
+import { CoinType, COINS, createInitialGameState } from '../game/types';
+import type { GameState } from '../game/types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   needsTicket,
   canPlay,
   consumeTicket,
-  getTotalTickets,
 } from '../monetize/ticketStore';
 import type { GameId, Difficulty, GameMode } from '../monetize/ticketTypes';
+import {
+  handlePlace,
+  handleSelect,
+  executeCpuPlace,
+  executeCpuMove,
+  checkGameOver,
+  getValidMoves,
+} from '../games/game1/game1Logic';
+import Board from '../games/game1/components/Board';
 
 // Param list mirrors RootStackParamList from App.tsx
 type ParamList = {
@@ -42,7 +51,12 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
 
   const [authReady, setAuthReady] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [ticketConsumed, setTicketConsumed] = useState(false);
+
+  // --- Mini game (三目並べ) state ---
+  const [showMiniGame, setShowMiniGame] = useState(false);
+  const [miniGameState, setMiniGameState] = useState<GameState>(createInitialGameState);
+  const [miniResult, setMiniResult] = useState<string | null>(null);
+  const miniCpuThinking = useRef(false);
 
   const {
     connectionState,
@@ -56,19 +70,14 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
     clearError,
   } = useGameSocket({ autoConnect: false }); // connect manually after auth
 
-  // --- Ticket gate: consume ticket before connecting ---
+  // --- Ticket gate: check availability but DON'T consume yet ---
   useEffect(() => {
-    const gid = 'game1' as GameId; // online battles are generic
+    const gid = 'game1' as GameId;
     const diff = 'normal' as Difficulty;
     const gmode = 'online' as GameMode;
     const required = needsTicket(gid, diff, gmode);
 
-    if (!required) {
-      setTicketConsumed(true);
-      return;
-    }
-
-    if (!canPlay(gid, diff, gmode)) {
+    if (required && !canPlay(gid, diff, gmode)) {
       Alert.alert(
         'チケット不足',
         'チケットが足りません。ショップで広告を見てチケットを獲得できます。',
@@ -80,33 +89,11 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
       return;
     }
 
-    Alert.alert(
-      'チケット消費',
-      'チケットを1枚消費します。よろしいですか？',
-      [
-        {
-          text: 'いいえ',
-          style: 'cancel',
-          onPress: () => navigation.goBack(),
-        },
-        {
-          text: 'はい',
-          onPress: async () => {
-            const ok = await consumeTicket();
-            if (ok) {
-              setTicketConsumed(true);
-            } else {
-              navigation.goBack();
-            }
-          },
-        },
-      ],
-    );
+    // Ticket is available — proceed to connect (ticket consumed only on match found)
   }, [navigation]);
 
-  // --- Authenticate then connect (only after ticket consumed) ---
+  // --- Authenticate then connect ---
   useEffect(() => {
-    if (!ticketConsumed) return;
     let cancelled = false;
     (async () => {
       try {
@@ -122,7 +109,7 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
       }
     })();
     return () => { cancelled = true; };
-  }, [ticketConsumed, connect]);
+  }, [connect]);
 
   const [dots, setDots] = useState('');
   const [elapsedSec, setElapsedSec] = useState(0);
@@ -190,16 +177,86 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
     }
   }, [connectionState, coin, joinQueue]);
 
-  // --- Navigate on match found ---
+  // --- Navigate on match found (consume ticket here) ---
   useEffect(() => {
     if (matchFound) {
-      navigation.replace('OnlineGame', {
-        coin,
-        roomId: matchFound.roomId,
-        playerId: matchFound.playerId,
-      });
+      (async () => {
+        const gid = 'game1' as GameId;
+        const diff = 'normal' as Difficulty;
+        const gmode = 'online' as GameMode;
+        const required = needsTicket(gid, diff, gmode);
+
+        if (required) {
+          await consumeTicket();
+        }
+
+        // Close mini game if open
+        setShowMiniGame(false);
+
+        navigation.replace('OnlineGame', {
+          coin,
+          roomId: matchFound.roomId,
+          playerId: matchFound.playerId,
+        });
+      })();
     }
   }, [matchFound, coin, navigation]);
+
+  // --- Mini game: CPU turn ---
+  useEffect(() => {
+    if (!showMiniGame || !miniGameState.active || miniGameState.turn !== 'cpu' || miniCpuThinking.current) return;
+    miniCpuThinking.current = true;
+    const timeout = setTimeout(() => {
+      setMiniGameState((prev) => {
+        if (!prev.active || prev.turn !== 'cpu') return prev;
+        if (prev.phase === 'place') return executeCpuPlace(prev, 'normal');
+        return executeCpuMove(prev, 'normal');
+      });
+      miniCpuThinking.current = false;
+    }, 600);
+    return () => { clearTimeout(timeout); miniCpuThinking.current = false; };
+  }, [showMiniGame, miniGameState.turn, miniGameState.active, miniGameState.phase]);
+
+  // --- Mini game: check game over & auto-restart ---
+  useEffect(() => {
+    if (!showMiniGame) return;
+    if (!miniGameState.active && miniResult === null) {
+      const outcome = checkGameOver(miniGameState);
+      if (outcome) {
+        setMiniResult(outcome === 'player' ? '勝ち!' : outcome === 'cpu' ? '負け...' : '引き分け');
+        // Auto-restart after a brief delay
+        const timeout = setTimeout(() => {
+          setMiniGameState(createInitialGameState());
+          setMiniResult(null);
+        }, 1500);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [showMiniGame, miniGameState, miniResult]);
+
+  const handleMiniCellPress = useCallback((index: number) => {
+    if (miniResult) return;
+    setMiniGameState((prev) => {
+      if (!prev.active || prev.turn !== 'player') return prev;
+      if (prev.phase === 'place') return handlePlace(prev, index);
+      return handleSelect(prev, index);
+    });
+  }, [miniResult]);
+
+  const miniValidTargets = miniGameState.selected !== null
+    ? getValidMoves(miniGameState.board, miniGameState.selected)
+    : [];
+
+  const handleToggleMiniGame = useCallback(() => {
+    setShowMiniGame((prev) => {
+      if (!prev) {
+        // Reset mini game when opening
+        setMiniGameState(createInitialGameState());
+        setMiniResult(null);
+      }
+      return !prev;
+    });
+  }, []);
 
   // --- Cancel ---
   const handleCancel = useCallback(() => {
@@ -234,7 +291,7 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
       </View>
 
       {/* Center: waiting animation */}
-      <View style={styles.center}>
+      <View style={[styles.center, showMiniGame && styles.centerCompact]}>
         {!authReady && !authError ? (
           <View style={styles.errorBox}>
             <ActivityIndicator size="large" color={COLORS.gold} />
@@ -305,9 +362,48 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
                 Players in queue: {queueCount}
               </Text>
             )}
+
+            {/* Mini game toggle button */}
+            <TouchableOpacity
+              style={styles.miniGameButton}
+              onPress={handleToggleMiniGame}
+            >
+              <Text style={styles.miniGameButtonText}>
+                {showMiniGame ? '三目並べを閉じる' : '待ち時間に三目並べで遊ぶ'}
+              </Text>
+            </TouchableOpacity>
           </>
         )}
       </View>
+
+      {/* Mini Game Area */}
+      {showMiniGame && (
+        <View style={styles.miniGameContainer}>
+          {miniResult && (
+            <Text style={styles.miniResultText}>{miniResult}</Text>
+          )}
+          <View style={styles.miniBoard}>
+            <Board
+              board={miniGameState.board}
+              playerCoin={coin}
+              cpuCoin={coin === 'fire' ? 'water' : 'fire'}
+              selectedCell={miniGameState.selected}
+              validTargets={miniValidTargets}
+              winLine={miniGameState.winLine}
+              onCellPress={handleMiniCellPress}
+            />
+          </View>
+          <Text style={styles.miniHint}>
+            {miniGameState.turn === 'cpu'
+              ? 'CPU思考中...'
+              : miniGameState.phase === 'place'
+              ? '空きマスをタップ'
+              : miniGameState.selected !== null
+              ? '移動先をタップ'
+              : '自分のコインをタップ'}
+          </Text>
+        </View>
+      )}
 
       {/* Cancel button */}
       <View style={styles.footer}>
@@ -346,6 +442,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  centerCompact: {
+    flex: 0,
+    marginBottom: 8,
   },
   spinnerContainer: {
     width: 100,
@@ -403,6 +503,39 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.blue,
+  },
+  miniGameButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+    backgroundColor: 'rgba(255,215,0,0.08)',
+  },
+  miniGameButtonText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.gold,
+  },
+  miniGameContainer: {
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  miniBoard: {
+    transform: [{ scale: 0.7 }],
+    marginVertical: -20,
+  },
+  miniResultText: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: COLORS.gold,
+    marginBottom: 4,
+  },
+  miniHint: {
+    fontSize: 12,
+    color: COLORS.textSecondary,
+    marginTop: 4,
   },
   footer: {
     alignItems: 'center',

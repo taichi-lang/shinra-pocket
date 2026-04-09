@@ -68,7 +68,8 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
     const gmode = mode as GameMode;
     const ticketRequired = needsTicket(gid, diff, gmode);
 
-    if (!ticketRequired) {
+    // Online mode: ticket is consumed on match found, not here
+    if (mode === 'online' || !ticketRequired) {
       proceedToGame();
       return;
     }

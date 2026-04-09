@@ -26,10 +26,13 @@ import {
   getValidDropsForPiece,
   movePiece,
   dropPiece,
+  getAllLegalActions,
 } from './game5Logic';
 import { getAIMove } from './game5AI';
 import ShogiBoard from './components/ShogiBoard';
 import HandPieces from './components/HandPieces';
+
+const TURN_TIME_LIMIT = 30; // seconds per turn
 
 interface Game5ScreenProps {
   mode?: GameMode;
@@ -53,9 +56,64 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
   const gameStateRef = useRef(gameState);
   gameStateRef.current = gameState;
 
+  const [timeLeft, setTimeLeft] = useState(TURN_TIME_LIMIT);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   const cpuSide: Side = playerSide === 'sun' ? 'moon' : 'sun';
   const isPlayerTurn =
     mode === 'local' || gameState.turn === playerSide;
+
+  // ─── Turn timer ───
+  useEffect(() => {
+    // Reset timer on turn change
+    if (gameState.phase === 'gameover') {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    setTimeLeft(TURN_TIME_LIMIT);
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    // Only run countdown when it's a human player's turn
+    const shouldCountdown = mode === 'local' || gameState.turn === playerSide;
+    if (!shouldCountdown) return;
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          // Time's up — current player loses
+          if (timerRef.current) clearInterval(timerRef.current);
+          setGameState(gs => {
+            if (gs.phase === 'gameover') return gs;
+            return {
+              ...gs,
+              winner: gs.turn === 'sun' ? 'moon' : 'sun',
+              phase: 'gameover' as const,
+            };
+          });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [gameState.turn, gameState.phase, gameState.moveCount, mode, playerSide]);
+
+  // ─── Check for no legal moves at start of turn ───
+  useEffect(() => {
+    if (gameState.phase === 'gameover') return;
+    const actions = getAllLegalActions(gameState, gameState.turn);
+    if (actions.length === 0) {
+      // Current player has no legal moves — they lose
+      setGameState(prev => ({
+        ...prev,
+        winner: prev.turn === 'sun' ? 'moon' : 'sun',
+        phase: 'gameover' as const,
+      }));
+    }
+  }, [gameState.turn, gameState.moveCount, gameState.phase]);
 
   // ─── Check alert ───
   useEffect(() => {
@@ -138,7 +196,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
 
       // Select own piece on the board
       if (cell && cell.side === gameState.turn) {
-        const moves = getValidMoves(board, pos);
+        const moves = getValidMoves(board, pos, gameState.moveHistory);
         setGameState(prev => ({
           ...prev,
           selectedPos: pos,
@@ -182,7 +240,8 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
       const drops = getValidDropsForPiece(
         gameState.board,
         gameState.turn,
-        pieceType
+        pieceType,
+        gameState.moveHistory
       );
       setGameState(prev => ({
         ...prev,
@@ -198,16 +257,22 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
   // ─── Notify parent on game end ───
   useEffect(() => {
     if (gameState.phase === 'gameover' && gameState.winner && onGameEnd) {
+      const isTimeout = timeLeft <= 0;
       const timer = setTimeout(() => {
-        onGameEnd(gameState.winner === playerSide ? 'player' : 'cpu');
+        if (isTimeout) {
+          onGameEnd('timeout');
+        } else {
+          onGameEnd(gameState.winner === playerSide ? 'player' : 'cpu');
+        }
       }, 2500);
       return () => clearTimeout(timer);
     }
-  }, [gameState.phase, gameState.winner, playerSide, onGameEnd]);
+  }, [gameState.phase, gameState.winner, playerSide, onGameEnd, timeLeft]);
 
   // ─── Reset ───
   const handleReset = useCallback(() => {
     setGameState(createInitialState());
+    setTimeLeft(TURN_TIME_LIMIT);
     aiThinking.current = false;
   }, []);
 
@@ -216,7 +281,10 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     ? 'あなたの番'
     : 'CPUの番';
 
-  const winnerLabel = gameState.winner === playerSide
+  const isTimeout = gameState.phase === 'gameover' && timeLeft <= 0;
+  const winnerLabel = isTimeout
+    ? '時間切れ — 負け'
+    : gameState.winner === playerSide
     ? '勝利！'
     : gameState.winner === cpuSide
     ? '敗北...'
@@ -242,6 +310,20 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
           <Text style={styles.statusTurn}>{turnLabel}</Text>
         )}
       </View>
+
+      {/* Timer */}
+      {gameState.phase !== 'gameover' && (
+        <View style={styles.timerRow}>
+          <Text
+            style={[
+              styles.timerText,
+              timeLeft <= 10 && styles.timerTextUrgent,
+            ]}
+          >
+            {timeLeft}秒
+          </Text>
+        </View>
+      )}
 
       {/* Check Alert */}
       {showCheckAlert && (
@@ -306,12 +388,12 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
             <Text
               style={[
                 styles.resultText,
-                mode === 'cpu' && gameState.winner === cpuSide
+                (mode === 'cpu' && gameState.winner === cpuSide) || isTimeout
                   ? styles.resultTextLoss
                   : undefined,
               ]}
             >
-              {gameState.winner === playerSide ? '勝利！' : '敗北...'}
+              {winnerLabel}
             </Text>
             <View style={styles.overlayButtonRow}>
               <TouchableOpacity onPress={handleReset} style={styles.overlayButton}>
@@ -372,6 +454,20 @@ const styles = StyleSheet.create({
   statusWinner: {
     color: COLORS.red,
     fontSize: 20,
+    ...FONTS.heavy,
+  },
+  timerRow: {
+    marginBottom: 4,
+    alignItems: 'center',
+  },
+  timerText: {
+    color: COLORS.textSecondary,
+    fontSize: 16,
+    ...FONTS.bold,
+  },
+  timerTextUrgent: {
+    color: COLORS.red,
+    fontSize: 18,
     ...FONTS.heavy,
   },
   checkAlert: {
