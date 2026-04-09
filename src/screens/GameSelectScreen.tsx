@@ -135,7 +135,27 @@ export default function GameSelectScreen({ navigation, route }: Props) {
       return;
     }
 
-    // All other games go to CoinSelect
+    // Local mode: skip coin selection, assign random coins, go directly to game
+    // 一騎打ち (game2) のローカルはCPUモードに変更
+    if (mode === 'local') {
+      if (game.id === 'game2') {
+        // 一騎打ちはローカル非対応 → CPUモードでコイン選択へ
+        navigation.navigate('CoinSelect', { mode: 'cpu', gameId: game.id });
+        return;
+      }
+      // ランダムコイン割り当て（P1とP2は異なるコイン）
+      const shuffled = [...COIN_OPTIONS].sort(() => Math.random() - 0.5);
+      navigation.navigate('Game', {
+        coin: shuffled[0],
+        difficulty: 'normal',
+        gameId: game.id,
+        mode: 'local',
+        coin2: shuffled[1],
+      });
+      return;
+    }
+
+    // CPU mode: go to CoinSelect
     navigation.navigate('CoinSelect', { mode, gameId: game.id });
   };
 

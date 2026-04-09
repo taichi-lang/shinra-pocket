@@ -29,9 +29,9 @@ export interface Game1TimerConfig {
 }
 
 export const DEFAULT_TIMER_CONFIG: Game1TimerConfig = {
-  initialTime: 15,
+  initialTime: 5,
   decrementPerRound: 1,
-  minimumTime: 5,
+  minimumTime: 1,
 };
 
 // === Game1 設定 ===

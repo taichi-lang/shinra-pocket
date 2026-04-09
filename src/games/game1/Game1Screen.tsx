@@ -201,9 +201,9 @@ const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop })
         if (!prev.active) return prev;
         if (!isLocal && prev.turn !== 'player') return prev;
         if (prev.phase === 'place') {
-          return handlePlace(prev, index);
+          return handlePlace(prev, index, isLocal);
         } else {
-          return handleSelect(prev, index);
+          return handleSelect(prev, index, isLocal);
         }
       });
     },

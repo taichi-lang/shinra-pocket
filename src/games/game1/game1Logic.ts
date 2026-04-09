@@ -14,64 +14,83 @@ export function getValidMoves(board: CellState[], from: number): number[] {
     .filter((i) => i !== -1);
 }
 
-// === プレイヤーがコインを配置 ===
-export function handlePlace(state: GameState, cellIndex: number): GameState {
-  if (!state.active || state.phase !== 'place' || state.turn !== 'player') {
+// === プレイヤーがコインを配置 (isLocal: ローカル対戦時はcpuターンも人間操作) ===
+export function handlePlace(state: GameState, cellIndex: number, isLocal = false): GameState {
+  if (!state.active || state.phase !== 'place') {
+    return state;
+  }
+  // ローカルでなければplayerターンのみ
+  if (!isLocal && state.turn !== 'player') {
     return state;
   }
   if (state.board[cellIndex] !== null) {
     return state;
   }
-  if (state.playerPlaced >= MAX_PLACE_COUNT) {
+
+  const currentSide = state.turn; // 'player' or 'cpu'
+  const placedKey = currentSide === 'player' ? 'playerPlaced' : 'cpuPlaced';
+  const currentPlaced = state[placedKey];
+
+  if (currentPlaced >= MAX_PLACE_COUNT) {
     return state;
   }
 
   const newBoard = [...state.board];
-  newBoard[cellIndex] = 'player';
-  const newPlayerPlaced = state.playerPlaced + 1;
+  newBoard[cellIndex] = currentSide;
+  const newPlaced = currentPlaced + 1;
 
   // 配置後の勝利チェック
-  const winLine = getWinLine(newBoard, 'player');
+  const winLine = getWinLine(newBoard, currentSide);
   if (winLine) {
     return {
       ...state,
       board: newBoard,
-      playerPlaced: newPlayerPlaced,
+      [placedKey]: newPlaced,
       winLine,
       active: false,
     };
   }
 
+  const otherPlacedKey = currentSide === 'player' ? 'cpuPlaced' : 'playerPlaced';
+  const otherPlaced = state[otherPlacedKey];
+
   // 両者4枚配置完了 -> 移動フェーズへ
-  if (newPlayerPlaced >= MAX_PLACE_COUNT && state.cpuPlaced >= MAX_PLACE_COUNT) {
+  if (newPlaced >= MAX_PLACE_COUNT && otherPlaced >= MAX_PLACE_COUNT) {
     return {
       ...state,
       board: newBoard,
-      playerPlaced: newPlayerPlaced,
+      [placedKey]: newPlaced,
       phase: 'move',
       turn: 'player',
       moveRound: 1,
     };
   }
 
+  const nextTurn = currentSide === 'player' ? 'cpu' : 'player';
   return {
     ...state,
     board: newBoard,
-    playerPlaced: newPlayerPlaced,
-    turn: 'cpu',
+    [placedKey]: newPlaced,
+    turn: nextTurn,
   };
 }
 
-// === プレイヤーがコインを移動 ===
+// === プレイヤーがコインを移動 (isLocal: ローカル対戦対応) ===
 export function handleMove(
   state: GameState,
   from: number,
   to: number,
+  isLocal = false,
 ): GameState {
-  if (!state.active || state.phase !== 'move' || state.turn !== 'player') {
+  if (!state.active || state.phase !== 'move') {
     return state;
   }
-  if (state.board[from] !== 'player') {
+  if (!isLocal && state.turn !== 'player') {
+    return state;
+  }
+
+  const currentSide = state.turn;
+  if (state.board[from] !== currentSide) {
     return state;
   }
   if (state.board[to] !== null) {
@@ -80,9 +99,9 @@ export function handleMove(
 
   const newBoard = [...state.board];
   newBoard[from] = null;
-  newBoard[to] = 'player';
+  newBoard[to] = currentSide;
 
-  const winLine = getWinLine(newBoard, 'player');
+  const winLine = getWinLine(newBoard, currentSide);
   if (winLine) {
     return {
       ...state,
@@ -93,22 +112,29 @@ export function handleMove(
     };
   }
 
+  const nextTurn = currentSide === 'player' ? 'cpu' : 'player';
   return {
     ...state,
     board: newBoard,
     selected: null,
-    turn: 'cpu',
+    turn: nextTurn,
+    moveRound: nextTurn === 'player' ? state.moveRound + 1 : state.moveRound,
   };
 }
 
-// === セル選択 ===
-export function handleSelect(state: GameState, cellIndex: number): GameState {
-  if (!state.active || state.phase !== 'move' || state.turn !== 'player') {
+// === セル選択 (isLocal: ローカル対戦時は現在のターンの駒のみ選択可能) ===
+export function handleSelect(state: GameState, cellIndex: number, isLocal = false): GameState {
+  if (!state.active || state.phase !== 'move') {
+    return state;
+  }
+  if (!isLocal && state.turn !== 'player') {
     return state;
   }
 
-  // 自分のコインを選択
-  if (state.board[cellIndex] === 'player') {
+  const currentSide = state.turn;
+
+  // 自分のコインを選択（ローカルではターン側の駒のみ）
+  if (state.board[cellIndex] === currentSide) {
     const validMoves = getValidMoves(state.board, cellIndex);
     if (validMoves.length > 0) {
       return { ...state, selected: cellIndex };
@@ -118,7 +144,7 @@ export function handleSelect(state: GameState, cellIndex: number): GameState {
 
   // 選択済みのコインから移動先をタップ（空きマスならどこでも移動可能）
   if (state.selected !== null && state.board[cellIndex] === null) {
-    return handleMove(state, state.selected, cellIndex);
+    return handleMove(state, state.selected, cellIndex, isLocal);
   }
 
   return state;
