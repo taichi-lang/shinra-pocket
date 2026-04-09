@@ -23,7 +23,7 @@ export default function GameScreen({ navigation, route }: Props) {
   const handleGameEnd = (result: 'player' | 'cpu' | 'draw' | 'timeout') => {
     const duration = Date.now() - startTime.current;
     logEvent('game_end', { gameId, result, duration });
-    navigation.replace('Result', { result, coin, mode, gameId, difficulty });
+    navigation.replace('Result', { result, coin, mode, gameId, difficulty, coin2 });
   };
 
   const handleBack = () => navigation.goBack();
@@ -50,6 +50,7 @@ export default function GameScreen({ navigation, route }: Props) {
     case 'game4':
       return (
         <Game4Screen
+          mode={mode === 'local' ? 'local' : 'cpu'}
           difficulty={difficulty}
           onExit={handleBack}
           onGameEnd={handleGameEnd}
@@ -58,6 +59,7 @@ export default function GameScreen({ navigation, route }: Props) {
     case 'game5':
       return (
         <Game5Screen
+          mode={mode === 'local' ? 'local' : 'cpu'}
           difficulty={difficulty}
           onBack={handleBack}
           onGameEnd={handleGameEnd}

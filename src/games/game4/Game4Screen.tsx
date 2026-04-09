@@ -332,12 +332,12 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
       {/* Score display */}
       <View style={styles.scoreRow}>
         <View style={styles.scoreBox}>
-          <Text style={styles.scoreLabel}>あなたのスコア</Text>
-          <Text style={styles.scoreValue}>{state.board.pitR}</Text>
+          <Text style={styles.scoreLabel}>{mode === 'local' ? 'プレイヤーAのスコア' : 'あなたのスコア'}</Text>
+          <Text style={styles.scoreValue}>{humanSide === 'A' ? state.board.pitR : state.board.pitL}</Text>
         </View>
         <View style={styles.scoreBox}>
-          <Text style={styles.scoreLabel}>CPUのスコア</Text>
-          <Text style={styles.scoreValue}>{state.board.pitR}</Text>
+          <Text style={styles.scoreLabel}>{mode === 'local' ? 'プレイヤーBのスコア' : 'CPUのスコア'}</Text>
+          <Text style={styles.scoreValue}>{humanSide === 'A' ? state.board.pitL : state.board.pitR}</Text>
         </View>
       </View>
 

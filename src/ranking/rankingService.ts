@@ -119,10 +119,12 @@ export async function getMyRanking(playerId: string): Promise<PlayerRanking> {
 /**
  * Get the leaderboard (top players sorted by rating descending).
  */
-export async function getLeaderboard(limit = 100): Promise<PlayerRanking[]> {
+export async function getLeaderboard(limit = 100, gameType?: string): Promise<PlayerRanking[]> {
   try {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (gameType) params.set('gameType', gameType);
     return await fetchJson<PlayerRanking[]>(
-      `${API_BASE}/api/ranking/leaderboard?limit=${limit}`,
+      `${API_BASE}/api/ranking/leaderboard?${params}`,
     );
   } catch {
     // Return empty list when server is unreachable

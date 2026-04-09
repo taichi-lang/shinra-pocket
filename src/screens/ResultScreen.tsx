@@ -21,7 +21,7 @@ const RESULT_CONFIG = {
 
 export default function ResultScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
-  const { result, coin, mode, gameId = 'game1', difficulty = 'normal' } = route.params;
+  const { result, coin, mode, gameId = 'game1', difficulty = 'normal', coin2 } = route.params;
   const config = RESULT_CONFIG[result];
   const coinInfo = COINS[coin];
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -80,7 +80,7 @@ export default function ResultScreen({ navigation, route }: Props) {
           style={styles.primaryButton}
           onPress={() => {
             lightTap();
-            navigation.replace('Game', { coin, difficulty, gameId, mode });
+            navigation.replace('Game', { coin, difficulty, gameId, mode, coin2 });
           }}
           activeOpacity={0.8}
         >

@@ -34,6 +34,7 @@ export type RootStackParamList = {
     mode: 'cpu' | 'local' | 'online';
     gameId?: GameId;
     difficulty?: 'normal' | 'hard';
+    coin2?: CoinType;
   };
   Ranking: undefined;
   Shop: undefined;

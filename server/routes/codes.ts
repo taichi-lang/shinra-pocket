@@ -40,8 +40,8 @@ router.post("/redeem", async (req: Request, res: Response) => {
 
     const row = result.rows[0];
 
-    // Check expiry
-    if (new Date(row.expires_at) < new Date()) {
+    // Check expiry (null = no expiry)
+    if (row.expires_at && new Date(row.expires_at) < new Date()) {
       res.json({ valid: false, reason: "expired" });
       return;
     }

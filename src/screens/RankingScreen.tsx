@@ -82,10 +82,10 @@ export default function RankingScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(true);
   const [usingMock, setUsingMock] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (gameType: string) => {
     try {
       const [leaderboard, me] = await Promise.all([
-        getLeaderboard(100),
+        getLeaderboard(100, gameType),
         getMyRanking('local_player'), // TODO: use real player ID
       ]);
 
@@ -115,14 +115,14 @@ export default function RankingScreen({ navigation }: Props) {
   }, []);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchData(activeTab);
+  }, [fetchData, activeTab]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchData();
+    await fetchData(activeTab);
     setRefreshing(false);
-  }, [fetchData]);
+  }, [fetchData, activeTab]);
 
   const renderMyRanking = () => (
     <View style={styles.mySection}>

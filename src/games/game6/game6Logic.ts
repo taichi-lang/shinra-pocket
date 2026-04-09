@@ -157,12 +157,19 @@ export function isGridComplete(grid: Grid): boolean {
   return grid.every(c => c.value > 0);
 }
 
+export function getDiagSum(grid: Grid, diag: 'main' | 'anti'): number {
+  if (diag === 'main') return grid[0].value + grid[4].value + grid[8].value;
+  return grid[2].value + grid[4].value + grid[6].value;
+}
+
 export function isGridCorrect(grid: Grid, target: number): boolean {
   if (!isGridComplete(grid)) return false;
   for (let i = 0; i < 3; i++) {
     if (getRowSum(grid, i) !== target) return false;
     if (getColSum(grid, i) !== target) return false;
   }
+  if (getDiagSum(grid, 'main') !== target) return false;
+  if (getDiagSum(grid, 'anti') !== target) return false;
   return true;
 }
 
