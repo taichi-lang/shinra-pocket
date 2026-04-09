@@ -4,13 +4,18 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Use DATABASE_URL if available (Render), otherwise fall back to individual vars
+// Determine SSL config: external Render URLs need SSL, internal ones don't
+const dbUrl = process.env.DATABASE_URL || "";
+const needsSsl = dbUrl.includes(".render.com:");  // external has .render.com:5432
+const sslConfig = needsSsl ? { rejectUnauthorized: false } : false;
+
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
-      max: 20,
+      ssl: sslConfig as any,
+      max: 10,
       idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 5000,
+      connectionTimeoutMillis: 15000,
     }
   : {
       host: process.env.DB_HOST || "localhost",
