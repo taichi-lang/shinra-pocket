@@ -32,6 +32,17 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
+// ─── DB Health Check (debug) ────────────────────────────
+app.get("/health/db", async (_req, res) => {
+  try {
+    const pool = (await import("./db/connection")).default;
+    const r = await pool.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+    res.json({ status: "ok", tables: r.rows.map((x: any) => x.table_name) });
+  } catch (err: any) {
+    res.json({ status: "error", message: err.message });
+  }
+});
+
 // ─── API Routes ──────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/ranking", rankingRoutes);
