@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx ts-node index.ts",
     "start": "node dist/index.js",
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/db && cp db/schema.sql dist/db/schema.sql",
     "db:init": "psql -f db/schema.sql"
   },
   "dependencies": {

@@ -60,3 +60,30 @@ CREATE TABLE IF NOT EXISTS rankings_legacy (
 );
 
 CREATE INDEX IF NOT EXISTS idx_rankings_legacy_rating ON rankings_legacy (game_type, rating DESC);
+
+-- ============================================================
+-- Serial Codes
+-- ============================================================
+CREATE TABLE IF NOT EXISTS serial_codes (
+  code                TEXT PRIMARY KEY,
+  tickets             INTEGER      NOT NULL DEFAULT 1,
+  expires_at          TIMESTAMPTZ,
+  max_redemptions     INTEGER      NOT NULL DEFAULT 0,
+  current_redemptions INTEGER      NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS serial_code_redemptions (
+  code        TEXT         NOT NULL,
+  device_id   TEXT         NOT NULL,
+  redeemed_at TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (code, device_id)
+);
+
+-- ============================================================
+-- Banned Users
+-- ============================================================
+CREATE TABLE IF NOT EXISTS banned_users (
+  user_id   UUID PRIMARY KEY REFERENCES users(id),
+  reason    TEXT         NOT NULL DEFAULT '',
+  banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
+);

@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import { testConnection } from "./db/connection";
+import { testConnection, runMigrations } from "./db/connection";
 import { registerGameHandler } from "./socket/gameHandler";
 import authRoutes from "./routes/auth";
 import rankingRoutes from "./routes/ranking";
@@ -57,10 +57,20 @@ registerGameHandler(io);
 
 // ─── Start Server ────────────────────────────────────────
 async function start(): Promise<void> {
-  // Test DB connection (non-blocking — server starts regardless)
-  const dbOk = await testConnection();
-  if (!dbOk) {
-    console.warn("[Server] Starting without database — some features will be unavailable");
+  // Test DB connection and run migrations (non-blocking — server starts regardless)
+  if (!process.env.DATABASE_URL && !process.env.DB_HOST) {
+    console.warn("[Server] No DATABASE_URL or DB_HOST set — skipping DB initialization");
+  } else {
+    const dbOk = await testConnection();
+    if (dbOk) {
+      try {
+        await runMigrations();
+      } catch (err) {
+        console.error("[Server] Migration failed:", err);
+      }
+    } else {
+      console.warn("[Server] Starting without database — some features will be unavailable");
+    }
   }
 
   server.listen(PORT, () => {

@@ -78,9 +78,9 @@ router.get("/:gameType", async (req: Request, res: Response) => {
               u.username   AS "displayName",
               r.wins,
               r.losses,
-              r.draws,
+              0            AS draws,
               r.rating
-       FROM rankings r
+       FROM rankings_legacy r
        JOIN users u ON u.id = r.user_id
        WHERE r.game_type = $1
        ORDER BY r.rating DESC
@@ -103,7 +103,15 @@ router.post(
   requireAuth,
   validateRankingUpdate,
   async (req: AuthRequest, res: Response) => {
-    const client = await pool.connect();
+    let client;
+
+    try {
+      client = await pool.connect();
+    } catch (err) {
+      console.error("[Ranking] DB connection error:", err);
+      res.status(503).json({ error: "Database unavailable" });
+      return;
+    }
 
     try {
       const { playerId, result } = req.body as {
@@ -172,7 +180,7 @@ router.post(
       const newRating = updated.rows[0]?.rating ?? 100;
       res.json({ playerId, newRating, result });
     } catch (err) {
-      await client.query("ROLLBACK");
+      await client.query("ROLLBACK").catch(() => {});
       console.error("[Ranking] Update error:", err);
       res.status(500).json({ error: "Internal server error" });
     } finally {
