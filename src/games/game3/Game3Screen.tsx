@@ -339,7 +339,9 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
     return (
       <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
         <View style={styles.turnSwitchBox}>
-          <Text style={styles.turnSwitchEmoji}>{PLAYER_EMOJI[cp]}</Text>
+          <View style={[styles.turnSwitchBadge, { backgroundColor: COIN_BG[cp] }]}>
+            <Text style={styles.turnSwitchNumber}>{PLAYER_EMOJI[cp]}</Text>
+          </View>
           <Text style={styles.turnSwitchText}>
             {PLAYER_LABEL[cp]}の番です!
           </Text>
@@ -450,10 +452,9 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
                           { backgroundColor: COIN_BG[owner] },
                         ]}
                       >
-                        <Text style={styles.coinEmoji}>
+                        <Text style={styles.coinNumberLarge}>
                           {PLAYER_EMOJI[owner]}
                         </Text>
-                        <Text style={styles.coinNumber}>{num}</Text>
                       </View>
                       {cell.length > 1 && (
                         <View style={styles.layerBadge}>
@@ -546,7 +547,7 @@ function PlayerHandView({
       ]}
     >
       <Text style={[styles.handLabel, { color: colors.text }]}>
-        {PLAYER_EMOJI[player]} {PLAYER_LABEL[player]}
+        {PLAYER_LABEL[player]}（{player === 'fire' ? '赤' : player === 'water' ? '青' : '紫'}）
       </Text>
       <View style={styles.handCoins}>
         {([1, 2, 3] as CoinNumber[]).map(num => {
@@ -744,14 +745,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  coinEmoji: {
-    fontSize: 18,
-  },
-  coinNumber: {
+  coinNumberLarge: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 24,
     ...FONTS.heavy,
-    marginTop: -2,
+    textAlign: 'center',
   },
   emptyCell: {
     width: CELL_SIZE * 0.5,
@@ -829,6 +827,19 @@ const styles = StyleSheet.create({
   turnSwitchEmoji: {
     fontSize: 64,
     marginBottom: 16,
+  },
+  turnSwitchBadge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  turnSwitchNumber: {
+    color: '#fff',
+    fontSize: 40,
+    ...FONTS.heavy,
   },
   turnSwitchText: {
     color: COLORS.textPrimary,

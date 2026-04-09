@@ -14,15 +14,15 @@ export type Player = 'fire' | 'water' | 'swirl';
 export const PLAYERS: Player[] = ['fire', 'water', 'swirl'];
 
 export const PLAYER_EMOJI: Record<Player, string> = {
-  fire: '🔥',
-  water: '💧',
-  swirl: '🌀',
+  fire: '1',
+  water: '2',
+  swirl: '3',
 };
 
 export const PLAYER_LABEL: Record<Player, string> = {
-  fire: '火',
-  water: '水',
-  swirl: '渦',
+  fire: 'P1',
+  water: 'P2',
+  swirl: 'P3',
 };
 
 // === Coin Number (strength) ===
