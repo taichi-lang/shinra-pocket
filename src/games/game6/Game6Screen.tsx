@@ -109,25 +109,35 @@ const NumberPad: React.FC<NumberPadProps> = ({ range, onSelect, onClear }) => {
   const [min, max] = range;
   const numbers = Array.from({ length: max - min + 1 }, (_, i) => i + min);
 
+  // 5個ずつの行に分割して整列
+  const rows: number[][] = [];
+  for (let i = 0; i < numbers.length; i += 5) {
+    rows.push(numbers.slice(i, i + 5));
+  }
+
   return (
     <View style={styles.padContainer}>
+      {rows.map((row, ri) => (
+        <View key={ri} style={styles.padRow}>
+          {row.map(n => (
+            <TouchableOpacity
+              key={n}
+              style={styles.padButton}
+              onPress={() => onSelect(n)}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.padButtonText}>{n}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ))}
       <View style={styles.padRow}>
-        {numbers.map(n => (
-          <TouchableOpacity
-            key={n}
-            style={styles.padButton}
-            onPress={() => onSelect(n)}
-            activeOpacity={0.6}
-          >
-            <Text style={styles.padButtonText}>{n}</Text>
-          </TouchableOpacity>
-        ))}
         <TouchableOpacity
           style={[styles.padButton, styles.padButtonClear]}
           onPress={onClear}
           activeOpacity={0.6}
         >
-          <Text style={styles.padButtonText}>消す</Text>
+          <Text style={[styles.padButtonText, { fontSize: 14 }]}>消す</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -582,10 +592,9 @@ const styles = StyleSheet.create({
   sumTextCorrect: { color: '#00cc55' },
 
   // --- Number pad ---
-  padContainer: { marginBottom: 12, width: '100%', alignItems: 'center' },
+  padContainer: { marginBottom: 12, width: '100%', alignItems: 'center', gap: 8 },
   padRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'center',
     gap: 8,
   },
