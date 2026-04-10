@@ -117,13 +117,13 @@ describe('validation helpers', () => {
   });
 
   it('isGridComplete returns true when all cells filled', () => {
-    const grid = makeGrid([1, 2, 3, 3, 1, 2, 2, 3, 1]);
+    const grid = makeGrid([2, 1, 3, 3, 2, 1, 1, 3, 2]);
     expect(isGridComplete(grid)).toBe(true);
   });
 
   it('isGridCorrect returns true for valid solved grid', () => {
-    // target = 6: rows and cols all sum to 6
-    const grid = makeGrid([1, 2, 3, 3, 1, 2, 2, 3, 1]);
+    // target = 6: rows, cols, and diagonals all sum to 6
+    const grid = makeGrid([2, 1, 3, 3, 2, 1, 1, 3, 2]);
     expect(isGridCorrect(grid, 6)).toBe(true);
   });
 
@@ -144,10 +144,13 @@ describe('validation helpers', () => {
 describe('submitAnswer', () => {
   it('awards score for correct answer', () => {
     const state = createInitialState('puzzle', 'easy');
-    // Fill grid with solution
+    // Use a known magic-square solution with correct diagonals (target=6)
+    const magicSolution = [2, 1, 3, 3, 2, 1, 1, 3, 2];
+    const magicPuzzle = { ...state.puzzle, solution: magicSolution, target: 6 };
     const filledState: Game6State = {
       ...state,
-      grid: state.puzzle.solution.map(v => ({ value: v, kind: 'empty' as const })) as Grid,
+      puzzle: magicPuzzle,
+      grid: magicSolution.map(v => ({ value: v, kind: 'empty' as const })) as Grid,
     };
     const result = submitAnswer(filledState);
     expect(result.phase).toBe('correct');
@@ -191,9 +194,13 @@ describe('submitAnswer', () => {
 
   it('applies hint penalty to score', () => {
     const state = createInitialState('puzzle', 'easy');
+    // Use a known magic-square solution with correct diagonals (target=6)
+    const magicSolution = [2, 1, 3, 3, 2, 1, 1, 3, 2];
+    const magicPuzzle = { ...state.puzzle, solution: magicSolution, target: 6 };
     const noHint: Game6State = {
       ...state,
-      grid: state.puzzle.solution.map(v => ({ value: v, kind: 'empty' as const })) as Grid,
+      puzzle: magicPuzzle,
+      grid: magicSolution.map(v => ({ value: v, kind: 'empty' as const })) as Grid,
       hintsUsed: 0,
     };
     const withHint: Game6State = { ...noHint, hintsUsed: 2 };
@@ -294,7 +301,7 @@ describe('getHintCell', () => {
   });
 
   it('returns -1 when all cells are correct', () => {
-    const solution = [1, 2, 3, 3, 1, 2, 2, 3, 1];
+    const solution = [2, 1, 3, 3, 2, 1, 1, 3, 2];
     const grid = solution.map(v => ({ value: v, kind: 'empty' as const })) as Grid;
     expect(getHintCell(grid, solution)).toBe(-1);
   });

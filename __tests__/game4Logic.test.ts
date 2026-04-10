@@ -153,13 +153,17 @@ describe('checkWinner', () => {
     expect(checkWinner(createInitialBoard())).toBeNull();
   });
 
-  it('returns A when all of A side is empty', () => {
-    const board = makeBoard([0, 0, 0], [1, 2, 3], 5, 7);
+  it('returns A when A has more seeds in goal after finalization', () => {
+    // A side empty; pitL=2 (B's goal), pitR=10 (A's goal)
+    // finalize: pitR=10, pitL=2+6=8 → A wins (10 > 8)
+    const board = makeBoard([0, 0, 0], [1, 2, 3], 2, 10);
     expect(checkWinner(board)).toBe('A');
   });
 
-  it('returns B when all of B side is empty', () => {
-    const board = makeBoard([1, 1, 1], [0, 0, 0], 5, 7);
+  it('returns B when B has more seeds in goal after finalization', () => {
+    // B side empty; pitL=10 (B's goal), pitR=2 (A's goal)
+    // finalize: pitR=2+3=5, pitL=10 → B wins (10 > 5)
+    const board = makeBoard([1, 1, 1], [0, 0, 0], 10, 2);
     expect(checkWinner(board)).toBe('B');
   });
 });
@@ -204,19 +208,21 @@ describe('cloneBoard', () => {
 describe('sowing wraps around the board', () => {
   it('player A sowing many seeds wraps past pitL back to a0', () => {
     // A sows from pit 0 with 8 coins -- should go all the way around
-    const board = makeBoard([8, 0, 0], [0, 0, 0]);
-    const result = sowSeeds(board, 'A', 0);
     // cycle for A: a0, a1, a2, pitR, b2, b1, b0, pitL
     // distributes to: a1(+1), a2(+1), pitR(+1), b2(+1), b1(+1), b0(+1), pitL(+1), a0(+1)
-    expect(result.board.a[0]).toBe(1); // wrapped back
+    // Last seed lands on a0 (own side, was empty -> now 1). Capture rule triggers:
+    //   opposite of a0 is b2, which has 1 seed -> capture 1+1=2 into pitR, a0=0, b2=0
+    const board = makeBoard([8, 0, 0], [0, 0, 0]);
+    const result = sowSeeds(board, 'A', 0);
+    expect(result.board.a[0]).toBe(0); // captured
     expect(result.board.a[1]).toBe(1);
     expect(result.board.a[2]).toBe(1);
-    expect(result.board.pitR).toBe(1);
-    expect(result.board.b[2]).toBe(1);
+    expect(result.board.pitR).toBe(3); // 1 from sowing + 2 from capture
+    expect(result.board.b[2]).toBe(0); // captured
     expect(result.board.b[1]).toBe(1);
     expect(result.board.b[0]).toBe(1);
     expect(result.board.pitL).toBe(1);
-    // last seed lands on pitL for A -> not own pit -> no extra turn
+    // last seed lands on own side a0 (not own pit/goal) -> no extra turn
     expect(result.extraTurn).toBe(false);
   });
 });
