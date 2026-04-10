@@ -60,19 +60,23 @@ interface MinimaxResult {
 
 /**
  * Evaluate board from the perspective of `aiPlayer`.
- * Lower own-side coins = better (goal is to empty own side).
- * Extra turns and winning are highly valued.
+ * Standard Mancala: the player with more coins in their goal wins.
  */
 function evaluate(board: BoardState, aiPlayer: Player): number {
   const winner = checkWinner(board);
+  if (winner === 'draw') return 0;
   if (winner === aiPlayer) return 1000;
-  if (winner === opponent(aiPlayer)) return -1000;
+  if (winner !== null) return -1000; // opponent wins
 
+  // Goal-based evaluation: prefer more coins in own goal
+  const myGoal = aiPlayer === 'A' ? board.pitR : board.pitL;
+  const oppGoal = aiPlayer === 'A' ? board.pitL : board.pitR;
+
+  // Also consider side coins (fewer = closer to ending on our terms)
   const myCoins = sideTotal(board, aiPlayer);
   const oppCoins = sideTotal(board, opponent(aiPlayer));
 
-  // We want to minimize our own coins and maximize opponent's
-  return (oppCoins - myCoins) * 10;
+  return (myGoal - oppGoal) * 10 + (oppCoins - myCoins);
 }
 
 function minimax(

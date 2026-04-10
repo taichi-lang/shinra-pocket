@@ -65,18 +65,25 @@ export function cloneState(state: Game2State): Game2State {
 /**
  * Get valid placement indices for a given coin number from hand.
  * - "1" or "2" can go on empty cells
- * - "2" can also go on top of any "1" (stacking)
+ * - "2" can also go on top of OPPONENT's "1" (stacking to take over)
+ * - Cannot stack on your own "1"
  * - Nothing can go on top of a "2"
  */
-export function getValidPlacements(board: StackCell[], coinNumber: CoinNumber): number[] {
+export function getValidPlacements(board: StackCell[], coinNumber: CoinNumber, player?: Player): number[] {
   const valid: number[] = [];
   for (let i = 0; i < 9; i++) {
     const cell = board[i];
     if (isCellEmpty(cell)) {
       // Empty cell: any coin can be placed
       valid.push(i);
-    } else if (coinNumber === 2 && hasOnlyBottom(cell) && cell.bottom!.number === 1) {
-      // "2" can stack on top of any "1"
+    } else if (
+      coinNumber === 2 &&
+      hasOnlyBottom(cell) &&
+      cell.bottom!.number === 1 &&
+      // Must be opponent's coin (if player is specified)
+      (!player || cell.bottom!.owner !== player)
+    ) {
+      // "2" can stack on top of opponent's "1"
       valid.push(i);
     }
   }
@@ -104,12 +111,25 @@ export function getMovableCoins(board: StackCell[], player: Player): number[] {
 
 /**
  * Get valid move destinations for a coin at fromIndex.
- * Movement: only to empty cells (no stacking on move).
+ * Movement: to empty cells OR stacking on opponent's smaller coin.
  */
-export function getValidMoveTargets(board: StackCell[], _fromIndex: number): number[] {
+export function getValidMoveTargets(board: StackCell[], fromIndex: number): number[] {
+  const fromCell = board[fromIndex];
+  const movingCoin = getTopCoin(fromCell);
+  if (!movingCoin) return [];
+
   const targets: number[] = [];
   for (let i = 0; i < 9; i++) {
-    if (isCellEmpty(board[i])) {
+    if (i === fromIndex) continue;
+    const cell = board[i];
+    if (isCellEmpty(cell)) {
+      targets.push(i);
+    } else if (
+      hasOnlyBottom(cell) &&
+      cell.bottom!.owner !== movingCoin.owner &&
+      movingCoin.number > cell.bottom!.number
+    ) {
+      // Can stack on opponent's smaller coin
       targets.push(i);
     }
   }
@@ -123,8 +143,8 @@ export function hasAnyAction(state: Game2State, player: Player): boolean {
   const hand = player === 'player' ? state.playerHand : state.cpuHand;
 
   // Check placements from hand
-  if (hand.count1 > 0 && getValidPlacements(state.board, 1).length > 0) return true;
-  if (hand.count2 > 0 && getValidPlacements(state.board, 2).length > 0) return true;
+  if (hand.count1 > 0 && getValidPlacements(state.board, 1, player).length > 0) return true;
+  if (hand.count2 > 0 && getValidPlacements(state.board, 2, player).length > 0) return true;
 
   // Check moves on board
   const movable = getMovableCoins(state.board, player);
@@ -138,8 +158,8 @@ export function hasAnyAction(state: Game2State, player: Player): boolean {
 /** Check if player can place any coin from hand */
 export function canPlace(state: Game2State, player: Player): boolean {
   const hand = player === 'player' ? state.playerHand : state.cpuHand;
-  if (hand.count1 > 0 && getValidPlacements(state.board, 1).length > 0) return true;
-  if (hand.count2 > 0 && getValidPlacements(state.board, 2).length > 0) return true;
+  if (hand.count1 > 0 && getValidPlacements(state.board, 1, player).length > 0) return true;
+  if (hand.count2 > 0 && getValidPlacements(state.board, 2, player).length > 0) return true;
   return false;
 }
 
@@ -194,7 +214,7 @@ export function placeFromHand(
 
 /**
  * Move a coin on the board from one cell to another.
- * Only the top coin can move, only to empty cells.
+ * Only the top coin can move. Can move to empty cells or stack on opponent's smaller coin.
  * Returns new state.
  */
 export function moveOnBoard(
@@ -216,8 +236,13 @@ export function moveOnBoard(
     fromCell.bottom = null;
   }
 
-  // Place on empty cell
-  toCell.bottom = movedCoin;
+  if (isCellEmpty(toCell)) {
+    // Place on empty cell
+    toCell.bottom = movedCoin;
+  } else if (hasOnlyBottom(toCell)) {
+    // Stack on top of opponent's coin
+    toCell.top = movedCoin;
+  }
 
   return newState;
 }
@@ -296,7 +321,7 @@ export function getAllActions(state: Game2State, player: Player): GameAction[] {
   for (const coinNum of [1, 2] as CoinNumber[]) {
     const count = coinNum === 1 ? hand.count1 : hand.count2;
     if (count > 0) {
-      const targets = getValidPlacements(state.board, coinNum);
+      const targets = getValidPlacements(state.board, coinNum, player);
       for (const t of targets) {
         actions.push({ type: 'place', coinNumber: coinNum, targetIndex: t });
       }

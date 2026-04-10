@@ -96,7 +96,7 @@ describe('Game4: Mancala (パタパタ) — Full Playtest', () => {
     let currentPlayer: G4Player = 'A';
     const initialTotal = totalSeeds(board);
     let turnCount = 0;
-    let winner: G4Player | null = null;
+    let winner: G4Player | 'draw' | null = null;
 
     while (turnCount < MAX_TURNS) {
       // Check invariants every turn
@@ -143,21 +143,19 @@ describe('Game4: Mancala (パタパタ) — Full Playtest', () => {
     expect(hasNegativeSeeds(board)).toBe(false);
     expect(totalSeeds(board)).toBe(initialTotal);
 
-    // Winner should be the player who emptied their side
+    // Game should be over: at least one side must be empty
     const finalWinner = g4CheckWinner(board);
     if (finalWinner !== null) {
-      if (finalWinner === 'A') {
-        expect(board.a[0] + board.a[1] + board.a[2]).toBe(0);
-      } else {
-        expect(board.b[0] + board.b[1] + board.b[2]).toBe(0);
-      }
+      const aEmpty = board.a[0] + board.a[1] + board.a[2] === 0;
+      const bEmpty = board.b[0] + board.b[1] + board.b[2] === 0;
+      expect(aEmpty || bEmpty).toBe(true);
     }
 
     return { turnCount, winner: finalWinner };
   }
 
   it('should complete 10 games vs normal AI without crashes or illegal states', () => {
-    const results: { turnCount: number; winner: G4Player | null }[] = [];
+    const results: { turnCount: number; winner: G4Player | 'draw' | null }[] = [];
     for (let i = 0; i < TOTAL_GAMES; i++) {
       const r = playOneGame(i, 'normal');
       results.push(r);
@@ -170,7 +168,7 @@ describe('Game4: Mancala (パタパタ) — Full Playtest', () => {
   });
 
   it('should complete 10 games vs hard AI without crashes or illegal states', () => {
-    const results: { turnCount: number; winner: G4Player | null }[] = [];
+    const results: { turnCount: number; winner: G4Player | 'draw' | null }[] = [];
     for (let i = 0; i < TOTAL_GAMES; i++) {
       const r = playOneGame(i, 'hard');
       results.push(r);

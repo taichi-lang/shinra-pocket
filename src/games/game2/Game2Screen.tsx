@@ -223,7 +223,7 @@ export default function Game2Screen({
     const count = coinNumber === 1 ? playerHand.count1 : playerHand.count2;
     if (count <= 0) return;
 
-    const validTargets = getValidPlacements(board, coinNumber);
+    const validTargets = getValidPlacements(board, coinNumber, 'player');
     if (validTargets.length === 0) {
       setMessage(`${coinNumber}を置ける場所がありません`);
       return;

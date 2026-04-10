@@ -24,6 +24,8 @@ import {
   checkWinner,
   getValidPits,
   opponent,
+  finalizeBoard,
+  cloneBoard,
 } from './game4Logic';
 import { getAIMove } from './game4AI';
 import { MancalaBoard } from './components/MancalaBoard';
@@ -129,10 +131,13 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
       setState((s) => ({ ...s, board: result.board, phase: 'playing' }));
 
       const winner = checkWinner(result.board);
-      if (winner) {
+      if (winner !== null) {
+        // Finalize: sweep remaining coins to respective goals
+        const finalBoard = cloneBoard(result.board);
+        finalizeBoard(finalBoard);
         setState((s) => ({
           ...s,
-          board: result.board,
+          board: finalBoard,
           winner,
           phase: 'finished',
         }));
@@ -237,9 +242,11 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
 
   // Notify parent when game ends (for ResultScreen navigation)
   useEffect(() => {
-    if (state.winner && onGameEnd) {
+    if (state.winner !== null && onGameEnd) {
       const timer = setTimeout(() => {
-        if (mode === 'cpu') {
+        if (state.winner === 'draw') {
+          onGameEnd('draw');
+        } else if (mode === 'cpu') {
           onGameEnd(state.winner === humanSide ? 'player' : 'cpu');
         } else {
           // In local mode, player A winning counts as 'player'
@@ -259,6 +266,7 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
   // Turn display
   const turnLabel = (() => {
     if (state.winner) {
+      if (state.winner === 'draw') return '引き分け!';
       if (mode === 'cpu') {
         return state.winner === humanSide ? 'あなたの勝ち!' : 'CPUの勝ち...';
       }
@@ -349,20 +357,23 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
       </View>
 
       {/* Game Over Overlay */}
-      {state.winner && (
+      {state.winner !== null && (
         <View style={styles.overlay}>
           <View style={styles.resultBox}>
             <Text
               style={[
                 styles.resultText,
-                mode === 'cpu' && state.winner !== humanSide && styles.resultTextLoss,
+                state.winner === 'draw' && styles.resultTextDraw,
+                mode === 'cpu' && state.winner !== humanSide && state.winner !== 'draw' && styles.resultTextLoss,
               ]}
             >
-              {mode === 'cpu'
-                ? state.winner === humanSide
-                  ? '勝利！'
-                  : '敗北...'
-                : `プレイヤー${state.winner}の勝ち！`}
+              {state.winner === 'draw'
+                ? '引き分け！'
+                : mode === 'cpu'
+                  ? state.winner === humanSide
+                    ? '勝利！'
+                    : '敗北...'
+                  : `プレイヤー${state.winner}の勝ち！`}
             </Text>
             <View style={styles.overlayButtonRow}>
               <TouchableOpacity onPress={handleReset} style={styles.overlayButton}>
@@ -513,6 +524,9 @@ const styles = StyleSheet.create({
   },
   resultTextLoss: {
     color: '#ff4444',
+  },
+  resultTextDraw: {
+    color: COLORS.textSecondary,
   },
   overlayButtonRow: {
     flexDirection: 'row',

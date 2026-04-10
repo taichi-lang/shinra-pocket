@@ -125,19 +125,83 @@ export function sowSeeds(
   const ownPit: Slot = player === 'A' ? 'pitR' : 'pitL';
   const extraTurn = lastSlot === ownPit;
 
+  // --- Capture rule ---
+  // If last seed lands in an EMPTY pit on the current player's OWN side,
+  // capture that seed + all seeds from the OPPOSITE pit into the player's goal.
+  const ownSlots: Slot[] = player === 'A' ? ['a0', 'a1', 'a2'] : ['b0', 'b1', 'b2'];
+  const ownSlotIndex = ownSlots.indexOf(lastSlot);
+  if (ownSlotIndex >= 0 && !extraTurn) {
+    // Last seed landed on own side
+    const landedCount = getSlotValue(newBoard, lastSlot);
+    if (landedCount === 1) {
+      // It was empty before (now has exactly 1 = the seed we just placed)
+      // Opposite pit: for pit index i, opposite is (2 - i)
+      const oppositeSlots: Slot[] = player === 'A' ? ['b0', 'b1', 'b2'] : ['a0', 'a1', 'a2'];
+      const oppositeSlot = oppositeSlots[2 - ownSlotIndex];
+      const oppositeCount = getSlotValue(newBoard, oppositeSlot);
+      if (oppositeCount > 0) {
+        // Capture: move landed seed + opposite seeds to own goal
+        const captured = 1 + oppositeCount;
+        setSlotValue(newBoard, lastSlot, 0);
+        setSlotValue(newBoard, oppositeSlot, 0);
+        if (player === 'A') {
+          newBoard.pitR += captured;
+        } else {
+          newBoard.pitL += captured;
+        }
+        // Add a capture step for animation
+        steps.push({
+          target: ownPit,
+          boardAfter: cloneBoard(newBoard),
+        });
+      }
+    }
+  }
+
   return { board: newBoard, extraTurn, steps };
 }
 
 /**
- * Check if the given player has won (all 3 of their pits are empty).
+ * Check if the game is over (either side's pits are all empty).
+ * Returns true if the game has ended. Does NOT mutate the board.
  */
-export function checkWinner(board: BoardState): Player | null {
+export function isGameOver(board: BoardState): boolean {
   const aEmpty = board.a[0] === 0 && board.a[1] === 0 && board.a[2] === 0;
   const bEmpty = board.b[0] === 0 && board.b[1] === 0 && board.b[2] === 0;
+  return aEmpty || bEmpty;
+}
 
-  if (aEmpty) return 'A';
-  if (bEmpty) return 'B';
-  return null;
+/**
+ * Finalize the board when the game is over:
+ * remaining coins on each side go to that side's goal.
+ * Mutates the board in place.
+ */
+export function finalizeBoard(board: BoardState): void {
+  // Sweep remaining A-side coins into A's goal (pitR)
+  board.pitR += board.a[0] + board.a[1] + board.a[2];
+  board.a = [0, 0, 0];
+  // Sweep remaining B-side coins into B's goal (pitL)
+  board.pitL += board.b[0] + board.b[1] + board.b[2];
+  board.b = [0, 0, 0];
+}
+
+/**
+ * Check winner after the game ends (standard Mancala rules).
+ * When one side's pits are all empty, remaining coins on the OTHER side
+ * go to that other player's goal. Then compare goals.
+ *
+ * Returns 'A', 'B', or 'draw'. Returns null if the game is not over.
+ */
+export function checkWinner(board: BoardState): Player | 'draw' | null {
+  if (!isGameOver(board)) return null;
+
+  // Finalize on a copy to determine winner without mutating input
+  const b = cloneBoard(board);
+  finalizeBoard(b);
+
+  if (b.pitR > b.pitL) return 'A';
+  if (b.pitL > b.pitR) return 'B';
+  return 'draw';
 }
 
 /**
