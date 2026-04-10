@@ -14,11 +14,15 @@ let maintenanceState = {
 };
 
 // ─── Admin API Key Middleware ────────────────────────────
-const ADMIN_KEY = process.env.ADMIN_API_KEY || "shinra-admin-secret-key";
+const ADMIN_API_KEY = process.env.ADMIN_API_KEY;
 
 function requireAdminKey(req: Request, res: Response, next: NextFunction): void {
+  if (!ADMIN_API_KEY) {
+    res.status(503).json({ error: 'Admin API not configured' });
+    return;
+  }
   const key = req.headers["x-admin-key"];
-  if (key !== ADMIN_KEY) {
+  if (key !== ADMIN_API_KEY) {
     res.status(403).json({ error: "Forbidden: invalid admin key" });
     return;
   }

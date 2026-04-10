@@ -154,6 +154,18 @@ function findMatch(queue: QueueEntry[], player: QueueEntry): QueueEntry | null {
   return bestMatch;
 }
 
+// Clean up stale queue entries every 60 seconds
+setInterval(() => {
+  const now = Date.now();
+  const STALE_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+  for (const [gameType, queue] of queues) {
+    const before = queue.length;
+    queues.set(gameType, queue.filter(e => now - e.joinedAt < STALE_THRESHOLD));
+    const removed = before - (queues.get(gameType)?.length ?? 0);
+    if (removed > 0) console.log(`[Matchmaking] Cleaned ${removed} stale entries from ${gameType} queue`);
+  }
+}, 60_000);
+
 /** Exported for Socket.io integration */
 export { queues, getQueue, findMatch };
 export default router;
