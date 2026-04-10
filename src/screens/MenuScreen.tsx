@@ -69,7 +69,7 @@ export default function MenuScreen({ navigation }: Props) {
 
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 40 + insets.bottom }]}
         showsVerticalScrollIndicator={false}
       >
         {MENU_ITEMS.map((item) => (

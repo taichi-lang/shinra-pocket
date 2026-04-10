@@ -9,6 +9,7 @@ import {
   View,
   Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SIZES } from '../utils/theme';
 import { useGameSocket } from './useGameSocket';
 import { CellState, CoinType, COINS, WIN_LINES } from '../game/types';
@@ -24,6 +25,7 @@ type ParamList = {
 type Props = NativeStackScreenProps<ParamList, 'OnlineGame'>;
 
 export default function OnlineGameScreen({ navigation, route }: Props) {
+  const insets = useSafeAreaInsets();
   const { coin, roomId, playerId } = route.params;
   const coinInfo = COINS[coin];
 
@@ -184,7 +186,7 @@ export default function OnlineGameScreen({ navigation, route }: Props) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top + 12 }]}>
       {/* Status bar */}
       <View style={styles.statusBar}>
         <Text style={styles.phaseText}>
@@ -240,7 +242,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
     paddingHorizontal: 20,
-    paddingTop: 56,
+    paddingTop: 12,
     paddingBottom: 32,
   },
   statusBar: {

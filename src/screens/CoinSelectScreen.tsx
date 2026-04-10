@@ -238,7 +238,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
       )}
 
       <TouchableOpacity
-        style={[styles.confirmButton, !(isLocal ? selected && selected2 : selected) && styles.confirmButtonDisabled]}
+        style={[styles.confirmButton, { marginBottom: 40 + insets.bottom }, !(isLocal ? selected && selected2 : selected) && styles.confirmButtonDisabled]}
         onPress={handleConfirm}
         disabled={!(isLocal ? selected && selected2 : selected)}
         activeOpacity={0.8}
@@ -388,7 +388,6 @@ const styles = StyleSheet.create({
   },
   confirmButton: {
     marginTop: 'auto',
-    marginBottom: 40,
     borderRadius: 16,
     overflow: 'hidden',
   },

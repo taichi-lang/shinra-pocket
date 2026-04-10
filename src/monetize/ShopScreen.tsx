@@ -12,8 +12,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  SafeAreaView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS } from '../utils/theme';
 import { useNavigation } from '@react-navigation/native';
 import { lightTap, mediumTap, heavyTap, success as hapticSuccess } from '../utils/haptics';
@@ -38,6 +38,7 @@ import { t } from '../i18n';
 // ============================================================
 
 export default function ShopScreen({ navigation }: { navigation?: any }) {
+  const insets = useSafeAreaInsets();
   const [purchasing, setPurchasing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [tickets, setTickets] = useState<TicketState | null>(null);
@@ -124,7 +125,7 @@ export default function ShopScreen({ navigation }: { navigation?: any }) {
   // ----------------------------------------------------------
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -270,7 +271,7 @@ export default function ShopScreen({ navigation }: { navigation?: any }) {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
