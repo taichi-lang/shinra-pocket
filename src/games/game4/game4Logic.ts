@@ -192,16 +192,16 @@ export function finalizeBoard(board: BoardState): void {
  *
  * Returns 'A', 'B', or 'draw'. Returns null if the game is not over.
  */
-export function checkWinner(board: BoardState): Player | 'draw' | null {
+export function checkWinner(board: BoardState): Player | null {
   if (!isGameOver(board)) return null;
 
   // Finalize on a copy to determine winner without mutating input
   const b = cloneBoard(board);
   finalizeBoard(b);
 
+  // 引き分けなし: 同点の場合は後手(B)の勝ち（先手有利を相殺）
   if (b.pitR > b.pitL) return 'A';
-  if (b.pitL > b.pitR) return 'B';
-  return 'draw';
+  return 'B';
 }
 
 /**

@@ -60,7 +60,7 @@ export interface Game4State {
   board: BoardState;
   currentPlayer: Player;
   phase: GamePhase;
-  winner: Player | 'draw' | null;
+  winner: Player | null;
   /** Mode: cpu or local (2-player) */
   mode: 'cpu' | 'local';
   /** CPU difficulty (only relevant in cpu mode) */

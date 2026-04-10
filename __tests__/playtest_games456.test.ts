@@ -96,7 +96,7 @@ describe('Game4: Mancala (パタパタ) — Full Playtest', () => {
     let currentPlayer: G4Player = 'A';
     const initialTotal = totalSeeds(board);
     let turnCount = 0;
-    let winner: G4Player | 'draw' | null = null;
+    let winner: G4Player | null = null;
 
     while (turnCount < MAX_TURNS) {
       // Check invariants every turn
@@ -155,7 +155,7 @@ describe('Game4: Mancala (パタパタ) — Full Playtest', () => {
   }
 
   it('should complete 10 games vs normal AI without crashes or illegal states', () => {
-    const results: { turnCount: number; winner: G4Player | 'draw' | null }[] = [];
+    const results: { turnCount: number; winner: G4Player | null }[] = [];
     for (let i = 0; i < TOTAL_GAMES; i++) {
       const r = playOneGame(i, 'normal');
       results.push(r);
@@ -168,7 +168,7 @@ describe('Game4: Mancala (パタパタ) — Full Playtest', () => {
   });
 
   it('should complete 10 games vs hard AI without crashes or illegal states', () => {
-    const results: { turnCount: number; winner: G4Player | 'draw' | null }[] = [];
+    const results: { turnCount: number; winner: G4Player | null }[] = [];
     for (let i = 0; i < TOTAL_GAMES; i++) {
       const r = playOneGame(i, 'hard');
       results.push(r);

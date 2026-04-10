@@ -244,9 +244,7 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
   useEffect(() => {
     if (state.winner !== null && onGameEnd) {
       const timer = setTimeout(() => {
-        if (state.winner === 'draw') {
-          onGameEnd('draw');
-        } else if (mode === 'cpu') {
+        if (mode === 'cpu') {
           onGameEnd(state.winner === humanSide ? 'player' : 'cpu');
         } else {
           // In local mode, player A winning counts as 'player'
@@ -266,7 +264,6 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
   // Turn display
   const turnLabel = (() => {
     if (state.winner) {
-      if (state.winner === 'draw') return '引き分け!';
       if (mode === 'cpu') {
         return state.winner === humanSide ? 'あなたの勝ち!' : 'CPUの勝ち...';
       }
@@ -363,17 +360,14 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
             <Text
               style={[
                 styles.resultText,
-                state.winner === 'draw' && styles.resultTextDraw,
-                mode === 'cpu' && state.winner !== humanSide && state.winner !== 'draw' && styles.resultTextLoss,
+                mode === 'cpu' && state.winner !== humanSide && styles.resultTextLoss,
               ]}
             >
-              {state.winner === 'draw'
-                ? '引き分け！'
-                : mode === 'cpu'
-                  ? state.winner === humanSide
-                    ? '勝利！'
-                    : '敗北...'
-                  : `プレイヤー${state.winner}の勝ち！`}
+              {mode === 'cpu'
+                ? state.winner === humanSide
+                  ? '勝利！'
+                  : '敗北...'
+                : `プレイヤー${state.winner}の勝ち！`}
             </Text>
             <View style={styles.overlayButtonRow}>
               <TouchableOpacity onPress={handleReset} style={styles.overlayButton}>

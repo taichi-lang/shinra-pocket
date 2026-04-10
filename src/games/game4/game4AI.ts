@@ -64,7 +64,6 @@ interface MinimaxResult {
  */
 function evaluate(board: BoardState, aiPlayer: Player): number {
   const winner = checkWinner(board);
-  if (winner === 'draw') return 0;
   if (winner === aiPlayer) return 1000;
   if (winner !== null) return -1000; // opponent wins
 
