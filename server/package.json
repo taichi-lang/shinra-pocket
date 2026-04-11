@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx ts-node index.ts",
     "start": "node dist/index.js",
-    "build": "tsc && node -e \"const fs=require('fs'),p=require('path');const d=p.join(__dirname,'dist','db');fs.mkdirSync(d,{recursive:true});fs.copyFileSync(p.join(__dirname,'db','schema.sql'),p.join(d,'schema.sql'));console.log('Copied schema.sql to dist/db/')\"",
+    "build": "tsc && node -e \"const fs=require('fs'),p=require('path');const d=p.join(__dirname,'dist','db');fs.mkdirSync(d,{recursive:true});fs.copyFileSync(p.join(__dirname,'db','schema.sql'),p.join(d,'schema.sql'));const ad=p.join(__dirname,'dist','admin');fs.mkdirSync(ad,{recursive:true});fs.copyFileSync(p.join(__dirname,'admin','index.html'),p.join(ad,'index.html'));console.log('Copied schema.sql and admin/index.html to dist/')\"",
     "db:init": "psql -f db/schema.sql"
   },
   "dependencies": {
