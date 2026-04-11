@@ -459,6 +459,7 @@
             <th>ID</th>
             <th>プレイヤー</th>
             <th>画面</th>
+            <th>デバイス</th>
             <th>説明</th>
             <th>ステータス</th>
             <th>日時</th>
@@ -466,7 +467,7 @@
           </tr>
         </thead>
         <tbody id="reportsTableBody">
-          <tr><td colspan="7" style="text-align:center;color:#666">読み込み中...</td></tr>
+          <tr><td colspan="8" style="text-align:center;color:#666">読み込み中...</td></tr>
         </tbody>
       </table>
       <div class="pagination">
@@ -483,7 +484,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
           <div><span style="color:#888;">プレイヤーID:</span> <span id="rdPlayerId">-</span></div>
           <div><span style="color:#888;">画面:</span> <span id="rdScreen">-</span></div>
-          <div><span style="color:#888;">デバイス:</span> <span id="rdDevice">-</span></div>
+          <div><span style="color:#888;">デバイス:</span> <span id="rdDevice">-</span> <span id="rdDeviceBadge"></span></div>
           <div><span style="color:#888;">アプリVer:</span> <span id="rdAppVersion">-</span></div>
           <div style="grid-column:1/3;"><span style="color:#888;">説明:</span><br><span id="rdDescription">-</span></div>
           <div><span style="color:#888;">報告日時:</span> <span id="rdCreatedAt">-</span></div>
@@ -858,6 +859,18 @@
     }
   }
 
+  function deviceBadge(deviceInfo) {
+    if (!deviceInfo) return '<span style="color:#666">-</span>';
+    const info = escHtml(deviceInfo);
+    const lower = deviceInfo.toLowerCase();
+    if (lower.startsWith('ios')) {
+      return '<span class="badge" style="background:rgba(0,122,255,0.15);color:#007AFF;">&#x1F34E; ' + info + '</span>';
+    } else if (lower.startsWith('android')) {
+      return '<span class="badge" style="background:rgba(61,220,132,0.15);color:#3DDC84;">&#x1F916; ' + info + '</span>';
+    }
+    return '<span class="badge badge-gray">' + info + '</span>';
+  }
+
   async function loadReports(page = 1) {
     reportPage = page;
     const status = document.getElementById('reportStatusFilter').value;
@@ -874,7 +887,7 @@
 
     const tbody = document.getElementById('reportsTableBody');
     if (data.reports.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666">報告なし</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#666">報告なし</td></tr>';
       return;
     }
 
@@ -883,6 +896,7 @@
         <td>${r.id}</td>
         <td>${r.playerId ? escHtml(r.playerId).substring(0, 8) + '...' : '<span style="color:#666">匿名</span>'}</td>
         <td>${escHtml(r.screenName)}</td>
+        <td>${deviceBadge(r.deviceInfo)}</td>
         <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(r.description)}</td>
         <td>${reportStatusBadge(r.status)}</td>
         <td>${new Date(r.createdAt).toLocaleString('ja-JP')}</td>
@@ -902,6 +916,7 @@
     document.getElementById('rdPlayerId').textContent = report.playerId || '(未設定)';
     document.getElementById('rdScreen').textContent = report.screenName;
     document.getElementById('rdDevice').textContent = report.deviceInfo || '-';
+    document.getElementById('rdDeviceBadge').innerHTML = deviceBadge(report.deviceInfo);
     document.getElementById('rdAppVersion').textContent = report.appVersion || '-';
     document.getElementById('rdDescription').textContent = report.description;
     document.getElementById('rdCreatedAt').textContent = new Date(report.createdAt).toLocaleString('ja-JP');

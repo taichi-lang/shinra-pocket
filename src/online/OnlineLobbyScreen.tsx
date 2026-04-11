@@ -37,7 +37,15 @@ import Board from '../games/game1/components/Board';
 // Param list mirrors RootStackParamList from App.tsx
 type ParamList = {
   OnlineLobby: { coin: CoinType };
-  OnlineGame: { coin: CoinType; roomId: string; playerId: string };
+  OnlineGame: {
+    coin: CoinType;
+    roomId: string;
+    playerId: string;
+    displayName?: string;
+    countryFlag?: string;
+    opponentDisplayName?: string;
+    opponentCountryFlag?: string;
+  };
   Menu: undefined;
   Shop: undefined;
 };
@@ -177,7 +185,12 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
     }
   }, [connectionState, coin, joinQueue]);
 
-  // --- Navigate on match found (consume ticket here) ---
+  // --- Match found: show opponent, then navigate ---
+  const [matchFoundInfo, setMatchFoundInfo] = useState<{
+    opponentDisplayName: string;
+    opponentCountryFlag: string;
+  } | null>(null);
+
   useEffect(() => {
     if (matchFound) {
       (async () => {
@@ -193,11 +206,23 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
         // Close mini game if open
         setShowMiniGame(false);
 
-        navigation.replace('OnlineGame', {
-          coin,
-          roomId: matchFound.roomId,
-          playerId: matchFound.playerId,
-        });
+        // Show opponent info briefly
+        const oppName = matchFound.opponentDisplayName || 'Opponent';
+        const oppFlag = matchFound.opponentCountryFlag || '';
+        setMatchFoundInfo({ opponentDisplayName: oppName, opponentCountryFlag: oppFlag });
+
+        // Navigate after a brief display
+        setTimeout(() => {
+          navigation.replace('OnlineGame', {
+            coin,
+            roomId: matchFound.roomId,
+            playerId: matchFound.playerId,
+            displayName: matchFound.displayName,
+            countryFlag: matchFound.countryFlag,
+            opponentDisplayName: oppName,
+            opponentCountryFlag: oppFlag,
+          });
+        }, 1500);
       })();
     }
   }, [matchFound, coin, navigation]);
@@ -405,6 +430,17 @@ export default function OnlineLobbyScreen({ navigation, route }: Props) {
         </View>
       )}
 
+      {/* Match Found Overlay */}
+      {matchFoundInfo && (
+        <View style={styles.matchFoundOverlay}>
+          <Text style={styles.matchFoundTitle}>MATCH FOUND!</Text>
+          <View style={styles.matchFoundRow}>
+            <Text style={styles.matchFoundFlag}>{matchFoundInfo.opponentCountryFlag}</Text>
+            <Text style={styles.matchFoundName}>{matchFoundInfo.opponentDisplayName}</Text>
+          </View>
+        </View>
+      )}
+
       {/* Cancel button */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
@@ -553,5 +589,34 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: COLORS.red,
     letterSpacing: 1,
+  },
+  matchFoundOverlay: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    marginBottom: 12,
+    backgroundColor: 'rgba(255,215,0,0.08)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.gold,
+  },
+  matchFoundTitle: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: COLORS.gold,
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+  matchFoundRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  matchFoundFlag: {
+    fontSize: 28,
+  },
+  matchFoundName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.gold,
   },
 });

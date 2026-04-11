@@ -54,6 +54,10 @@ export interface MatchFoundPayload {
   playerId: string;
   opponentId: string;
   playerOrder: 1 | 2; // 1 = first turn, 2 = second turn
+  displayName?: string;
+  countryFlag?: string;
+  opponentDisplayName?: string;
+  opponentCountryFlag?: string;
 }
 
 // === Room State ===
@@ -69,6 +73,8 @@ export interface PlayerInfo {
   id: string;
   coin: CoinType;
   connected: boolean;
+  displayName?: string;   // player display name
+  countryFlag?: string;   // emoji flag like 🇯🇵
 }
 
 // === Match State (synced game state) ===

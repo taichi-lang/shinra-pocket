@@ -17,7 +17,15 @@ import type { MatchState } from './types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type ParamList = {
-  OnlineGame: { coin: CoinType; roomId: string; playerId: string };
+  OnlineGame: {
+    coin: CoinType;
+    roomId: string;
+    playerId: string;
+    displayName?: string;
+    countryFlag?: string;
+    opponentDisplayName?: string;
+    opponentCountryFlag?: string;
+  };
   Result: { result: 'player' | 'cpu' | 'draw' | 'timeout'; coin: CoinType; mode: 'cpu' | 'online' };
   Menu: undefined;
 };
@@ -26,7 +34,15 @@ type Props = NativeStackScreenProps<ParamList, 'OnlineGame'>;
 
 export default function OnlineGameScreen({ navigation, route }: Props) {
   const insets = useSafeAreaInsets();
-  const { coin, roomId, playerId } = route.params;
+  const {
+    coin,
+    roomId,
+    playerId,
+    displayName: myDisplayName = 'あなた',
+    countryFlag: myFlag = '',
+    opponentDisplayName = 'Opponent',
+    opponentCountryFlag: oppFlag = '',
+  } = route.params;
   const coinInfo = COINS[coin];
 
   const {
@@ -208,15 +224,18 @@ export default function OnlineGameScreen({ navigation, route }: Props) {
         </View>
       </View>
 
-      {/* Info */}
-      <View style={styles.infoRow}>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>You</Text>
-          <Text style={styles.infoValue}>{coinInfo.emoji} {coin}</Text>
+      {/* Player Info */}
+      <View style={styles.playerInfoRow}>
+        <View style={styles.playerSide}>
+          {myFlag ? <Text style={styles.flagEmoji}>{myFlag}</Text> : null}
+          <Text style={styles.playerName}>{myDisplayName}</Text>
+          <Text style={styles.playerCoinEmoji}>{coinInfo.emoji}</Text>
         </View>
-        <View style={styles.infoItem}>
-          <Text style={styles.infoLabel}>Room</Text>
-          <Text style={styles.infoValueSmall}>{roomId.slice(0, 8)}</Text>
+        <Text style={styles.vsText}>VS</Text>
+        <View style={styles.playerSide}>
+          {oppFlag ? <Text style={styles.flagEmoji}>{oppFlag}</Text> : null}
+          <Text style={styles.playerName}>{opponentDisplayName}</Text>
+          <Text style={styles.playerCoinEmoji}>{'*'}</Text>
         </View>
       </View>
 
@@ -319,30 +338,35 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: COLORS.red,
   },
-  infoRow: {
+  playerInfoRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 16,
-  },
-  infoItem: {
+    justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 16,
+    gap: 12,
   },
-  infoLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: COLORS.textMuted,
-    marginBottom: 2,
+  playerSide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
-  infoValue: {
+  flagEmoji: {
+    fontSize: 20,
+  },
+  playerName: {
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.textPrimary,
+    color: COLORS.gold,
   },
-  infoValueSmall: {
-    fontSize: 13,
-    fontWeight: '400',
-    color: COLORS.textSecondary,
-    fontFamily: 'monospace',
+  playerCoinEmoji: {
+    fontSize: 18,
+    marginLeft: 2,
+  },
+  vsText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: COLORS.textMuted,
+    letterSpacing: 2,
   },
   errorText: {
     fontSize: 13,

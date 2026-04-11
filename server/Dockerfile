@@ -3,10 +3,13 @@ FROM node:20-slim
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --only=production && npm install typescript
+RUN npm ci
 
 COPY . .
-RUN npx tsc || true
+RUN npm run build
+
+# Remove devDependencies for smaller image
+RUN npm prune --production
 
 EXPOSE 3001
 

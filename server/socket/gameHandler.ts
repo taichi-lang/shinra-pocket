@@ -83,6 +83,8 @@ interface QueueEntry {
   gameType: string;
   coin: string;
   joinedAt: number;
+  displayName: string;
+  countryFlag: string;
 }
 
 interface PlayerData {
@@ -91,6 +93,8 @@ interface PlayerData {
   username: string;
   coin: string;
   rating: number;
+  displayName: string;
+  countryFlag: string;
 }
 
 interface GameRoom {
@@ -228,6 +232,8 @@ function createMatch(
     username: entry1.username,
     coin: entry1.coin,
     rating: entry1.rating,
+    displayName: entry1.displayName,
+    countryFlag: entry1.countryFlag,
   });
   players.set(entry2.userId, {
     socketId: entry2.socketId,
@@ -235,6 +241,8 @@ function createMatch(
     username: entry2.username,
     coin: entry2.coin,
     rating: entry2.rating,
+    displayName: entry2.displayName,
+    countryFlag: entry2.countryFlag,
   });
 
   const room: GameRoom = {
@@ -260,15 +268,19 @@ function createMatch(
 
   // Emit matchmaking:found to each player individually
   for (const [userId, pd] of players) {
-    const opponentId = userId === entry1.userId ? entry2.userId : entry1.userId;
+    const opponentEntry = userId === entry1.userId ? entry2 : entry1;
     const order = playerOrder.get(userId)!;
     const sock = io.sockets.sockets.get(pd.socketId);
     if (sock) {
       sock.emit(Events.MATCH_FOUND, {
         roomId,
         playerId: userId,
-        opponentId,
+        opponentId: opponentEntry.userId,
         playerOrder: order === "player1" ? 1 : 2,
+        displayName: pd.displayName,
+        countryFlag: pd.countryFlag,
+        opponentDisplayName: opponentEntry.displayName,
+        opponentCountryFlag: opponentEntry.countryFlag,
       });
     }
   }
@@ -296,6 +308,8 @@ function startGame(io: Server, room: GameRoom): void {
     userId: p.userId,
     username: p.username,
     coin: p.coin,
+    displayName: p.displayName,
+    countryFlag: p.countryFlag,
   }));
 
   io.to(room.roomId).emit(Events.GAME_START, {
@@ -432,10 +446,12 @@ export function setupGameHandler(io: Server): void {
     // ── Matchmaking: Join Queue ─────────────────────────
     socket.on(
       Events.JOIN_QUEUE,
-      (data: { gameType: string; coin?: string; rating?: number }) => {
+      (data: { gameType: string; coin?: string; rating?: number; displayName?: string; countryFlag?: string }) => {
         const gameType = data.gameType ?? "game1";
         const coin = data.coin ?? "default";
         const rating = data.rating ?? 1000;
+        const displayName = data.displayName || user.username;
+        const countryFlag = data.countryFlag || "";
 
         // Remove from queue if already in it
         matchmakingQueue.delete(user.userId);
@@ -448,6 +464,8 @@ export function setupGameHandler(io: Server): void {
           gameType,
           coin,
           joinedAt: Date.now(),
+          displayName,
+          countryFlag,
         };
 
         matchmakingQueue.set(user.userId, entry);
@@ -569,6 +587,8 @@ export function setupGameHandler(io: Server): void {
         userId: p.userId,
         username: p.username,
         coin: p.coin,
+        displayName: p.displayName,
+        countryFlag: p.countryFlag,
       }));
 
       socket.emit(Events.GAME_STATE_UPDATE, {
@@ -648,6 +668,8 @@ function handleReconnection(
       userId: p.userId,
       username: p.username,
       coin: p.coin,
+      displayName: p.displayName,
+      countryFlag: p.countryFlag,
     }));
 
     socket.emit(Events.GAME_STATE_UPDATE, {

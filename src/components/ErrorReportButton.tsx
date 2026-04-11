@@ -36,16 +36,15 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
       const playerId = (await AsyncStorage.getItem('playerId')) ?? 'unknown';
       const { width, height } = Dimensions.get('window');
 
+      const osLabel = Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS;
+      const osVersion = String(Platform.Version);
+      const deviceInfoStr = `${osLabel} ${osVersion} | ${width}x${height}`;
+
       const body = {
         playerId,
         screenName,
         description: description.trim(),
-        deviceInfo: {
-          platform: Platform.OS,
-          version: Platform.Version,
-          screenWidth: width,
-          screenHeight: height,
-        },
+        deviceInfo: deviceInfoStr,
         timestamp: new Date().toISOString(),
         appVersion: '1.0.0',
       };

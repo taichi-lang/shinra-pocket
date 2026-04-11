@@ -11,6 +11,7 @@ import {
   QueueStatus,
   SocketEvents,
 } from './types';
+import { getProfile } from '../services/userProfile';
 
 interface UseGameSocketOptions {
   autoConnect?: boolean;
@@ -27,7 +28,7 @@ interface UseGameSocketReturn {
   // Matchmaking
   queueStatus: QueueStatus | null;
   matchFound: MatchFoundPayload | null;
-  joinQueue: (coin: string) => void;
+  joinQueue: (coin: string) => Promise<void>;
   leaveQueue: () => void;
 
   // Game
@@ -77,8 +78,13 @@ export function useGameSocket(options: UseGameSocketOptions = {}): UseGameSocket
 
   // --- Matchmaking ---
 
-  const joinQueue = useCallback((coin: string) => {
-    socketService.emit(SocketEvents.JOIN_QUEUE, { coin });
+  const joinQueue = useCallback(async (coin: string) => {
+    const profile = await getProfile();
+    socketService.emit(SocketEvents.JOIN_QUEUE, {
+      coin,
+      displayName: profile.displayName,
+      countryFlag: profile.countryFlag,
+    });
   }, []);
 
   const leaveQueue = useCallback(() => {
