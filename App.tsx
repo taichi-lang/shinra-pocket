@@ -12,6 +12,7 @@ import GameScreen from './src/screens/GameScreen';
 import ResultScreen from './src/screens/ResultScreen';
 import RankingScreen from './src/screens/RankingScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import RuleScreen from './src/screens/RuleScreen';
 import ShopScreen from './src/monetize/ShopScreen';
 import SerialCodeScreen from './src/monetize/SerialCodeScreen';
 import OnlineLobbyScreen from './src/screens/OnlineLobbyScreen';
@@ -47,6 +48,7 @@ export type RootStackParamList = {
   SerialCode: undefined;
   OnlineLobby: { coin: CoinType };
   OnlineGame: { coin: CoinType; roomId: string; playerId: string };
+  Rule: { gameId: GameId };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -107,6 +109,7 @@ export default function App() {
             <Stack.Screen name="SerialCode" component={SerialCodeScreen} />
             <Stack.Screen name="OnlineLobby" component={OnlineLobbyScreen} />
             <Stack.Screen name="OnlineGame" component={OnlineGameScreen} />
+            <Stack.Screen name="Rule" component={RuleScreen} />
           </Stack.Navigator>
         </NavigationContainer>
         {currentScreen !== 'Splash' && (

@@ -202,6 +202,16 @@ export default function GameSelectScreen({ navigation, route }: Props) {
                 onPress={() => handleGamePress(game)}
                 activeOpacity={0.7}
               >
+                <TouchableOpacity
+                  style={styles.helpButton}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    navigation.navigate('Rule', { gameId: game.id });
+                  }}
+                  hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                >
+                  <Text style={styles.helpButtonText}>{'?'}</Text>
+                </TouchableOpacity>
                 <Text style={styles.gameEmoji}>{game.emoji}</Text>
                 <Text style={styles.gameTitle}>{game.title}</Text>
                 <Text style={styles.gameSubtitle}>
@@ -320,5 +330,24 @@ const styles = StyleSheet.create({
   },
   lockIcon: {
     fontSize: 18,
+  },
+  helpButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,215,0,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
+  },
+  helpButtonText: {
+    fontSize: 13,
+    color: COLORS.gold,
+    ...FONTS.bold,
   },
 });

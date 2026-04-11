@@ -21,6 +21,14 @@ import { setLocale, getCurrentLocale, t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
+// TODO: Replace with actual SNS URLs
+const SNS_LINKS = [
+  { name: 'X (Twitter)', icon: '𝕏', url: 'https://x.com/ShinraPocket' },
+  { name: 'Instagram', icon: '📸', url: 'https://instagram.com/shinrapocket' },
+  { name: 'YouTube', icon: '▶️', url: 'https://youtube.com/@shinrapocket' },
+  { name: 'TikTok', icon: '🎵', url: 'https://tiktok.com/@shinrapocket' },
+];
+
 const APP_VERSION = '1.0.0';
 const PRIVACY_POLICY_URL = 'https://shinrapocket.example.com/privacy';
 const TERMS_URL = 'https://shinrapocket.example.com/terms';
@@ -248,6 +256,24 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* SNS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>SNS</Text>
+          <View style={styles.snsRow}>
+            {SNS_LINKS.map((link) => (
+              <TouchableOpacity
+                key={link.name}
+                style={styles.snsButton}
+                onPress={() => Linking.openURL(link.url)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.snsIcon}>{link.icon}</Text>
+                <Text style={styles.snsName}>{link.name}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
         {/* App Version */}
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>
@@ -391,6 +417,30 @@ const styles = StyleSheet.create({
   linkArrow: {
     fontSize: 22,
     color: COLORS.textMuted,
+  },
+  snsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  snsButton: {
+    flex: 1,
+    minWidth: '40%' as unknown as number,
+    backgroundColor: COLORS.cardBg,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.cardBorder,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  snsIcon: {
+    fontSize: 22,
+    marginBottom: 4,
+  },
+  snsName: {
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    ...FONTS.regular,
   },
   versionContainer: {
     alignItems: 'center',
