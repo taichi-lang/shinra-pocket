@@ -14,6 +14,7 @@ import rankingRoutes from "./routes/ranking";
 import matchmakingRoutes from "./routes/matchmaking";
 import codesRoutes from "./routes/codes";
 import adminRoutes from "./routes/admin";
+import reportsRouter from "./routes/reports";
 
 // ─── Config ──────────────────────────────────────────────
 const PORT = parseInt(process.env.PORT || "3001", 10);
@@ -49,6 +50,7 @@ app.use("/api/ranking", rankingRoutes);
 app.use("/api/matchmaking", matchmakingRoutes);
 app.use("/api/codes", codesRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/reports", reportsRouter);
 
 // ─── Admin Dashboard (static HTML) ─────────────────────
 app.use("/admin", express.static(path.join(__dirname, "admin")));

@@ -87,3 +87,24 @@ CREATE TABLE IF NOT EXISTS banned_users (
   reason    TEXT         NOT NULL DEFAULT '',
   banned_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
+
+-- ============================================================
+-- Error Reports
+-- ============================================================
+CREATE TABLE IF NOT EXISTS error_reports (
+  id                    SERIAL PRIMARY KEY,
+  player_id             TEXT,
+  screen_name           TEXT NOT NULL,
+  description           TEXT NOT NULL,
+  device_info           TEXT,
+  app_version           TEXT,
+  status                TEXT DEFAULT 'open',
+  admin_note            TEXT,
+  compensation_tickets  INTEGER DEFAULT 0,
+  compensation_message  TEXT,
+  created_at            TIMESTAMPTZ DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_error_reports_status ON error_reports(status);
+CREATE INDEX IF NOT EXISTS idx_error_reports_created ON error_reports(created_at DESC);

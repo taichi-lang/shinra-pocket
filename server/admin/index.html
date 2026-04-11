@@ -236,6 +236,7 @@
     .badge-green { background: rgba(0,255,136,0.15); color: #00ff88; }
     .badge-red { background: rgba(255,68,68,0.15); color: #ff4444; }
     .badge-yellow { background: rgba(255,170,0,0.15); color: #ffaa00; }
+    .badge-gray { background: rgba(136,136,136,0.15); color: #888; }
 
     .maintenance-toggle {
       display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
@@ -300,6 +301,7 @@
   <div class="tab" data-tab="users" onclick="switchTab('users')">ユーザー管理</div>
   <div class="tab" data-tab="maintenance" onclick="switchTab('maintenance')">メンテナンス</div>
   <div class="tab" data-tab="codes" onclick="switchTab('codes')">シリアルコード</div>
+  <div class="tab" data-tab="reports" onclick="switchTab('reports')">エラー報告</div>
 </div>
 
 <!-- Content -->
@@ -437,6 +439,97 @@
     </div>
   </div>
 
+  <!-- Reports Panel -->
+  <div class="panel" id="panel-reports">
+    <div class="section">
+      <h3>エラー報告一覧</h3>
+      <div class="search-bar">
+        <select id="reportStatusFilter" style="width:160px;" onchange="loadReports()">
+          <option value="">すべて</option>
+          <option value="open">Open</option>
+          <option value="investigating">Investigating</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+        <button class="btn btn-primary" onclick="loadReports()">更新</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>プレイヤー</th>
+            <th>画面</th>
+            <th>説明</th>
+            <th>ステータス</th>
+            <th>日時</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="reportsTableBody">
+          <tr><td colspan="7" style="text-align:center;color:#666">読み込み中...</td></tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <button onclick="changeReportPage(-1)" id="prevReportPageBtn" disabled>前へ</button>
+        <span id="reportPageInfo">1 / 1</span>
+        <button onclick="changeReportPage(1)" id="nextReportPageBtn" disabled>次へ</button>
+      </div>
+    </div>
+
+    <!-- Report detail (shown when a report is expanded) -->
+    <div id="reportDetail" style="display:none;">
+      <div class="section" style="background:#111133; border-radius:8px; padding:20px; margin-top:16px;">
+        <h3 id="reportDetailTitle">報告 #-</h3>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+          <div><span style="color:#888;">プレイヤーID:</span> <span id="rdPlayerId">-</span></div>
+          <div><span style="color:#888;">画面:</span> <span id="rdScreen">-</span></div>
+          <div><span style="color:#888;">デバイス:</span> <span id="rdDevice">-</span></div>
+          <div><span style="color:#888;">アプリVer:</span> <span id="rdAppVersion">-</span></div>
+          <div style="grid-column:1/3;"><span style="color:#888;">説明:</span><br><span id="rdDescription">-</span></div>
+          <div><span style="color:#888;">報告日時:</span> <span id="rdCreatedAt">-</span></div>
+          <div><span style="color:#888;">お詫びチケット:</span> <span id="rdCompTickets">0</span></div>
+        </div>
+
+        <div class="form-group">
+          <label>ステータス変更</label>
+          <select id="rdStatusSelect">
+            <option value="open">Open</option>
+            <option value="investigating">Investigating</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>管理者メモ</label>
+          <textarea id="rdAdminNote" placeholder="メモ..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="updateReportStatus()">ステータス更新</button>
+
+        <hr style="border-color:#2a2a5a; margin:20px 0;">
+
+        <h3>お詫びチケット送付</h3>
+        <div id="rdCompensateSection">
+          <div class="inline-flex" style="margin-bottom:8px;">
+            <div class="form-group" style="margin-bottom:0; width:120px;">
+              <label>チケット数</label>
+              <input type="number" id="rdCompTicketInput" min="1" value="1">
+            </div>
+            <div class="form-group" style="margin-bottom:0; flex:1;">
+              <label>メッセージ</label>
+              <input type="text" id="rdCompMessage" placeholder="ご不便をおかけして申し訳ございません">
+            </div>
+          </div>
+          <button class="btn btn-warning" onclick="sendCompensation()">お詫びチケット送付</button>
+        </div>
+        <div id="rdNoPlayer" style="display:none; color:#ff4444; font-size:13px;">
+          プレイヤーIDが未設定のため、お詫びチケットを送付できません。
+        </div>
+
+        <button class="btn" style="background:#333; color:#ccc; margin-top:16px;" onclick="closeReportDetail()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Toast -->
@@ -509,6 +602,7 @@
     loadUsers();
     loadMaintenance();
     loadCodes();
+    loadReports();
     document.getElementById('statusText').textContent = '接続済み';
 
     // Auto-refresh every 30s
@@ -728,6 +822,145 @@
       document.getElementById('codeExpires').value = '';
       document.getElementById('codeMaxRedemptions').value = '';
       loadCodes();
+    }
+  }
+
+  // ── Error Reports ──
+  const REPORTS_API = window.location.origin + '/api/reports';
+  let reportPage = 1;
+  let reportTotalPages = 1;
+  let currentReportId = null;
+
+  async function reportApiFetch(path, options = {}) {
+    try {
+      const resp = await fetch(REPORTS_API + path, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-admin-key': adminKey,
+          ...(options.headers || {}),
+        },
+      });
+      return await resp.json();
+    } catch (err) {
+      console.error('Reports API error:', err);
+      return { error: err.message };
+    }
+  }
+
+  function reportStatusBadge(status) {
+    switch (status) {
+      case 'open':          return '<span class="badge badge-red">Open</span>';
+      case 'investigating': return '<span class="badge badge-yellow">Investigating</span>';
+      case 'resolved':      return '<span class="badge badge-green">Resolved</span>';
+      case 'closed':        return '<span class="badge badge-gray">Closed</span>';
+      default:              return '<span class="badge">' + escHtml(status) + '</span>';
+    }
+  }
+
+  async function loadReports(page = 1) {
+    reportPage = page;
+    const status = document.getElementById('reportStatusFilter').value;
+    const params = new URLSearchParams({ page: String(page), limit: '20' });
+    if (status) params.set('status', status);
+
+    const data = await reportApiFetch('?' + params.toString());
+    if (data.error) return;
+
+    reportTotalPages = Math.max(1, Math.ceil(data.total / data.limit));
+    document.getElementById('reportPageInfo').textContent = `${reportPage} / ${reportTotalPages}`;
+    document.getElementById('prevReportPageBtn').disabled = reportPage <= 1;
+    document.getElementById('nextReportPageBtn').disabled = reportPage >= reportTotalPages;
+
+    const tbody = document.getElementById('reportsTableBody');
+    if (data.reports.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#666">報告なし</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.reports.map(r => `
+      <tr>
+        <td>${r.id}</td>
+        <td>${r.playerId ? escHtml(r.playerId).substring(0, 8) + '...' : '<span style="color:#666">匿名</span>'}</td>
+        <td>${escHtml(r.screenName)}</td>
+        <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(r.description)}</td>
+        <td>${reportStatusBadge(r.status)}</td>
+        <td>${new Date(r.createdAt).toLocaleString('ja-JP')}</td>
+        <td><button class="btn btn-primary" style="padding:4px 10px; font-size:12px;" onclick='openReportDetail(${JSON.stringify(r).replace(/'/g, "&#39;")})'>詳細</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function changeReportPage(delta) {
+    loadReports(reportPage + delta);
+  }
+
+  function openReportDetail(report) {
+    currentReportId = report.id;
+    document.getElementById('reportDetail').style.display = 'block';
+    document.getElementById('reportDetailTitle').textContent = '報告 #' + report.id;
+    document.getElementById('rdPlayerId').textContent = report.playerId || '(未設定)';
+    document.getElementById('rdScreen').textContent = report.screenName;
+    document.getElementById('rdDevice').textContent = report.deviceInfo || '-';
+    document.getElementById('rdAppVersion').textContent = report.appVersion || '-';
+    document.getElementById('rdDescription').textContent = report.description;
+    document.getElementById('rdCreatedAt').textContent = new Date(report.createdAt).toLocaleString('ja-JP');
+    document.getElementById('rdCompTickets').textContent = report.compensationTickets || 0;
+    document.getElementById('rdStatusSelect').value = report.status;
+    document.getElementById('rdAdminNote').value = report.adminNote || '';
+
+    // Show/hide compensation section based on playerId
+    if (report.playerId) {
+      document.getElementById('rdCompensateSection').style.display = 'block';
+      document.getElementById('rdNoPlayer').style.display = 'none';
+    } else {
+      document.getElementById('rdCompensateSection').style.display = 'none';
+      document.getElementById('rdNoPlayer').style.display = 'block';
+    }
+  }
+
+  function closeReportDetail() {
+    document.getElementById('reportDetail').style.display = 'none';
+    currentReportId = null;
+  }
+
+  async function updateReportStatus() {
+    if (!currentReportId) return;
+    const status = document.getElementById('rdStatusSelect').value;
+    const adminNote = document.getElementById('rdAdminNote').value.trim();
+
+    const data = await reportApiFetch('/' + currentReportId, {
+      method: 'PATCH',
+      body: JSON.stringify({ status, adminNote: adminNote || undefined }),
+    });
+
+    if (data.success) {
+      showToast('ステータスを更新しました');
+      loadReports(reportPage);
+    }
+  }
+
+  async function sendCompensation() {
+    if (!currentReportId) return;
+    const tickets = parseInt(document.getElementById('rdCompTicketInput').value, 10);
+    const message = document.getElementById('rdCompMessage').value.trim();
+
+    if (!tickets || tickets < 1) {
+      showToast('チケット数を入力してください');
+      return;
+    }
+
+    const data = await reportApiFetch('/' + currentReportId + '/compensate', {
+      method: 'POST',
+      body: JSON.stringify({ tickets, message: message || undefined }),
+    });
+
+    if (data.success) {
+      showToast(`お詫びチケット ${data.ticketsSent} 枚を送付しました`);
+      document.getElementById('rdCompTickets').textContent = data.ticketsSent;
+      loadReports(reportPage);
+    } else if (data.error) {
+      showToast(data.error);
     }
   }
 

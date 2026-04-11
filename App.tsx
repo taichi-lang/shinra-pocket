@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, createNavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import SplashScreen from './src/screens/SplashScreen';
 import MenuScreen from './src/screens/MenuScreen';
@@ -15,6 +16,7 @@ import SerialCodeScreen from './src/monetize/SerialCodeScreen';
 import OnlineLobbyScreen from './src/screens/OnlineLobbyScreen';
 import OnlineGameScreen from './src/screens/OnlineGameScreen';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import ErrorReportButton from './src/components/ErrorReportButton';
 import { initAnalytics } from './src/analytics/analyticsService';
 import { initCrashReporter } from './src/analytics/crashReporter';
 import { initTicketStore } from './src/monetize/ticketStore';
@@ -45,40 +47,63 @@ export type RootStackParamList = {
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 export default function App() {
+  const [currentScreen, setCurrentScreen] = useState<string>('Splash');
+
   useEffect(() => {
     initCrashReporter();
     initAnalytics();
     initTicketStore();
   }, []);
 
+  const handleStateChange = useCallback(() => {
+    if (navigationRef.isReady()) {
+      const route = navigationRef.getCurrentRoute();
+      if (route?.name) {
+        setCurrentScreen(route.name);
+      }
+    }
+  }, []);
+
   return (
     <ErrorBoundary>
-    <NavigationContainer>
-      <StatusBar style="light" />
-      <Stack.Navigator
-        initialRouteName="Splash"
-        screenOptions={{
-          headerShown: false,
-          animation: 'fade',
-          contentStyle: { backgroundColor: '#050510' },
-        }}
-      >
-        <Stack.Screen name="Splash" component={SplashScreen} />
-        <Stack.Screen name="Menu" component={MenuScreen} />
-        <Stack.Screen name="GameSelect" component={GameSelectScreen} />
-        <Stack.Screen name="CoinSelect" component={CoinSelectScreen} />
-        <Stack.Screen name="Game" component={GameScreen} />
-        <Stack.Screen name="Result" component={ResultScreen} />
-        <Stack.Screen name="Ranking" component={RankingScreen} />
-        <Stack.Screen name="Shop" component={ShopScreen} />
-        <Stack.Screen name="Settings" component={SettingsScreen} />
-        <Stack.Screen name="SerialCode" component={SerialCodeScreen} />
-        <Stack.Screen name="OnlineLobby" component={OnlineLobbyScreen} />
-        <Stack.Screen name="OnlineGame" component={OnlineGameScreen} />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <View style={styles.container}>
+        <NavigationContainer ref={navigationRef} onStateChange={handleStateChange}>
+          <StatusBar style="light" />
+          <Stack.Navigator
+            initialRouteName="Splash"
+            screenOptions={{
+              headerShown: false,
+              animation: 'fade',
+              contentStyle: { backgroundColor: '#050510' },
+            }}
+          >
+            <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="Menu" component={MenuScreen} />
+            <Stack.Screen name="GameSelect" component={GameSelectScreen} />
+            <Stack.Screen name="CoinSelect" component={CoinSelectScreen} />
+            <Stack.Screen name="Game" component={GameScreen} />
+            <Stack.Screen name="Result" component={ResultScreen} />
+            <Stack.Screen name="Ranking" component={RankingScreen} />
+            <Stack.Screen name="Shop" component={ShopScreen} />
+            <Stack.Screen name="Settings" component={SettingsScreen} />
+            <Stack.Screen name="SerialCode" component={SerialCodeScreen} />
+            <Stack.Screen name="OnlineLobby" component={OnlineLobbyScreen} />
+            <Stack.Screen name="OnlineGame" component={OnlineGameScreen} />
+          </Stack.Navigator>
+        </NavigationContainer>
+        {currentScreen !== 'Splash' && (
+          <ErrorReportButton screenName={currentScreen} />
+        )}
+      </View>
     </ErrorBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
