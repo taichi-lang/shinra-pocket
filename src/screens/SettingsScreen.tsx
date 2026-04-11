@@ -21,12 +21,13 @@ import { setLocale, getCurrentLocale, t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
-// TODO: Replace with actual SNS URLs
 const SNS_LINKS = [
-  { name: 'X (Twitter)', icon: '𝕏', url: 'https://x.com/ShinraPocket' },
-  { name: 'Instagram', icon: '📸', url: 'https://instagram.com/shinrapocket' },
-  { name: 'YouTube', icon: '▶️', url: 'https://youtube.com/@shinrapocket' },
-  { name: 'TikTok', icon: '🎵', url: 'https://tiktok.com/@shinrapocket' },
+  { name: 'YouTube', icon: '▶️', url: 'https://youtube.com/@shinrawonderfultoys' },
+  { name: 'TikTok', icon: '🎵', url: 'https://www.tiktok.com/@shinrawonderfultoys' },
+  { name: 'Instagram', icon: '📸', url: 'https://www.instagram.com/shinrapocket' },
+  { name: '公式LINE', icon: '💬', url: 'https://lin.ee/H90H4xB' },
+  { name: 'Vlog', icon: '🎬', url: 'https://www.youtube.com/@shinrapocket' },
+  { name: 'ショップ', icon: '🛍️', url: 'https://shinratoys.base.shop' },
 ];
 
 const APP_VERSION = '1.0.0';
