@@ -35,12 +35,12 @@ if (!JWT_SECRET) {
 
 // ゲームの複雑さに応じた思考時間（オンライン対戦）
 const TURN_TIMEOUT_BY_GAME: Record<string, number> = {
-  game1: 10_000,   // 三目並べ: 10秒（シンプル）
-  game2: 20_000,   // 一騎打ち: 20秒（スタック戦略）
-  game4: 20_000,   // パタパタ: 20秒（種まき計算）
-  game5: 30_000,   // 日月の戦い: 30秒（将棋風、最も複雑）
+  game1: 5_000,    // 三目並べ: 5秒
+  game2: 10_000,   // 一騎打ち: 10秒
+  game4: 10_000,   // パタパタ: 10秒
+  game5: 15_000,   // 日月の戦い: 15秒
 };
-const DEFAULT_TURN_TIMEOUT_MS = 20_000;
+const DEFAULT_TURN_TIMEOUT_MS = 10_000;
 const MATCHMAKING_INTERVAL_MS = 2_000;
 const QUEUE_STALE_MS = 5 * 60 * 1000; // 5 minutes
 const RATING_INITIAL_RANGE = 100;
