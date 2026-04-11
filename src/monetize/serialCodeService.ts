@@ -9,6 +9,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addBonusTickets, setSubscriber } from './ticketStore';
 import { setAdsRemoved } from './adService';
+import { CONFIG } from '../config';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -197,7 +198,7 @@ export async function isCodeRedeemed(code: string): Promise<boolean> {
 // Server validation (optional)
 // ---------------------------------------------------------------------------
 
-const API_BASE = 'https://api.shinrapocket.com'; // placeholder
+const API_BASE = CONFIG.SERVER_URL;
 
 async function validateOnServer(code: string): Promise<SerialCode | undefined> {
   const res = await fetch(`${API_BASE}/api/codes/redeem`, {

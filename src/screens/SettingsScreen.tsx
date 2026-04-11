@@ -31,8 +31,9 @@ const SNS_LINKS = [
 ];
 
 const APP_VERSION = '1.0.0';
-const PRIVACY_POLICY_URL = 'https://shinrapocket.example.com/privacy';
-const TERMS_URL = 'https://shinrapocket.example.com/terms';
+// TODO: プライバシーポリシー・利用規約のURL（公開後に差し替え）
+const PRIVACY_POLICY_URL = 'https://shinratoys.base.shop/privacy';
+const TERMS_URL = 'https://shinratoys.base.shop/terms';
 
 const STORAGE_KEY_BGM = '@shinra_bgm_enabled';
 const STORAGE_KEY_SE = '@shinra_se_enabled';

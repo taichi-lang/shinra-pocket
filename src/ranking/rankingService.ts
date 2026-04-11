@@ -8,7 +8,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const RANKING_STORAGE_KEY = '@shinra_ranking';
-const API_BASE = 'https://api.shinrapocket.example.com'; // TODO: real URL
+import { CONFIG } from '../config';
+const API_BASE = CONFIG.SERVER_URL;
 
 // ---------------------------------------------------------------------------
 // Types

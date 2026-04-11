@@ -15,8 +15,7 @@ import { COLORS } from '../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGameSocket } from './useGameSocket';
 import { getOrCreateToken } from './authService';
-import { CoinType, COINS, createInitialGameState } from '../game/types';
-import type { GameState } from '../game/types';
+import { CoinType, COINS, createInitialGameState, type GameState } from '../game/types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   needsTicket,

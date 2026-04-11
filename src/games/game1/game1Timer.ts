@@ -1,8 +1,7 @@
 // Game1 Timer — Move phase timer system
 
 import { useRef, useCallback, useEffect, useState } from 'react';
-import type { Game1TimerConfig } from './game1Types';
-import { DEFAULT_TIMER_CONFIG } from './game1Types';
+import { type Game1TimerConfig, DEFAULT_TIMER_CONFIG } from './game1Types';
 
 /**
  * ラウンドに応じた制限時間を計算

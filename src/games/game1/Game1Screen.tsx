@@ -7,13 +7,11 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RouteProp } from '@react-navigation/native';
 
 import { COLORS, FONTS, SIZES } from '../../utils/theme';
-import type { CoinType, GameState, Difficulty } from '../../game/types';
-import { COINS, CPU_COIN_MAP, createInitialGameState } from '../../game/types';
+import { type CoinType, type GameState, type Difficulty, COINS, CPU_COIN_MAP, createInitialGameState } from '../../game/types';
 import {
   handlePlace,
   handleSelect,
@@ -24,8 +22,7 @@ import {
   canPlayerMove,
 } from './game1Logic';
 import { useGame1Timer, getTimeForRound } from './game1Timer';
-import { DEFAULT_TIMER_CONFIG } from './game1Types';
-import type { Game1Result } from './game1Types';
+import { DEFAULT_TIMER_CONFIG, type Game1Result } from './game1Types';
 
 import Board from './components/Board';
 import Timer from './components/Timer';

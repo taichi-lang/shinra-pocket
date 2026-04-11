@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { COLORS, SIZES } from '../../../utils/theme';
-import type { CoinType } from '../../../game/types';
-import { COINS } from '../../../game/types';
+import { type CoinType, COINS } from '../../../game/types';
 
 interface CoinProps {
   type: CoinType;

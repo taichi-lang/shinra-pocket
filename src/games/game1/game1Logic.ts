@@ -1,7 +1,6 @@
 // Game1 Logic — Full game state management
 
-import type { CellState, GameState, GamePhase } from '../../game/types';
-import { createInitialGameState } from '../../game/types';
+import { type CellState, type GameState, type GamePhase, createInitialGameState } from '../../game/types';
 import { checkWin, getWinLine, cpuPlace, cpuMove } from './game1AI';
 import type { Difficulty } from './game1Types';
 
