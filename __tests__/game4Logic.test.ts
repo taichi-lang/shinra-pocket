@@ -2,7 +2,8 @@ import {
   BoardState,
   Player,
   createInitialBoard,
-  INITIAL_PITS,
+  INITIAL_PITS_A,
+  INITIAL_PITS_B,
 } from '../src/games/game4/game4Types';
 import {
   cloneBoard,

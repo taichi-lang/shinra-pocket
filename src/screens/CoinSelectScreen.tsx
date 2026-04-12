@@ -48,9 +48,9 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
       navigation.navigate('OnlineLobby', { coin: selected });
     } else if (mode === 'local') {
       if (!selected2) return;
-      navigation.navigate('Game', { coin: selected, difficulty: 'normal', gameId, mode: 'local', coin2: selected2 });
+      navigation.push('Game', { coin: selected, difficulty: 'normal', gameId, mode: 'local', coin2: selected2 });
     } else {
-      navigation.navigate('Game', { coin: selected, difficulty, gameId });
+      navigation.push('Game', { coin: selected, difficulty, gameId, mode: 'cpu' });
     }
   };
 
@@ -76,23 +76,23 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
 
     if (!canPlay(gid, diff, gmode)) {
       Alert.alert(
-        'チケット不足',
-        'チケットが足りません。ショップで広告を見てチケットを獲得できます。',
+        t('coinSelect.ticketShortage'),
+        t('coinSelect.ticketShortageMessage'),
         [
-          { text: 'ショップへ', onPress: () => navigation.navigate('Shop') },
-          { text: '閉じる', style: 'cancel' },
+          { text: t('coinSelect.goToShop'), onPress: () => navigation.navigate('Shop') },
+          { text: t('coinSelect.close'), style: 'cancel' },
         ],
       );
       return;
     }
 
     Alert.alert(
-      'チケット消費',
-      'チケットを1枚消費します。よろしいですか？',
+      t('coinSelect.consumeTicket'),
+      t('coinSelect.consumeTicketMessage'),
       [
-        { text: 'いいえ', style: 'cancel' },
+        { text: t('coinSelect.no'), style: 'cancel' },
         {
-          text: 'はい',
+          text: t('coinSelect.yes'),
           onPress: async () => {
             const ok = await consumeTicket();
             if (ok) {
@@ -113,17 +113,17 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
         <TouchableOpacity
           onPress={() => { lightTap(); navigation.goBack(); }}
           style={[styles.backButton, { top: insets.top + 10 }]}
-          accessibilityLabel="戻る"
+          accessibilityLabel={t('coinSelect.back')}
           accessibilityRole="button"
         >
-          <Text style={styles.backText}>← 戻る</Text>
+          <Text style={styles.backText}>{t('coinSelect.back')}</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>コインを選べ</Text>
+        <Text style={styles.title}>{t('coinSelect.title')}</Text>
         <Text style={styles.subtitle}>
-          {mode === 'online' ? 'オンライン対戦' : mode === 'local' ? 'ローカル対戦' : 'CPU対戦'}
+          {mode === 'online' ? t('coinSelect.online') : mode === 'local' ? t('coinSelect.local') : t('coinSelect.cpu')}
         </Text>
         <Text style={styles.ticketBadge}>
-          🎫 {ticketCount === Infinity ? '∞' : `${ticketCount}枚`}
+          🎫 {ticketCount === Infinity ? '∞' : `${ticketCount}${t('menu.tickets')}`}
         </Text>
       </View>
 
@@ -153,7 +153,6 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
                 <Text style={styles.coinEmoji}>{coin.emoji}</Text>
               </LinearGradient>
               <Text style={styles.coinLabel}>{coin.label}</Text>
-              <Text style={styles.coinDesc}>{coin.description}</Text>
             </TouchableOpacity>
           );
         })}
@@ -185,7 +184,6 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
                     <Text style={styles.coinEmoji}>{coin.emoji}</Text>
                   </LinearGradient>
                   <Text style={styles.coinLabel}>{coin.label}</Text>
-                  <Text style={styles.coinDesc}>{coin.description}</Text>
                 </TouchableOpacity>
               );
             })}
@@ -195,7 +193,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
 
       {mode === 'cpu' && (
         <View style={styles.difficultyContainer}>
-          <Text style={styles.difficultyLabel}>難易度</Text>
+          <Text style={styles.difficultyLabel}>{t('coinSelect.difficulty')}</Text>
           <View style={styles.difficultyButtons}>
             <TouchableOpacity
               style={[
@@ -203,7 +201,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
                 difficulty === 'normal' && styles.diffButtonActive,
               ]}
               onPress={() => { lightTap(); setDifficulty('normal'); }}
-              accessibilityLabel="難易度ふつう"
+              accessibilityLabel={t('coinSelect.normal')}
               accessibilityRole="button"
             >
               <Text
@@ -212,7 +210,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
                   difficulty === 'normal' && styles.diffButtonTextActive,
                 ]}
               >
-                ふつう
+                {t('coinSelect.normal')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -221,7 +219,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
                 difficulty === 'hard' && styles.diffButtonActive,
               ]}
               onPress={() => { lightTap(); setDifficulty('hard'); }}
-              accessibilityLabel="難易度つよい"
+              accessibilityLabel={t('coinSelect.hard')}
               accessibilityRole="button"
             >
               <Text
@@ -230,7 +228,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
                   difficulty === 'hard' && styles.diffButtonTextActive,
                 ]}
               >
-                つよい
+                {t('coinSelect.hard')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -255,7 +253,7 @@ export default function CoinSelectScreen({ navigation, route }: Props) {
               !(isLocal ? selected && selected2 : selected) && styles.confirmTextDisabled,
             ]}
           >
-            {mode === 'online' ? 'マッチング開始' : mode === 'local' ? 'ローカル対戦開始！' : 'バトル開始！'}
+            {mode === 'online' ? t('coinSelect.startMatching') : mode === 'local' ? t('coinSelect.startLocalBattle') : t('coinSelect.startBattle')}
           </Text>
         </LinearGradient>
       </TouchableOpacity>
@@ -345,13 +343,7 @@ const styles = StyleSheet.create({
     ...FONTS.bold,
     textAlign: 'center',
   },
-  coinDesc: {
-    fontSize: 10,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-    textAlign: 'center',
-    ...FONTS.regular,
-  },
+  // coinDesc removed
   difficultyContainer: {
     marginTop: 32,
     alignItems: 'center',

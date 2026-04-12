@@ -70,6 +70,79 @@ const en: Record<string, string> = {
   'coinSelect.no': 'No',
   'coinSelect.yes': 'Yes',
 
+  // Rule / Tutorial
+  'rule.howToPlay': '📌 How to Play',
+
+  // Game 1: Tic-Tac-Toe
+  'rule.game1.title': '🪙 Tic-Tac-Toe',
+  'rule.game1.purpose': '【Goal】Line up 3 coins to win!',
+  'rule.game1.step1': '① Place 4 coins each, taking turns',
+  'rule.game1.step2': '② After placing all, it\'s the move phase!',
+  'rule.game1.step2note': 'Move your coin to an empty space',
+  'rule.game1.step3': '③ Line up 3 in a row/column/diagonal to win!',
+  'rule.game1.winExample': '← Win!',
+  'rule.game1.timer': '⏱️ Move time limit (5s → 1s)',
+  'rule.game1.timerNote': 'Time\'s up = you lose!',
+
+  // Game 2: Duel
+  'rule.game2.title': '⚔️ Duel',
+  'rule.game2.purpose': '【Goal】Line up 3 coins to win!',
+  'rule.game2.step1': '① Your coins: ① x2, ② x2',
+  'rule.game2.step1note': '4 coins per player',
+  'rule.game2.step2': '② Place a coin on an empty space',
+  'rule.game2.step3': '③ ② coins can stack on opponent\'s ① coins!',
+  'rule.game2.step3note': ' ← Overwrite opponent\'s ①!',
+  'rule.game2.step4': '④ You can also move coins on the board',
+  'rule.game2.step4note': 'Can move onto opponent\'s smaller coins too',
+  'rule.game2.step5': '⑤ Top coins count — line up 3 to win!',
+
+  // Game 3: Three-Way
+  'rule.game3.title': '🔱 Three-Way',
+  'rule.game3.purpose': '【Goal】3-player battle! First to line up 3 wins',
+  'rule.game3.step1': '① 3 players (🔴 Red 🔵 Blue 🟣 Purple)',
+  'rule.game3.step2': '② Each player has 6 coins (2 each of ①②③)',
+  'rule.game3.step3': '③ Higher numbers can stack on opponent\'s coins',
+  'rule.game3.step4': '④ After placing, it\'s the move phase',
+  'rule.game3.step5': '⑤ Line up 3 to win!',
+  'rule.game3.cpuNote': '🤖 You play against 2 CPUs',
+
+  // Game 4: Patapata (Mancala)
+  'rule.game4.title': '🫳 Patapata',
+  'rule.game4.purpose': '【Goal】Collect the most coins in your goal!',
+  'rule.game4.step1': '① Choose one of your pits',
+  'rule.game4.step2': '② Sow coins one by one counterclockwise',
+  'rule.game4.step2note': '⬇️ Around the board ⬇️',
+  'rule.game4.step3': '③ Last coin lands in goal = extra turn!',
+  'rule.game4.step4': '④ Last coin lands in your empty pit...',
+  'rule.game4.step4note': '→ Capture opponent\'s coins across!',
+  'rule.game4.step5': '⑤ Game ends when one side is empty',
+  'rule.game4.step5note': 'Most coins in goal wins!',
+
+  // Game 5: Sun & Moon
+  'rule.game5.title': '☀️ Sun & Moon',
+  'rule.game5.purpose': '【Goal】Checkmate the opponent\'s king!',
+  'rule.game5.step1': '① A 3x3 mini shogi game!',
+  'rule.game5.step2': '② Piece moves:',
+  'rule.game5.piece_king': '👑 King → 1 space in any direction',
+  'rule.game5.piece_fire': '🔥 Fire → 1 space diagonally',
+  'rule.game5.piece_water': '💧 Water → 1 space vertically',
+  'rule.game5.step3': '③ Captured pieces become your own',
+  'rule.game5.step4': '④ Drop captured pieces in your territory',
+  'rule.game5.rulesLabel': '⚠️ Rules',
+  'rule.game5.rule1': '- Same move only twice (3rd time forbidden)',
+  'rule.game5.rule2': '- Can\'t move = you lose!',
+  'rule.game5.timer': '⏱️ 30 seconds per turn',
+
+  // Game 6: 3x3 Quiz
+  'rule.game6.title': '🧩 3x3 Quiz',
+  'rule.game6.purpose': '【Goal】Solve the number puzzle!',
+  'rule.game6.step1': '① Fill numbers in a 3x3 grid',
+  'rule.game6.step2': '② Make all row/column/diagonal sums',
+  'rule.game6.step2note': 'equal to the same number!',
+  'rule.game6.step3': '③ Wrong answers cost a life (❤️❤️❤️)',
+  'rule.game6.step4': '④ Use hints to reveal a cell',
+  'rule.game6.premium': '🔒 Premium members only',
+
   // Result
   'result.win': 'Victory!',
   'result.winSubtitle': 'What a brilliant move',
@@ -162,6 +235,36 @@ const en: Record<string, string> = {
   'settings.privacy': 'Privacy Policy',
   'settings.terms': 'Terms of Service',
   'settings.version': 'Version',
+
+  // Setup
+  'setup.title': 'SHINRA POCKET',
+  'setup.subtitle': 'Initial Setup',
+  'setup.step1': 'STEP 1: Account',
+  'setup.googleLogin': 'Sign in with Google',
+  'setup.skip': 'Skip (Guest Mode)',
+  'setup.loggedInAs': '✓ Signed in as {name}',
+  'setup.step2': 'STEP 2: Display Name',
+  'setup.namePlaceholder': 'Enter your name',
+  'setup.step3': 'STEP 3: Country Flag',
+  'setup.searchPlaceholder': 'Search...',
+  'setup.startGame': 'Start Game!',
+  'setup.nameError': 'Input Error',
+  'setup.nameErrorMessage': 'Name must be 1-20 characters (no special characters)',
+  'setup.saveError': 'Failed to save. Please try again.',
+  'setup.googleProfileError': 'Failed to get Google profile',
+
+  // Error Report
+  'errorReport.title': 'Error Report',
+  'errorReport.screen': 'Screen: {screen}',
+  'errorReport.placeholder': 'Describe the issue',
+  'errorReport.close': 'Close',
+  'errorReport.send': 'Send',
+  'errorReport.inputError': 'Input Error',
+  'errorReport.inputErrorMessage': 'Please describe the issue',
+  'errorReport.success': 'Sent',
+  'errorReport.successMessage': 'Error report sent. Thank you!',
+  'errorReport.failure': 'Send Failed',
+  'errorReport.failureMessage': 'Failed to send error report. Please try again later.',
 
   // Common
   'common.ok': 'OK',

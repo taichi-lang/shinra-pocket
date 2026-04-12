@@ -144,11 +144,13 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
 
         if (newState.phase === 'finished') {
           if (newState.winner) {
+            const winResult = toResult(newState.winner);
+            const winEmoji = winResult === 'player' ? '🏆' : '😢';
             setMessage(
-              `${PLAYER_EMOJI[newState.winner]} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
+              `${winEmoji} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
             );
           } else {
-            setMessage('引き分け!');
+            setMessage('🤝 引き分け!');
           }
           if (onGameEnd && mode === 'vsCPU') {
             onGameEnd(toResult(newState.winner));
@@ -180,11 +182,13 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
     (newState: Game3State) => {
       if (newState.phase === 'finished') {
         if (newState.winner) {
+          const winResult = toResult(newState.winner);
+          const winEmoji = winResult === 'player' ? '🏆' : '😢';
           setMessage(
-            `${PLAYER_EMOJI[newState.winner]} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
+            `${winEmoji} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
           );
         } else {
-          setMessage('引き分け!');
+          setMessage('🤝 引き分け!');
         }
         if (onGameEnd && mode === 'vsCPU') {
           onGameEnd(toResult(newState.winner));

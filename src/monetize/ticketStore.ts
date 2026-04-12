@@ -26,6 +26,7 @@ import {
   obfuscateValue,
   deobfuscateValue,
 } from '../security/antiCheat';
+import { isGuestUser } from '../services/userProfile';
 
 // ---------------------------------------------------------------------------
 // Internal state
@@ -270,7 +271,9 @@ export async function resetIfNewDay(): Promise<void> {
   const today = todayString();
   if (state.lastResetDate === today) return;
 
-  state.freeTickets = FREE_DAILY_TICKETS;
+  // Guest users do not receive free daily tickets
+  const guest = await isGuestUser();
+  state.freeTickets = guest ? 0 : FREE_DAILY_TICKETS;
   state.adTickets = 0;
   state.adTicketsUsedToday = 0;
   state.lastResetDate = today;

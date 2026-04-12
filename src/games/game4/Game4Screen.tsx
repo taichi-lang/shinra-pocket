@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Alert,
 } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -29,6 +30,7 @@ import {
 } from './game4Logic';
 import { getAIMove } from './game4AI';
 import { MancalaBoard } from './components/MancalaBoard';
+import { isSubscriptionActive } from '../../monetize/iapService';
 
 const CPU_DELAY = 800;
 const SOW_STEP_DELAY = 300;
@@ -234,11 +236,23 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
   }, []);
 
   // Reset game
-  const handleReset = useCallback(() => {
+  const doReset = useCallback(() => {
     setState(createInitialState(mode, difficulty, humanSide));
     setInputLocked(false);
     setHighlightSlot(null);
   }, [mode, difficulty, humanSide]);
+
+  const handleReset = useCallback(() => {
+    if (!isSubscriptionActive()) {
+      Alert.alert(
+        'プレミアム限定',
+        '「最初から」はプレミアム会員限定の機能です。',
+        [{ text: 'OK', style: 'cancel' }],
+      );
+      return;
+    }
+    doReset();
+  }, [doReset]);
 
   // Notify parent when game ends (for ResultScreen navigation)
   useEffect(() => {

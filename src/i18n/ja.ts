@@ -70,6 +70,79 @@ const ja: Record<string, string> = {
   'coinSelect.no': 'いいえ',
   'coinSelect.yes': 'はい',
 
+  // Rule / Tutorial
+  'rule.howToPlay': '📌 あそびかた',
+
+  // Game 1: Tic-Tac-Toe
+  'rule.game1.title': '🪙 三目並べ',
+  'rule.game1.purpose': '【目的】コインを3つ並べたら勝ち！',
+  'rule.game1.step1': '① まず4枚ずつ順番にコインを置く',
+  'rule.game1.step2': '② 全部置いたら移動フェーズ！',
+  'rule.game1.step2note': '自分のコインを空いてるマスに動かせるよ',
+  'rule.game1.step3': '③ タテ・ヨコ・ナナメに3つ揃えば勝ち！',
+  'rule.game1.winExample': '← 勝ち！',
+  'rule.game1.timer': '⏱️ 移動は制限時間あり（5秒→1秒）',
+  'rule.game1.timerNote': '時間切れは負け！',
+
+  // Game 2: Duel
+  'rule.game2.title': '⚔️ 一騎打ち',
+  'rule.game2.purpose': '【目的】コインを3つ並べたら勝ち！',
+  'rule.game2.step1': '① 手持ちコイン: ①×2枚 ②×2枚',
+  'rule.game2.step1note': '各プレイヤー4枚のコイン',
+  'rule.game2.step2': '② コインを空きマスに置く',
+  'rule.game2.step3': '③ ②のコインは相手の①の上に重ねられる！',
+  'rule.game2.step3note': ' ← 相手の①を上書き！',
+  'rule.game2.step4': '④ 盤上の自分のコインも移動できる',
+  'rule.game2.step4note': '相手の小さいコインの上にも移動OK',
+  'rule.game2.step5': '⑤ 一番上のコインで3つ揃えば勝ち！',
+
+  // Game 3: Three-Way
+  'rule.game3.title': '🔱 三つ巴',
+  'rule.game3.purpose': '【目的】3人でバトル！先に3つ並べた人の勝ち',
+  'rule.game3.step1': '① 3人のプレイヤー（🔴赤 🔵青 🟣紫）',
+  'rule.game3.step2': '② 各プレイヤー6枚のコイン（①②③が2枚ずつ）',
+  'rule.game3.step3': '③ 大きい数字で相手のコインの上に重ねられる',
+  'rule.game3.step4': '④ 配置が終わったら移動フェーズ',
+  'rule.game3.step5': '⑤ 3つ揃えた人の勝ち！',
+  'rule.game3.cpuNote': '🤖 CPU2体が相手だよ',
+
+  // Game 4: Patapata (Mancala)
+  'rule.game4.title': '🫳 パタパタ',
+  'rule.game4.purpose': '【目的】ゴールにたくさんコインを集めよう！',
+  'rule.game4.step1': '① 自分の穴を1つ選ぶ',
+  'rule.game4.step2': '② 中のコインを1個ずつ反時計回りにまく',
+  'rule.game4.step2note': '⬇️ ぐるっと回る ⬇️',
+  'rule.game4.step3': '③ 最後のコインがゴールに入ったらもう1回！',
+  'rule.game4.step4': '④ 自分の空の穴に最後のコインが入ったら',
+  'rule.game4.step4note': '→ 反対側の相手のコインもゲット！',
+  'rule.game4.step5': '⑤ どちらかの穴が全部空になったら終了',
+  'rule.game4.step5note': 'ゴールのコインが多い方が勝ち！',
+
+  // Game 5: Sun & Moon
+  'rule.game5.title': '☀️ 日月の戦い',
+  'rule.game5.purpose': '【目的】相手の王（太陽/月）を詰めろ！',
+  'rule.game5.step1': '① 3×3のミニ将棋！',
+  'rule.game5.step2': '② 駒の動き:',
+  'rule.game5.piece_king': '👑王 → 全方向に1マス',
+  'rule.game5.piece_fire': '🔥火 → ナナメに1マス',
+  'rule.game5.piece_water': '💧水 → タテに1マス',
+  'rule.game5.step3': '③ 相手の駒を取ったら自分の手持ちに',
+  'rule.game5.step4': '④ 手持ちの駒を自分の陣地に置ける',
+  'rule.game5.rulesLabel': '⚠️ ルール',
+  'rule.game5.rule1': '・同じ動きは2回まで（3回目は禁止）',
+  'rule.game5.rule2': '・動けなくなったら負け！',
+  'rule.game5.timer': '⏱️ 1ターン30秒',
+
+  // Game 6: 3x3 Quiz
+  'rule.game6.title': '🧩 3x3クイズ',
+  'rule.game6.purpose': '【目的】数字パズルを解こう！',
+  'rule.game6.step1': '① 3×3のマスに数字を入れる',
+  'rule.game6.step2': '② タテ・ヨコ・ナナメの合計を',
+  'rule.game6.step2note': '全部同じ数にしよう！',
+  'rule.game6.step3': '③ 間違えるとライフが減る（❤️❤️❤️）',
+  'rule.game6.step4': '④ ヒントボタンで1マス教えてくれるよ',
+  'rule.game6.premium': '🔒 プレミアム限定ゲーム',
+
   // Result
   'result.win': '勝利！',
   'result.winSubtitle': '見事な一手だった',
@@ -162,6 +235,36 @@ const ja: Record<string, string> = {
   'settings.privacy': 'プライバシーポリシー',
   'settings.terms': '利用規約',
   'settings.version': 'バージョン',
+
+  // Setup
+  'setup.title': 'SHINRA POCKET',
+  'setup.subtitle': '初期設定',
+  'setup.step1': 'STEP 1: アカウント',
+  'setup.googleLogin': 'Googleでログイン',
+  'setup.skip': 'スキップ（ゲストモード）',
+  'setup.loggedInAs': '✓ {name} でログイン中',
+  'setup.step2': 'STEP 2: 表示名',
+  'setup.namePlaceholder': 'ユーザー名を入力',
+  'setup.step3': 'STEP 3: 国旗',
+  'setup.searchPlaceholder': '検索...',
+  'setup.startGame': 'ゲーム開始!',
+  'setup.nameError': '入力エラー',
+  'setup.nameErrorMessage': '名前は1〜20文字で入力してください（特殊文字は使用できません）',
+  'setup.saveError': '保存に失敗しました。もう一度お試しください。',
+  'setup.googleProfileError': 'Googleプロフィールの取得に失敗しました',
+
+  // Error Report
+  'errorReport.title': 'エラー報告',
+  'errorReport.screen': '画面: {screen}',
+  'errorReport.placeholder': '問題の内容を教えてください',
+  'errorReport.close': '閉じる',
+  'errorReport.send': '送信',
+  'errorReport.inputError': '入力エラー',
+  'errorReport.inputErrorMessage': '問題の内容を入力してください',
+  'errorReport.success': '送信完了',
+  'errorReport.successMessage': 'エラー報告を送信しました。ありがとうございます！',
+  'errorReport.failure': '送信失敗',
+  'errorReport.failureMessage': 'エラー報告の送信に失敗しました。後でもう一度お試しください。',
 
   // Common
   'common.ok': 'OK',

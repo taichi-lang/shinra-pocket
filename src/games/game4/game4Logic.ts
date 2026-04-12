@@ -125,38 +125,7 @@ export function sowSeeds(
   const ownPit: Slot = player === 'A' ? 'pitR' : 'pitL';
   const extraTurn = lastSlot === ownPit;
 
-  // --- Capture rule ---
-  // If last seed lands in an EMPTY pit on the current player's OWN side,
-  // capture that seed + all seeds from the OPPOSITE pit into the player's goal.
-  const ownSlots: Slot[] = player === 'A' ? ['a0', 'a1', 'a2'] : ['b0', 'b1', 'b2'];
-  const ownSlotIndex = ownSlots.indexOf(lastSlot);
-  if (ownSlotIndex >= 0 && !extraTurn) {
-    // Last seed landed on own side
-    const landedCount = getSlotValue(newBoard, lastSlot);
-    if (landedCount === 1) {
-      // It was empty before (now has exactly 1 = the seed we just placed)
-      // Opposite pit: for pit index i, opposite is (2 - i)
-      const oppositeSlots: Slot[] = player === 'A' ? ['b0', 'b1', 'b2'] : ['a0', 'a1', 'a2'];
-      const oppositeSlot = oppositeSlots[2 - ownSlotIndex];
-      const oppositeCount = getSlotValue(newBoard, oppositeSlot);
-      if (oppositeCount > 0) {
-        // Capture: move landed seed + opposite seeds to own goal
-        const captured = 1 + oppositeCount;
-        setSlotValue(newBoard, lastSlot, 0);
-        setSlotValue(newBoard, oppositeSlot, 0);
-        if (player === 'A') {
-          newBoard.pitR += captured;
-        } else {
-          newBoard.pitL += captured;
-        }
-        // Add a capture step for animation
-        steps.push({
-          target: ownPit,
-          boardAfter: cloneBoard(newBoard),
-        });
-      }
-    }
-  }
+  // No capture rule — coins simply stay where they land.
 
   return { board: newBoard, extraTurn, steps };
 }

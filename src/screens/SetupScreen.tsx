@@ -20,6 +20,7 @@ import { RootStackParamList } from '../../App';
 import { COLORS, FONTS } from '../utils/theme';
 import { COUNTRY_FLAGS, CountryFlag, codeToFlag, findByCode } from '../utils/countryFlags';
 import { saveProfile, UserProfile } from '../services/userProfile';
+import { t } from '../i18n';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -99,7 +100,7 @@ export default function SetupScreen({ navigation }: Props) {
         setDisplayName(data.name.slice(0, 20));
       }
     } catch {
-      Alert.alert('Error', 'Googleプロフィールの取得に失敗しました');
+      Alert.alert('Error', t('setup.googleProfileError'));
     } finally {
       setIsSigningIn(false);
     }
@@ -133,7 +134,7 @@ export default function SetupScreen({ navigation }: Props) {
   async function handleStart() {
     const trimmedName = displayName.trim();
     if (!isValidName(trimmedName)) {
-      Alert.alert('入力エラー', '名前は1〜20文字で入力してください（特殊文字は使用できません）');
+      Alert.alert(t('setup.nameError'), t('setup.nameErrorMessage'));
       return;
     }
 
@@ -150,7 +151,7 @@ export default function SetupScreen({ navigation }: Props) {
       await saveProfile(profile);
       navigation.replace('Menu');
     } catch {
-      Alert.alert('Error', '保存に失敗しました。もう一度お試しください。');
+      Alert.alert('Error', t('setup.saveError'));
     } finally {
       setIsSaving(false);
     }
@@ -187,16 +188,16 @@ export default function SetupScreen({ navigation }: Props) {
         {/* Header */}
         <Text style={styles.headerEmoji}>🪙</Text>
         <Text style={styles.headerTitle}>SHINRA POCKET</Text>
-        <Text style={styles.headerSubtitle}>初期設定</Text>
+        <Text style={styles.headerSubtitle}>{t('setup.subtitle')}</Text>
 
         {/* Step 1: Google Sign-In */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>STEP 1: アカウント</Text>
+          <Text style={styles.sectionTitle}>{t('setup.step1')}</Text>
 
           {googleUser ? (
             <View style={styles.googleConnected}>
               <Text style={styles.googleConnectedText}>
-                ✓ {googleUser.name} でログイン中
+                {t('setup.loggedInAs', { name: googleUser.name })}
               </Text>
             </View>
           ) : (
@@ -210,7 +211,7 @@ export default function SetupScreen({ navigation }: Props) {
                 {isSigningIn ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={styles.googleButtonText}>Googleでログイン</Text>
+                  <Text style={styles.googleButtonText}>{t('setup.googleLogin')}</Text>
                 )}
               </TouchableOpacity>
 
@@ -219,7 +220,7 @@ export default function SetupScreen({ navigation }: Props) {
                 onPress={handleSkipGoogle}
                 activeOpacity={0.7}
               >
-                <Text style={styles.skipButtonText}>スキップ（ゲストモード）</Text>
+                <Text style={styles.skipButtonText}>{t('setup.skip')}</Text>
               </TouchableOpacity>
             </>
           )}
@@ -227,7 +228,7 @@ export default function SetupScreen({ navigation }: Props) {
 
         {/* Step 2: Display Name */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>STEP 2: 表示名</Text>
+          <Text style={styles.sectionTitle}>{t('setup.step2')}</Text>
 
           <View style={styles.namePreview}>
             <Text style={styles.namePreviewFlag}>{selectedCountry.flag}</Text>
@@ -240,7 +241,7 @@ export default function SetupScreen({ navigation }: Props) {
             style={styles.nameInput}
             value={displayName}
             onChangeText={(text) => setDisplayName(text.slice(0, 20))}
-            placeholder="ユーザー名を入力"
+            placeholder={t('setup.namePlaceholder')}
             placeholderTextColor={COLORS.textMuted}
             maxLength={20}
             autoCapitalize="none"
@@ -251,13 +252,13 @@ export default function SetupScreen({ navigation }: Props) {
 
         {/* Step 3: Country Flag */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>STEP 3: 国旗</Text>
+          <Text style={styles.sectionTitle}>{t('setup.step3')}</Text>
 
           <TextInput
             style={styles.searchInput}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholder="検索..."
+            placeholder={t('setup.searchPlaceholder')}
             placeholderTextColor={COLORS.textMuted}
             autoCapitalize="none"
             autoCorrect={false}
@@ -284,7 +285,7 @@ export default function SetupScreen({ navigation }: Props) {
           {isSaving ? (
             <ActivityIndicator color="#000" size="small" />
           ) : (
-            <Text style={styles.startButtonText}>ゲーム開始!</Text>
+            <Text style={styles.startButtonText}>{t('setup.startGame')}</Text>
           )}
         </TouchableOpacity>
 

@@ -70,6 +70,8 @@ export default function SerialCodeScreen({ navigation }: Props) {
         return { text: 'このコードは既に使用済みです', color: COLORS.orange };
       case 'expired':
         return { text: 'このコードは期限切れです', color: COLORS.red };
+      case 'guest_not_allowed':
+        return { text: 'Googleアカウント連携が必要です', color: COLORS.orange };
       case 'invalid':
       default:
         return { text: '無効なコードです', color: COLORS.red };

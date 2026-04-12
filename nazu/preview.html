@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@catnazu プレビュー</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #fafafa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .container { max-width: 470px; margin: 20px auto; }
+  h1 { text-align: center; font-size: 14px; color: #999; padding: 16px 0; border-bottom: 1px solid #dbdbdb; margin-bottom: 20px; }
+
+  .post { background: #fff; border: 1px solid #dbdbdb; border-radius: 8px; margin-bottom: 24px; overflow: hidden; }
+
+  .post-header { display: flex; align-items: center; padding: 12px 16px; }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: #222; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; margin-right: 10px; flex-shrink: 0; }
+  .username { font-weight: 600; font-size: 14px; color: #262626; }
+
+  .post-image-wrap { width: 100%; aspect-ratio: 1/1; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; }
+  .post-image-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+  .post-actions { padding: 8px 16px; display: flex; gap: 16px; }
+  .post-actions svg { width: 24px; height: 24px; cursor: pointer; }
+
+  .post-likes { padding: 0 16px 4px; font-weight: 600; font-size: 14px; color: #262626; }
+
+  .post-caption { padding: 0 16px 8px; font-size: 14px; line-height: 1.5; color: #262626; white-space: pre-line; }
+  .post-caption .cap-username { font-weight: 600; margin-right: 4px; }
+
+  .post-hashtags { padding: 0 16px 12px; font-size: 14px; color: #00376b; line-height: 1.6; word-break: break-all; }
+
+  .post-alt { padding: 8px 16px; font-size: 12px; color: #8e8e8e; border-top: 1px solid #efefef; }
+  .post-alt span { font-weight: 600; }
+
+  .post-en { padding: 8px 16px; font-size: 13px; color: #666; border-top: 1px solid #efefef; white-space: pre-line; }
+  .post-en-label { font-weight: 600; font-size: 11px; color: #999; text-transform: uppercase; }
+
+  .badge { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-left: 8px; }
+
+  .file-info { padding: 4px 16px 8px; font-size: 11px; color: #bcbcbc; }
+
+  /* drop zone */
+  .drop-zone { border: 2px dashed #dbdbdb; border-radius: 8px; padding: 40px 20px; text-align: center; color: #999; margin-bottom: 24px; cursor: pointer; transition: border-color 0.2s; }
+  .drop-zone:hover, .drop-zone.dragover { border-color: #0095f6; color: #0095f6; }
+  .drop-zone p { font-size: 14px; margin-bottom: 8px; }
+  .drop-zone small { font-size: 12px; }
+
+  .caption-editor { width: 100%; min-height: 80px; border: 1px solid #dbdbdb; border-radius: 4px; padding: 8px; font-size: 14px; font-family: inherit; resize: vertical; margin-top: 8px; }
+  .hashtag-editor { width: 100%; min-height: 40px; border: 1px solid #dbdbdb; border-radius: 4px; padding: 8px; font-size: 13px; font-family: inherit; resize: vertical; margin-top: 4px; color: #00376b; }
+
+  .toolbar { display: flex; gap: 8px; padding: 8px 0; flex-wrap: wrap; }
+  .toolbar button { background: #0095f6; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; font-size: 13px; cursor: pointer; font-weight: 600; }
+  .toolbar button:hover { background: #0081d6; }
+  .toolbar button.secondary { background: #fff; color: #262626; border: 1px solid #dbdbdb; }
+  .toolbar button.secondary:hover { background: #fafafa; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>@catnazu 投稿プレビュー</h1>
+
+  <div class="drop-zone" id="dropZone">
+    <p>写真をドラッグ＆ドロップ or クリックで選択</p>
+    <small>複数枚OK。それぞれプレビューカードを生成します</small>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+  </div>
+
+  <div id="posts">
+    <!-- Post A -->
+    <div class="post">
+      <div class="post-header">
+        <div class="avatar">🐈‍⬛</div>
+        <span class="username">catnazu</span>
+        <span class="badge">Draft A</span>
+      </div>
+      <div class="post-image-wrap">
+        <img src="D:/保存/Backup/IMG_2961.JPG" alt="なづが上を見上げている">
+      </div>
+      <div class="post-actions">
+        <svg viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-1.834-1.527-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 013.679-1.938z" fill="none" stroke="#262626" stroke-width="2"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="#262626" stroke-width="2" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24"><polygon points="22 3 9.218 10.083 11.698 20.334 22 3" fill="none" stroke="#262626" stroke-width="2" stroke-linejoin="round"/><line x1="11.698" y1="20.334" x2="22" y2="3" fill="none" stroke="#262626" stroke-width="2"/><line x1="2" y1="22" x2="11.698" y2="20.334" fill="none" stroke="#262626" stroke-width="2"/></svg>
+      </div>
+      <div class="post-caption">
+        <span class="cap-username">catnazu</span>何か見つけたらしい。
+天井の隅をじっと見つめて動かない。
+この金色の目で見られると、こっちまで気になってくる🐈‍⬛</div>
+      <div class="post-hashtags">#保護猫 #黒猫 #ブラックスモークタビー #blacksmoketabby #catnazu #猫のいる暮らし #猫スタグラム #猫好きさんと繋がりたい #猫部 #元野良猫 #保護猫のいる暮らし #catsofinstagram #blackcat #blackcatsofinstagram #rescuecat #catlife #goldeneyes #猫の目 #猫写真</div>
+      <div class="post-alt"><span>ALT:</span> 黒猫が上を見上げている写真。金色の丸い目が印象的で、白い壁を背景に黒い毛並みが際立っている。</div>
+      <div class="post-en"><span class="post-en-label">EN:</span> She found something on the ceiling.
+Won't move until she figures it out.</div>
+      <div class="file-info">IMG_2961.JPG</div>
+    </div>
+
+    <!-- Post B -->
+    <div class="post">
+      <div class="post-header">
+        <div class="avatar">🐈‍⬛</div>
+        <span class="username">catnazu</span>
+        <span class="badge">Draft B</span>
+      </div>
+      <div class="post-image-wrap">
+        <img src="D:/保存/Backup/IMG_2260.JPG" alt="なづが壁に手をついて伸びている">
+      </div>
+      <div class="post-actions">
+        <svg viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-1.834-1.527-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 013.679-1.938z" fill="none" stroke="#262626" stroke-width="2"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="#262626" stroke-width="2" stroke-linejoin="round"/></svg>
+        <svg viewBox="0 0 24 24"><polygon points="22 3 9.218 10.083 11.698 20.334 22 3" fill="none" stroke="#262626" stroke-width="2" stroke-linejoin="round"/><line x1="11.698" y1="20.334" x2="22" y2="3" fill="none" stroke="#262626" stroke-width="2"/><line x1="2" y1="22" x2="11.698" y2="20.334" fill="none" stroke="#262626" stroke-width="2"/></svg>
+      </div>
+      <div class="post-caption">
+        <span class="cap-username">catnazu</span>壁に手をついて伸びをしている。
+背中の毛をよく見ると、黒の下にグレーの縞が透けて見える。
+ブラックスモークタビーという毛色の特徴🐾</div>
+      <div class="post-hashtags">#保護猫 #黒猫 #ブラックスモークタビー #blacksmoketabby #catnazu #猫のいる暮らし #ねこすたぐらむ #にゃんすたぐらむ #猫好き #保護猫と暮らす #猫のいる生活 #catsofinstagram #blackcatsofinstagram #rescuecat #adoptdontshop #smokecat #tabbycat #もふもふ #猫の手</div>
+      <div class="post-alt"><span>ALT:</span> 黒猫が壁に前足をついて体を伸ばしている後ろ姿。黒い毛の下にグレーの縞模様が薄く見える。</div>
+      <div class="post-en"><span class="post-en-label">EN:</span> Stretching against the wall.
+If you look closely, you can see grey tabby stripes under the black — that's a black smoke tabby.</div>
+      <div class="file-info">IMG_2260.JPG</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const postsContainer = document.getElementById('posts');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) continue;
+    const reader = new FileReader();
+    reader.onload = e => addDraftPost(e.target.result, file.name);
+    reader.readAsDataURL(file);
+  }
+}
+
+function addDraftPost(src, filename) {
+  const n = postsContainer.querySelectorAll('.post').length + 1;
+  const post = document.createElement('div');
+  post.className = 'post';
+  post.innerHTML = `
+    <div class="post-header">
+      <div class="avatar">🐈‍⬛</div>
+      <span class="username">catnazu</span>
+      <span class="badge">New #${n}</span>
+    </div>
+    <div class="post-image-wrap"><img src="${src}" alt=""></div>
+    <div class="post-actions">
+      <svg viewBox="0 0 24 24"><path d="M16.792 3.904A4.989 4.989 0 0121.5 9.122c0 3.072-2.652 4.959-5.197 7.222-2.512 2.243-3.865 3.469-4.303 3.752-.477-.309-1.834-1.527-4.303-3.752C5.141 14.072 2.5 12.167 2.5 9.122a4.989 4.989 0 014.708-5.218 4.21 4.21 0 013.675 1.941c.84 1.175.98 1.763 1.12 1.763s.278-.588 1.11-1.766a4.17 4.17 0 013.679-1.938z" fill="none" stroke="#262626" stroke-width="2"/></svg>
+      <svg viewBox="0 0 24 24"><path d="M20.656 17.008a9.993 9.993 0 10-3.59 3.615L22 22z" fill="none" stroke="#262626" stroke-width="2" stroke-linejoin="round"/></svg>
+      <svg viewBox="0 0 24 24"><polygon points="22 3 9.218 10.083 11.698 20.334 22 3" fill="none" stroke="#262626" stroke-width="2" stroke-linejoin="round"/></svg>
+    </div>
+    <div style="padding: 8px 16px;">
+      <textarea class="caption-editor" placeholder="キャプションを入力..."></textarea>
+      <textarea class="hashtag-editor" placeholder="#ハッシュタグ #を入力..."></textarea>
+    </div>
+    <div class="file-info">${filename}</div>
+  `;
+  postsContainer.appendChild(post);
+  post.scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+</body>
+</html>

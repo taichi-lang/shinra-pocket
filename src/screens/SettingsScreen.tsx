@@ -22,18 +22,18 @@ import { setLocale, getCurrentLocale, t } from '../i18n';
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
 const SNS_LINKS = [
-  { name: 'YouTube', icon: '▶️', url: 'https://youtube.com/@shinrawonderfultoys' },
-  { name: 'TikTok', icon: '🎵', url: 'https://www.tiktok.com/@shinrawonderfultoys' },
-  { name: 'Instagram', icon: '📸', url: 'https://www.instagram.com/shinrapocket' },
-  { name: '公式LINE', icon: '💬', url: 'https://lin.ee/H90H4xB' },
-  { name: 'Vlog', icon: '🎬', url: 'https://www.youtube.com/@shinrapocket' },
-  { name: 'ショップ', icon: '🛍️', url: 'https://shinratoys.base.shop' },
+  { name: 'YouTube', icon: '▶', bg: '#FF0000', fg: '#FFFFFF', url: 'https://youtube.com/@shinrawonderfultoys' },
+  { name: 'TikTok', icon: '♪', bg: '#000000', fg: '#FFFFFF', accent: '#25F4EE', url: 'https://www.tiktok.com/@shinrawonderfultoys' },
+  { name: 'Instagram', icon: '📷', bg: '#C13584', fg: '#FFFFFF', url: 'https://www.instagram.com/shinrapocket' },
+  { name: 'LINE', icon: 'LINE', bg: '#06C755', fg: '#FFFFFF', url: 'https://lin.ee/H90H4xB' },
+  { name: 'Vlog', icon: '🎬', bg: '#1E90FF', fg: '#FFFFFF', url: 'https://www.youtube.com/@shinrapocket' },
+  { name: 'Shop', icon: '🛍', bg: '#FF8C00', fg: '#FFFFFF', url: 'https://shinratoys.base.shop' },
 ];
 
 const APP_VERSION = '1.0.0';
-// TODO: プライバシーポリシー・利用規約のURL（公開後に差し替え）
-const PRIVACY_POLICY_URL = 'https://shinratoys.base.shop/privacy';
-const TERMS_URL = 'https://shinratoys.base.shop/terms';
+// プライバシーポリシー・利用規約URL（サーバーから配信）
+const PRIVACY_POLICY_URL = 'https://shinrapocket.up.railway.app/legal/privacy';
+const TERMS_URL = 'https://shinrapocket.up.railway.app/legal/terms';
 
 const STORAGE_KEY_BGM = '@shinra_bgm_enabled';
 const STORAGE_KEY_SE = '@shinra_se_enabled';
@@ -269,7 +269,9 @@ export default function SettingsScreen({ navigation }: Props) {
                 onPress={() => Linking.openURL(link.url)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.snsIcon}>{link.icon}</Text>
+                <View style={[styles.snsIconCircle, { backgroundColor: link.bg }]}>
+                  <Text style={[styles.snsIconText, { color: link.fg }]}>{link.icon}</Text>
+                </View>
                 <Text style={styles.snsName}>{link.name}</Text>
               </TouchableOpacity>
             ))}
@@ -423,25 +425,30 @@ const styles = StyleSheet.create({
   snsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    justifyContent: 'space-between',
+    gap: 8,
   },
   snsButton: {
-    flex: 1,
-    minWidth: '40%' as unknown as number,
-    backgroundColor: COLORS.cardBg,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.cardBorder,
-    paddingVertical: 12,
     alignItems: 'center',
+    width: 70,
+    marginBottom: 8,
   },
-  snsIcon: {
+  snsIconCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  snsIconText: {
     fontSize: 22,
-    marginBottom: 4,
+    ...FONTS.bold,
   },
   snsName: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.textSecondary,
+    textAlign: 'center',
     ...FONTS.regular,
   },
   versionContainer: {

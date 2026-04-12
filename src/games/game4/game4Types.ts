@@ -71,13 +71,14 @@ export interface Game4State {
   message: string | null;
 }
 
-/** Initial board configuration */
-export const INITIAL_PITS: [number, number, number] = [4, 3, 2];
+/** Initial board configuration: A side [2,3,4], B side [4,3,2] */
+export const INITIAL_PITS_A: [number, number, number] = [2, 3, 4];
+export const INITIAL_PITS_B: [number, number, number] = [4, 3, 2];
 
 export function createInitialBoard(): BoardState {
   return {
-    a: [...INITIAL_PITS] as [number, number, number],
-    b: [2, 3, 4], // mirror: B1=2, B2=3, B3=4
+    a: [...INITIAL_PITS_A] as [number, number, number],
+    b: [...INITIAL_PITS_B] as [number, number, number],
     pitL: 0,
     pitR: 0,
   };

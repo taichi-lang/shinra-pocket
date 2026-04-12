@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
+import { Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { logEvent } from '../analytics/analyticsService';
@@ -26,7 +27,12 @@ export default function GameScreen({ navigation, route }: Props) {
     navigation.replace('Result', { result, coin, mode, gameId, difficulty, coin2 });
   };
 
-  const handleBack = () => navigation.goBack();
+  const handleBack = useCallback(() => {
+    Alert.alert('確認', 'ゲームを終了しますか？', [
+      { text: 'いいえ', style: 'cancel' },
+      { text: 'はい', onPress: () => navigation.goBack() },
+    ]);
+  }, [navigation]);
 
   switch (gameId) {
     case 'game2':

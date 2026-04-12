@@ -15,6 +15,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, FONTS } from '../utils/theme';
 import { CONFIG } from '../config';
+import { t } from '../i18n';
 
 interface ErrorReportButtonProps {
   screenName: string;
@@ -27,7 +28,7 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
 
   const handleSend = async () => {
     if (!description.trim()) {
-      Alert.alert('入力エラー', '問題の内容を入力してください');
+      Alert.alert(t('errorReport.inputError'), t('errorReport.inputErrorMessage'));
       return;
     }
 
@@ -57,11 +58,11 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      Alert.alert('送信完了', 'エラー報告を送信しました。ありがとうございます！');
+      Alert.alert(t('errorReport.success'), t('errorReport.successMessage'));
       setDescription('');
       setVisible(false);
     } catch (e) {
-      Alert.alert('送信失敗', 'エラー報告の送信に失敗しました。後でもう一度お試しください。');
+      Alert.alert(t('errorReport.failure'), t('errorReport.failureMessage'));
     } finally {
       setSending(false);
     }
@@ -88,12 +89,12 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <View style={styles.modal}>
-            <Text style={styles.title}>エラー報告</Text>
-            <Text style={styles.subtitle}>画面: {screenName}</Text>
+            <Text style={styles.title}>{t('errorReport.title')}</Text>
+            <Text style={styles.subtitle}>{t('errorReport.screen', { screen: screenName })}</Text>
 
             <TextInput
               style={styles.input}
-              placeholder="問題の内容を教えてください"
+              placeholder={t('errorReport.placeholder')}
               placeholderTextColor={COLORS.textMuted}
               multiline
               numberOfLines={5}
@@ -112,7 +113,7 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
                 }}
                 disabled={sending}
               >
-                <Text style={styles.closeBtnText}>閉じる</Text>
+                <Text style={styles.closeBtnText}>{t('errorReport.close')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -123,7 +124,7 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
                 {sending ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Text style={styles.sendBtnText}>送信</Text>
+                  <Text style={styles.sendBtnText}>{t('errorReport.send')}</Text>
                 )}
               </TouchableOpacity>
             </View>

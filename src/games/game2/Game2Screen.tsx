@@ -7,6 +7,7 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,6 +37,7 @@ import {
 import { chooseAIAction } from './game2AI';
 import StackCellView from './components/StackCellView';
 import CoinStack from './components/CoinStack';
+import { isSubscriptionActive } from '../../monetize/iapService';
 
 interface Game2ScreenProps {
   playerCoin: CoinType;
@@ -308,11 +310,23 @@ export default function Game2Screen({
   }, [winner, active, onGameEnd]);
 
   // ---- Reset ----
-  const handleReset = () => {
+  const doReset = () => {
     setState(createInitialGame2State());
     clearSelection();
     setMessage('コインを選んで配置しよう');
     isProcessing.current = false;
+  };
+
+  const handleReset = () => {
+    if (!isSubscriptionActive()) {
+      Alert.alert(
+        'プレミアム限定',
+        '「最初から」はプレミアム会員限定の機能です。',
+        [{ text: 'OK', style: 'cancel' }],
+      );
+      return;
+    }
+    doReset();
   };
 
   // ---- Build hand coin items for player ----

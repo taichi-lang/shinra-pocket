@@ -50,3 +50,20 @@ export async function isSetupComplete(): Promise<boolean> {
 export async function clearProfile(): Promise<void> {
   await AsyncStorage.removeItem(PROFILE_KEY);
 }
+
+/**
+ * Check if user is a guest (no Google account linked).
+ * Returns true if user has no googleId set.
+ */
+export async function isGuestUser(): Promise<boolean> {
+  try {
+    const json = await AsyncStorage.getItem(PROFILE_KEY);
+    if (json) {
+      const profile: UserProfile = JSON.parse(json);
+      return !profile.googleId;
+    }
+    return true; // No profile = guest
+  } catch {
+    return true;
+  }
+}

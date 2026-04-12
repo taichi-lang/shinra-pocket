@@ -5,12 +5,14 @@ import {
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, GameId } from '../../App';
 import { COLORS, FONTS } from '../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { t } from '../i18n';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Rule'>;
 
@@ -23,12 +25,12 @@ const fs = (base: number) => (COMPACT ? base - 1 : base);
 function Game1Rule() {
   return (
     <>
-      <Text style={s.heading}>{'🪙 三目並べ'}</Text>
-      <Text style={s.purpose}>{'【目的】コインを3つ並べたら勝ち！'}</Text>
+      <Text style={s.heading}>{t('rule.game1.title')}</Text>
+      <Text style={s.purpose}>{t('rule.game1.purpose')}</Text>
 
-      <Text style={s.label}>{'📌 あそびかた'}</Text>
+      <Text style={s.label}>{t('rule.howToPlay')}</Text>
 
-      <Text style={s.body}>{'① まず4枚ずつ順番にコインを置く'}</Text>
+      <Text style={s.body}>{t('rule.game1.step1')}</Text>
       <View style={s.gridRow}>
         <Cell c="🔴" /><Cell /><Cell c="🔵" />
       </View>
@@ -39,17 +41,17 @@ function Game1Rule() {
         <Cell c="🔵" /><Cell /><Cell />
       </View>
 
-      <Text style={s.body}>{'② 全部置いたら移動フェーズ！'}</Text>
-      <Text style={s.note}>{'   自分のコインを空いてるマスに動かせるよ'}</Text>
+      <Text style={s.body}>{t('rule.game1.step2')}</Text>
+      <Text style={s.note}>{t('rule.game1.step2note')}</Text>
 
-      <Text style={s.body}>{'③ タテ・ヨコ・ナナメに3つ揃えば勝ち！'}</Text>
+      <Text style={s.body}>{t('rule.game1.step3')}</Text>
       <View style={s.gridRow}>
         <Cell c="🔴" /><Cell c="🔴" /><Cell c="🔴" />
       </View>
-      <Text style={s.win}>{'← 勝ち！'}</Text>
+      <Text style={s.win}>{t('rule.game1.winExample')}</Text>
 
-      <Text style={s.warn}>{'⏱️ 移動は制限時間あり（5秒→1秒）'}</Text>
-      <Text style={s.note}>{'   時間切れは負け！'}</Text>
+      <Text style={s.warn}>{t('rule.game1.timer')}</Text>
+      <Text style={s.note}>{t('rule.game1.timerNote')}</Text>
     </>
   );
 }
@@ -57,23 +59,32 @@ function Game1Rule() {
 function Game2Rule() {
   return (
     <>
-      <Text style={s.heading}>{'⚔️ 一騎打ち'}</Text>
-      <Text style={s.purpose}>{'【目的】コインを3つ並べたら勝ち！'}</Text>
+      <Text style={s.heading}>{t('rule.game2.title')}</Text>
+      <Text style={s.purpose}>{t('rule.game2.purpose')}</Text>
 
-      <Text style={s.label}>{'📌 あそびかた'}</Text>
-      <Text style={s.body}>{'① 手持ちコイン: ①×2枚 ②×2枚'}</Text>
-      <Text style={s.body}>{'② コインを空きマスに置く'}</Text>
-      <Text style={s.body}>{'③ ②のコインは相手の①の上に重ねられる！'}</Text>
+      <Text style={s.label}>{t('rule.howToPlay')}</Text>
+      <Text style={s.body}>{t('rule.game2.step1')}</Text>
+
+      <View style={s.gridRow}>
+        <MiniCell t="①" /><MiniCell t="①" /><MiniCell t="②" />
+      </View>
+      <View style={s.gridRow}>
+        <MiniCell t="②" /><View style={s.miniCellEmpty} /><View style={s.miniCellEmpty} />
+      </View>
+      <Text style={s.note}>{t('rule.game2.step1note')}</Text>
+
+      <Text style={s.body}>{t('rule.game2.step2')}</Text>
+      <Text style={s.body}>{t('rule.game2.step3')}</Text>
       <View style={s.stackRow}>
         <View style={s.stackCell}>
           <Text style={s.stackTop}>{'②'}</Text>
           <Text style={s.stackBottom}>{'①'}</Text>
         </View>
-        <Text style={s.note}>{' ← 相手の①を上書き！'}</Text>
+        <Text style={s.note}>{t('rule.game2.step3note')}</Text>
       </View>
-      <Text style={s.body}>{'④ 盤上の自分のコインも移動できる'}</Text>
-      <Text style={s.note}>{'   相手の小さいコインの上にも移動OK'}</Text>
-      <Text style={s.body}>{'⑤ 一番上のコインで3つ揃えば勝ち！'}</Text>
+      <Text style={s.body}>{t('rule.game2.step4')}</Text>
+      <Text style={s.note}>{t('rule.game2.step4note')}</Text>
+      <Text style={s.body}>{t('rule.game2.step5')}</Text>
     </>
   );
 }
@@ -81,16 +92,27 @@ function Game2Rule() {
 function Game3Rule() {
   return (
     <>
-      <Text style={s.heading}>{'🔱 三つ巴'}</Text>
-      <Text style={s.purpose}>{'【目的】3人でバトル！先に3つ並べた人の勝ち'}</Text>
+      <Text style={s.heading}>{t('rule.game3.title')}</Text>
+      <Text style={s.purpose}>{t('rule.game3.purpose')}</Text>
 
-      <Text style={s.label}>{'📌 あそびかた'}</Text>
-      <Text style={s.body}>{'① 3人のプレイヤー（🔴赤 🔵青 🟣紫）'}</Text>
-      <Text style={s.body}>{'② 各プレイヤー6枚のコイン（①②③が2枚ずつ）'}</Text>
-      <Text style={s.body}>{'③ 大きい数字で相手のコインの上に重ねられる'}</Text>
-      <Text style={s.body}>{'④ 配置が終わったら移動フェーズ'}</Text>
-      <Text style={s.body}>{'⑤ 3つ揃えた人の勝ち！'}</Text>
-      <Text style={s.warn}>{'🤖 CPU2体が相手だよ'}</Text>
+      <Text style={s.label}>{t('rule.howToPlay')}</Text>
+      <Text style={s.body}>{t('rule.game3.step1')}</Text>
+
+      <View style={s.gridRow}>
+        <Cell c="🔴" /><Cell /><Cell c="🔵" />
+      </View>
+      <View style={s.gridRow}>
+        <Cell /><Cell c="🟣" /><Cell />
+      </View>
+      <View style={s.gridRow}>
+        <Cell c="🔵" /><Cell /><Cell c="🔴" />
+      </View>
+
+      <Text style={s.body}>{t('rule.game3.step2')}</Text>
+      <Text style={s.body}>{t('rule.game3.step3')}</Text>
+      <Text style={s.body}>{t('rule.game3.step4')}</Text>
+      <Text style={s.body}>{t('rule.game3.step5')}</Text>
+      <Text style={s.warn}>{t('rule.game3.cpuNote')}</Text>
     </>
   );
 }
@@ -98,24 +120,31 @@ function Game3Rule() {
 function Game4Rule() {
   return (
     <>
-      <Text style={s.heading}>{'🫳 パタパタ'}</Text>
-      <Text style={s.purpose}>{'【目的】ゴールにたくさんコインを集めよう！'}</Text>
+      <Text style={s.heading}>{t('rule.game4.title')}</Text>
+      <Text style={s.purpose}>{t('rule.game4.purpose')}</Text>
 
-      <Text style={s.label}>{'📌 あそびかた'}</Text>
-      <Text style={s.body}>{'① 自分の穴を1つ選ぶ'}</Text>
-      <Text style={s.body}>{'② 中のコインを1個ずつ反時計回りにまく'}</Text>
-      <View style={s.gridRow}>
-        <MiniCell t="4" /><MiniCell t="3" /><MiniCell t="2" />
+      <Text style={s.label}>{t('rule.howToPlay')}</Text>
+      <Text style={s.body}>{t('rule.game4.step1')}</Text>
+      <Text style={s.body}>{t('rule.game4.step2')}</Text>
+      <View style={s.mancalaRow}>
+        <View style={s.mancalaGoal}><Text style={s.mancalaGoalText}>G</Text></View>
+        <View>
+          <View style={s.gridRow}>
+            <MiniCell t="4" /><MiniCell t="4" /><MiniCell t="4" />
+          </View>
+          <View style={s.gridRow}>
+            <MiniCell t="4" /><MiniCell t="4" /><MiniCell t="4" />
+          </View>
+        </View>
+        <View style={s.mancalaGoal}><Text style={s.mancalaGoalText}>G</Text></View>
       </View>
-      <Text style={s.note}>{'   ⬇️ ぐるっと回る ⬇️'}</Text>
-      <View style={s.gridRow}>
-        <MiniCell t="4" /><MiniCell t="3" /><MiniCell t="2" />
-      </View>
-      <Text style={s.body}>{'③ 最後のコインがゴールに入ったらもう1回！'}</Text>
-      <Text style={s.body}>{'④ 自分の空の穴に最後のコインが入ったら'}</Text>
-      <Text style={s.note}>{'   → 反対側の相手のコインもゲット！'}</Text>
-      <Text style={s.body}>{'⑤ どちらかの穴が全部空になったら終了'}</Text>
-      <Text style={s.note}>{'   ゴールのコインが多い方が勝ち！'}</Text>
+      <Text style={s.note}>{t('rule.game4.step2note')}</Text>
+
+      <Text style={s.body}>{t('rule.game4.step3')}</Text>
+      <Text style={s.body}>{t('rule.game4.step4')}</Text>
+      <Text style={s.note}>{t('rule.game4.step4note')}</Text>
+      <Text style={s.body}>{t('rule.game4.step5')}</Text>
+      <Text style={s.note}>{t('rule.game4.step5note')}</Text>
     </>
   );
 }
@@ -123,22 +152,33 @@ function Game4Rule() {
 function Game5Rule() {
   return (
     <>
-      <Text style={s.heading}>{'☀️ 日月の戦い'}</Text>
-      <Text style={s.purpose}>{'【目的】相手の王（太陽/月）を詰めろ！'}</Text>
+      <Text style={s.heading}>{t('rule.game5.title')}</Text>
+      <Text style={s.purpose}>{t('rule.game5.purpose')}</Text>
 
-      <Text style={s.label}>{'📌 あそびかた'}</Text>
-      <Text style={s.body}>{'① 3×3のミニ将棋！'}</Text>
-      <Text style={s.body}>{'② 駒の動き:'}</Text>
-      <Text style={s.note}>{'   👑王 → 全方向に1マス'}</Text>
-      <Text style={s.note}>{'   🔥火 → ナナメに1マス'}</Text>
-      <Text style={s.note}>{'   💧水 → タテに1マス'}</Text>
-      <Text style={s.body}>{'③ 相手の駒を取ったら自分の手持ちに'}</Text>
-      <Text style={s.body}>{'④ 手持ちの駒を自分の陣地に置ける'}</Text>
+      <Text style={s.label}>{t('rule.howToPlay')}</Text>
+      <Text style={s.body}>{t('rule.game5.step1')}</Text>
 
-      <Text style={s.label}>{'⚠️ ルール'}</Text>
-      <Text style={s.note}>{'・同じ動きは2回まで（3回目は禁止）'}</Text>
-      <Text style={s.note}>{'・動けなくなったら負け！'}</Text>
-      <Text style={s.warn}>{'⏱️ 1ターン30秒'}</Text>
+      <View style={s.gridRow}>
+        <MiniCell t="🔥" /><MiniCell t="👑" /><MiniCell t="💧" />
+      </View>
+      <View style={s.gridRow}>
+        <View style={s.miniCellEmpty} /><View style={s.miniCellEmpty} /><View style={s.miniCellEmpty} />
+      </View>
+      <View style={s.gridRow}>
+        <MiniCell t="💧" /><MiniCell t="👑" /><MiniCell t="🔥" />
+      </View>
+
+      <Text style={s.body}>{t('rule.game5.step2')}</Text>
+      <Text style={s.note}>{t('rule.game5.piece_king')}</Text>
+      <Text style={s.note}>{t('rule.game5.piece_fire')}</Text>
+      <Text style={s.note}>{t('rule.game5.piece_water')}</Text>
+      <Text style={s.body}>{t('rule.game5.step3')}</Text>
+      <Text style={s.body}>{t('rule.game5.step4')}</Text>
+
+      <Text style={s.label}>{t('rule.game5.rulesLabel')}</Text>
+      <Text style={s.note}>{t('rule.game5.rule1')}</Text>
+      <Text style={s.note}>{t('rule.game5.rule2')}</Text>
+      <Text style={s.warn}>{t('rule.game5.timer')}</Text>
     </>
   );
 }
@@ -146,13 +186,13 @@ function Game5Rule() {
 function Game6Rule() {
   return (
     <>
-      <Text style={s.heading}>{'🧩 3x3クイズ'}</Text>
-      <Text style={s.purpose}>{'【目的】数字パズルを解こう！'}</Text>
+      <Text style={s.heading}>{t('rule.game6.title')}</Text>
+      <Text style={s.purpose}>{t('rule.game6.purpose')}</Text>
 
-      <Text style={s.label}>{'📌 あそびかた'}</Text>
-      <Text style={s.body}>{'① 3×3のマスに数字を入れる'}</Text>
-      <Text style={s.body}>{'② タテ・ヨコ・ナナメの合計を'}</Text>
-      <Text style={s.note}>{'   全部同じ数にしよう！'}</Text>
+      <Text style={s.label}>{t('rule.howToPlay')}</Text>
+      <Text style={s.body}>{t('rule.game6.step1')}</Text>
+      <Text style={s.body}>{t('rule.game6.step2')}</Text>
+      <Text style={s.note}>{t('rule.game6.step2note')}</Text>
 
       <View style={s.gridRow}>
         <MiniCell t="2" /><MiniCell t="7" /><MiniCell t="6" />
@@ -167,9 +207,9 @@ function Game6Rule() {
         <Text style={s.sumLabel}>{'→15'}</Text>
       </View>
 
-      <Text style={s.body}>{'③ 間違えるとライフが減る（❤️❤️❤️）'}</Text>
-      <Text style={s.body}>{'④ ヒントボタンで1マス教えてくれるよ'}</Text>
-      <Text style={s.warn}>{'🔒 プレミアム限定ゲーム'}</Text>
+      <Text style={s.body}>{t('rule.game6.step3')}</Text>
+      <Text style={s.body}>{t('rule.game6.step4')}</Text>
+      <Text style={s.warn}>{t('rule.game6.premium')}</Text>
     </>
   );
 }
@@ -213,7 +253,11 @@ export default function RuleScreen({ navigation, route }: Props) {
       colors={[COLORS.bgGradientStart, COLORS.bgGradientEnd, COLORS.bg]}
       style={s.container}
     >
-      <View style={[s.content, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12 }]}>
+      <ScrollView
+        style={s.scrollView}
+        contentContainerStyle={[s.content, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <RuleContent />
 
         <View style={s.bottomSpacer} />
@@ -222,9 +266,9 @@ export default function RuleScreen({ navigation, route }: Props) {
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
-          <Text style={s.closeButtonText}>{'閉じる'}</Text>
+          <Text style={s.closeButtonText}>{t('common.close')}</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </LinearGradient>
   );
 }
@@ -235,27 +279,30 @@ const s = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scrollView: {
     flex: 1,
+  },
+  content: {
     paddingHorizontal: 24,
   },
   heading: {
     fontSize: fs(24),
     color: COLORS.gold,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: COMPACT ? 4 : 8,
     ...FONTS.heavy,
   },
   purpose: {
     fontSize: fs(15),
     color: COLORS.gold,
-    textAlign: 'center',
+    textAlign: 'left',
     marginBottom: COMPACT ? 6 : 10,
     ...FONTS.bold,
   },
   label: {
     fontSize: fs(16),
     color: COLORS.textPrimary,
+    textAlign: 'left',
     marginTop: COMPACT ? 4 : 8,
     marginBottom: COMPACT ? 2 : 4,
     ...FONTS.bold,
@@ -263,18 +310,22 @@ const s = StyleSheet.create({
   body: {
     fontSize: fs(14),
     color: COLORS.textPrimary,
+    textAlign: 'left',
     lineHeight: COMPACT ? 20 : 22,
     ...FONTS.regular,
   },
   note: {
     fontSize: fs(13),
     color: COLORS.textSecondary,
+    textAlign: 'left',
     lineHeight: COMPACT ? 18 : 20,
+    paddingLeft: 12,
     ...FONTS.regular,
   },
   warn: {
     fontSize: fs(14),
     color: COLORS.orange,
+    textAlign: 'left',
     marginTop: COMPACT ? 4 : 6,
     ...FONTS.bold,
   },
@@ -323,6 +374,15 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     margin: 1,
   },
+  miniCellEmpty: {
+    width: 30,
+    height: 30,
+    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 5,
+    margin: 1,
+  },
   miniCellText: {
     fontSize: fs(14),
     color: COLORS.textPrimary,
@@ -348,9 +408,32 @@ const s = StyleSheet.create({
     color: COLORS.textMuted,
     ...FONTS.regular,
   },
+  // Mancala (game4)
+  mancalaRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 4,
+    gap: 4,
+  },
+  mancalaGoal: {
+    width: 28,
+    height: 60,
+    backgroundColor: 'rgba(255,215,0,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.3)',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mancalaGoalText: {
+    fontSize: fs(14),
+    color: COLORS.gold,
+    ...FONTS.bold,
+  },
   // Bottom
   bottomSpacer: {
-    flex: 1,
+    height: 20,
   },
   closeButton: {
     backgroundColor: 'rgba(255,215,0,0.1)',

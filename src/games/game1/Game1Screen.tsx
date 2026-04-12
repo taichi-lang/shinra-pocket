@@ -5,6 +5,7 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -62,6 +63,17 @@ const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop })
   const resultRef = useRef<Game1Result | null>(null);
 
   const timer = useGame1Timer(DEFAULT_TIMER_CONFIG);
+
+  // Reset all state when route params change (re-entering from CoinSelect/Result)
+  useEffect(() => {
+    setGameState(createInitialGameState());
+    setResult(null);
+    resultRef.current = null;
+    gameOverNavigated.current = false;
+    cpuThinking.current = false;
+    timer.stopTimer();
+    setShowPassDevice(false);
+  }, [playerCoin, difficulty, gameMode]);
 
   // === 有効な移動先 ===
   const validTargets =
@@ -251,7 +263,12 @@ const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop })
         {/* 戻るボタン + ヘッダー: コイン情報 */}
         <View style={styles.backRow}>
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              Alert.alert('確認', 'ゲームを終了しますか？', [
+                { text: 'いいえ', style: 'cancel' },
+                { text: 'はい', onPress: () => navigation.goBack() },
+              ]);
+            }}
             style={styles.backBtn}
           >
             <Text style={styles.backBtnText}>{'< 戻る'}</Text>

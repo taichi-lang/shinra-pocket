@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addBonusTickets, setSubscriber } from './ticketStore';
 import { setAdsRemoved } from './adService';
 import { CONFIG } from '../config';
+import { isGuestUser } from '../services/userProfile';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -143,6 +144,12 @@ export async function redeemCode(rawCode: string): Promise<RedeemResult> {
   const devCode = findDevCode(code);
   if (devCode) {
     return executeDevCode(devCode);
+  }
+
+  // Guest users cannot redeem serial codes (dev codes are exempt)
+  const guest = await isGuestUser();
+  if (guest) {
+    return { success: false, error: 'guest_not_allowed' };
   }
 
   // Check if already redeemed on this device

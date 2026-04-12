@@ -6,6 +6,7 @@ import { RootStackParamList } from '../../App';
 import { COLORS, FONTS } from '../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from '../i18n';
+import { COINS, CoinType } from '../game/types';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Splash'>;
 
@@ -69,7 +70,11 @@ export default function SplashScreen({ navigation }: Props) {
           },
         ]}
       >
-        <Text style={styles.logoEmoji}>🪙</Text>
+        <View style={styles.coinRow}>
+          {(['fire', 'water', 'swirl'] as CoinType[]).map((type) => (
+            <Text key={type} style={styles.logoEmoji}>{COINS[type].emoji}</Text>
+          ))}
+        </View>
         <Text style={styles.title}>SHINRA</Text>
         <Text style={styles.subtitle}>POCKET</Text>
       </Animated.View>
@@ -100,9 +105,13 @@ const styles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
   },
-  logoEmoji: {
-    fontSize: 80,
+  coinRow: {
+    flexDirection: 'row',
+    gap: 12,
     marginBottom: 16,
+  },
+  logoEmoji: {
+    fontSize: 56,
   },
   title: {
     fontSize: 48,

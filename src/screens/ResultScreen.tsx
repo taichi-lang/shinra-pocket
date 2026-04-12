@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Alert } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
@@ -9,6 +9,7 @@ import { COINS } from '../game/types';
 import { logScreenView } from '../analytics/analyticsService';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from '../i18n';
+import { isSubscriptionActive } from '../monetize/iapService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
@@ -77,20 +78,30 @@ export default function ResultScreen({ navigation, route }: Props) {
 
       <Animated.View style={[styles.buttons, { opacity: fadeAnim }]}>
         <TouchableOpacity
-          style={styles.primaryButton}
+          style={[styles.primaryButton, !isSubscriptionActive() && styles.primaryButtonDisabled]}
           onPress={() => {
             lightTap();
+            if (!isSubscriptionActive()) {
+              Alert.alert(
+                'プレミアム限定',
+                '「もう一回」はプレミアム会員限定の機能です。コイン選択画面から再プレイできます。',
+                [{ text: 'OK', style: 'cancel' }],
+              );
+              return;
+            }
             navigation.replace('Game', { coin, difficulty, gameId, mode, coin2 });
           }}
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={[COLORS.gold, COLORS.orange]}
+            colors={isSubscriptionActive() ? [COLORS.gold, COLORS.orange] : ['#333', '#222']}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
           >
-            <Text style={styles.primaryButtonText}>もう一回！</Text>
+            <Text style={[styles.primaryButtonText, !isSubscriptionActive() && { color: COLORS.textMuted }]}>
+              {isSubscriptionActive() ? 'もう一回！' : 'もう一回！（👑 プレミアム限定）'}
+            </Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -165,6 +176,9 @@ const styles = StyleSheet.create({
   primaryButton: {
     borderRadius: 16,
     overflow: 'hidden',
+  },
+  primaryButtonDisabled: {
+    opacity: 0.6,
   },
   buttonGradient: {
     paddingVertical: 18,

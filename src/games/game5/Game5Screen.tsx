@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  AlertButton,
 } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../utils/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -31,6 +32,7 @@ import {
 import { getAIMove } from './game5AI';
 import ShogiBoard from './components/ShogiBoard';
 import HandPieces from './components/HandPieces';
+import { isSubscriptionActive } from '../../monetize/iapService';
 
 const TURN_TIME_LIMIT = 30; // seconds per turn
 
@@ -270,11 +272,23 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
   }, [gameState.phase, gameState.winner, playerSide, onGameEnd, timeLeft]);
 
   // ─── Reset ───
-  const handleReset = useCallback(() => {
+  const doReset = useCallback(() => {
     setGameState(createInitialState());
     setTimeLeft(TURN_TIME_LIMIT);
     aiThinking.current = false;
   }, []);
+
+  const handleReset = useCallback(() => {
+    if (!isSubscriptionActive()) {
+      Alert.alert(
+        'プレミアム限定',
+        '「最初から」はプレミアム会員限定の機能です。',
+        [{ text: 'OK', style: 'cancel' }],
+      );
+      return;
+    }
+    doReset();
+  }, [doReset]);
 
   // ─── Render ───
   const turnLabel = gameState.turn === 'sun'
