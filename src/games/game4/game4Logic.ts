@@ -11,17 +11,15 @@ import {
 } from './game4Types';
 
 // ---------- Circulation order ----------
-// Each entry is a key into BoardState or a helper label.
-// Player A: A1(a0)->A2(a1)->A3(a2)->PIT_R->B3(b2)->B2(b1)->B1(b0)->PIT_L -> ...
-// Player B: B1(b0)->B2(b1)->B3(b2)->PIT_L->A3(a2)->A2(a1)->A1(a0)->PIT_R -> ...
+// 全プレイヤー共通: a0→a1→a2→pitR→b2→b1→b0→pitL→a0...
+// 一方向のみ（反時計回り）。AもBも同じ方向で回る。
 
 type Slot = 'a0' | 'a1' | 'a2' | 'pitR' | 'b2' | 'b1' | 'b0' | 'pitL';
 
-const CYCLE_A: Slot[] = ['a0', 'a1', 'a2', 'pitR', 'b2', 'b1', 'b0', 'pitL'];
-const CYCLE_B: Slot[] = ['b0', 'b1', 'b2', 'pitL', 'a2', 'a1', 'a0', 'pitR'];
+const CYCLE: Slot[] = ['a0', 'a1', 'a2', 'pitR', 'b2', 'b1', 'b0', 'pitL'];
 
-function getCycle(player: Player): Slot[] {
-  return player === 'A' ? CYCLE_A : CYCLE_B;
+function getCycle(_player: Player): Slot[] {
+  return CYCLE;
 }
 
 // ---------- Board helpers ----------
