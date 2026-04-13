@@ -162,8 +162,9 @@ export function needsTicket(
   // Game6 is a standalone puzzle — no ticket cost
   if (gameId === 'game6') return false;
 
+  // CPU battles are always free (including hard difficulty)
   if (mode === 'cpu') {
-    return difficulty === 'hard';
+    return false;
   }
 
   // local and online always cost a ticket

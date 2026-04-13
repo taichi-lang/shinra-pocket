@@ -275,16 +275,13 @@ export function checkWinner(
 }
 
 // ------------------------------------------------------------------
-// Check draw (all players stuck)
+// Check draw — disabled: 三つ巴 has no draw.
+// If a player can't move, they lose.
 // ------------------------------------------------------------------
 
-export function checkDraw(state: Game3State): boolean {
-  for (const p of PLAYERS) {
-    if (hasAnyAction(state.board, state.hands[p], p)) {
-      return false;
-    }
-  }
-  return true;
+export function checkDraw(_state: Game3State): boolean {
+  // No draw in 三つ巴. If a player can't move, they lose.
+  return false;
 }
 
 // ------------------------------------------------------------------
@@ -306,17 +303,25 @@ export function advanceTurn(state: Game3State): Game3State {
     return newState;
   }
 
-  // Check draw
-  if (checkDraw(newState)) {
+  // Rotate to next player.
+  // If the next player can't move, they lose.
+  // The winner is the player who made the last move (the one who just went).
+  let next = nextPlayer(newState.currentPlayer);
+  if (!hasAnyAction(newState.board, newState.hands[next], next)) {
+    // Next player can't move — they lose.
+    // Check the player after them too.
+    const afterNext = nextPlayer(next);
+    if (!hasAnyAction(newState.board, newState.hands[afterNext], afterNext)) {
+      // Both opponents can't move — current player wins
+      newState.winner = newState.currentPlayer;
+      newState.phase = 'finished';
+      return newState;
+    }
+    // Only next player is stuck — the previous player (who just moved) wins
+    // because they forced an opponent into an unplayable state
+    newState.winner = newState.currentPlayer;
     newState.phase = 'finished';
     return newState;
-  }
-
-  // Rotate to next player, skip if stuck (max 3 tries)
-  let next = nextPlayer(newState.currentPlayer);
-  for (let i = 0; i < 3; i++) {
-    if (hasAnyAction(newState.board, newState.hands[next], next)) break;
-    next = nextPlayer(next);
   }
   newState.currentPlayer = next;
 

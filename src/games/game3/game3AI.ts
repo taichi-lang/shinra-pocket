@@ -15,12 +15,9 @@ import { PLAYERS } from './game3Types';
 import { WIN_LINES } from '../../game/types';
 import {
   topOwner,
-  topNumber,
   getAllActions,
   applyAction,
   checkWinner,
-  checkDraw,
-  advanceTurn,
   cloneState,
   hasAnyAction,
   nextPlayer,
@@ -223,9 +220,6 @@ function maxN(state: Game3State, depth: number): ScoreTuple {
   if (winResult) {
     return terminalScore(winResult.winner);
   }
-  if (checkDraw(state)) {
-    return [0, 0, 0];
-  }
   if (depth <= 0) {
     return evaluate(state);
   }
@@ -239,10 +233,10 @@ function maxN(state: Game3State, depth: number): ScoreTuple {
   );
 
   if (actions.length === 0) {
-    // Skip this player's turn
-    const skipped = cloneState(state);
-    skipped.currentPlayer = nextPlayer(current);
-    return maxN(skipped, depth - 1);
+    // Current player can't move — the previous player (who forced this) wins.
+    // We approximate: the player who moved last is the one before current.
+    const prev = PLAYERS[(PLAYERS.indexOf(current) + 2) % 3];
+    return terminalScore(prev);
   }
 
   let bestScores: ScoreTuple = [-Infinity, -Infinity, -Infinity];
@@ -263,11 +257,8 @@ function maxN(state: Game3State, depth: number): ScoreTuple {
 /** Advance turn for AI simulation (no UI state changes) */
 function advanceTurnForAI(state: Game3State, movedPlayer: Player): Game3State {
   const newState = cloneState(state);
-  let next = nextPlayer(movedPlayer);
-  for (let i = 0; i < 3; i++) {
-    if (hasAnyAction(newState.board, newState.hands[next], next)) break;
-    next = nextPlayer(next);
-  }
+  const next = nextPlayer(movedPlayer);
+  // If next player can't move, they lose — handled in maxN terminal check
   newState.currentPlayer = next;
   return newState;
 }

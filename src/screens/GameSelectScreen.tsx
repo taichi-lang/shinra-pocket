@@ -11,8 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList, GameId } from '../../App';
 import { COLORS, FONTS } from '../utils/theme';
-import { getTotalTickets, isGame6Unlocked, canPlay, consumeTicket } from '../monetize/ticketStore';
-import type { GameMode } from '../monetize/ticketTypes';
+import { getTotalTickets, isGame6Unlocked } from '../monetize/ticketStore';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { t } from '../i18n';
@@ -145,41 +144,14 @@ export default function GameSelectScreen({ navigation, route }: Props) {
             }),
           },
           {
-            text: 'つよい 🎫×1',
+            text: 'つよい',
             onPress: () => {
-              const gid = 'game5' as GameId;
-              if (!canPlay(gid, 'hard', mode as GameMode)) {
-                Alert.alert(
-                  'チケット不足',
-                  'チケットが足りません。ショップで広告を見てチケットを獲得できます。',
-                  [
-                    { text: 'ショップへ', onPress: () => navigation.navigate('Shop') },
-                    { text: '閉じる', style: 'cancel' },
-                  ],
-                );
-                return;
-              }
-              Alert.alert(
-                'チケット消費',
-                'チケットを1枚消費します。よろしいですか？',
-                [
-                  { text: 'いいえ', style: 'cancel' },
-                  {
-                    text: 'はい',
-                    onPress: async () => {
-                      const ok = await consumeTicket();
-                      if (ok) {
-                        navigation.navigate('Game', {
-                          coin: 'fire',
-                          difficulty: 'hard',
-                          gameId: 'game5',
-                          mode,
-                        });
-                      }
-                    },
-                  },
-                ],
-              );
+              navigation.navigate('Game', {
+                coin: 'fire',
+                difficulty: 'hard',
+                gameId: 'game5',
+                mode,
+              });
             },
           },
           { text: 'キャンセル', style: 'cancel' },

@@ -74,9 +74,9 @@ export const Pit: React.FC<PitProps> = ({
         {coins}
       </Text>
       {/* Coin dots visualization */}
-      {!isGoal && coins > 0 && coins <= 8 && (
+      {!isGoal && coins > 0 && coins <= 6 && (
         <View style={styles.dotsContainer}>
-          {Array.from({ length: Math.min(coins, 8) }).map((_, i) => (
+          {Array.from({ length: Math.min(coins, 6) }).map((_, i) => (
             <View key={i} style={styles.dot} />
           ))}
         </View>
@@ -137,28 +137,28 @@ const styles = StyleSheet.create({
   },
   coinCount: {
     ...FONTS.heavy,
-    fontSize: 22,
+    fontSize: 24,
     color: COLORS.textPrimary,
   },
   coinCountGoal: {
-    fontSize: 18,
+    fontSize: 20,
     color: COLORS.gold,
   },
   dotsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    maxWidth: PIT_SIZE - 16,
+    maxWidth: PIT_SIZE - 12,
     position: 'absolute',
-    bottom: 6,
+    bottom: 5,
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: COLORS.gold,
-    margin: 1,
-    opacity: 0.7,
+    margin: 1.5,
+    opacity: 0.85,
   },
 });
 

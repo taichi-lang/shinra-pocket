@@ -88,14 +88,18 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
   // Start game
   // ------------------------------------------------------------------
 
+  // Determine which player the human controls based on the coin prop
+  const humanPlayer: Player = (coin as Player) || 'fire';
+
   const startGame = useCallback((m: Game3Mode, d: Difficulty) => {
     setMode(m);
     setDifficulty(d);
-    const state = createInitialGame3State(m, d);
+    const hp = m === 'vsCPU' ? humanPlayer : 'fire';
+    const state = createInitialGame3State(m, d, hp);
     setGameState(state);
     setMessage('');
     setShowTurnSwitch(false);
-  }, []);
+  }, [humanPlayer]);
 
   const resetToMenu = useCallback(() => {
     if (cpuTimerRef.current) clearTimeout(cpuTimerRef.current);
@@ -112,9 +116,16 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
   // Convert game3 winner to standard result for navigation
   const toResult = useCallback((winner: Player | null): 'player' | 'cpu' | 'draw' => {
     if (!winner) return 'draw';
-    // In vsCPU mode, 'fire' is the human player
-    return winner === 'fire' ? 'player' : 'cpu';
-  }, []);
+    const hp = gameState?.humanPlayer ?? humanPlayer;
+    return winner === hp ? 'player' : 'cpu';
+  }, [gameState?.humanPlayer, humanPlayer]);
+
+  // Auto-start when entering from GameSelect with coin prop
+  useEffect(() => {
+    if (coin && onGameEnd && !gameState) {
+      startGame('vsCPU', difficulty);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ------------------------------------------------------------------
   // CPU turn
@@ -123,10 +134,10 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
   const isCPU = useCallback(
     (player: Player): boolean => {
       if (!mode) return false;
-      if (mode === 'vsCPU') return player !== 'fire';
+      if (mode === 'vsCPU') return player !== (gameState?.humanPlayer ?? humanPlayer);
       return false; // local3P: all human
     },
-    [mode],
+    [mode, gameState?.humanPlayer, humanPlayer],
   );
 
   const doCPUTurn = useCallback(
@@ -150,7 +161,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
               `${winEmoji} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
             );
           } else {
-            setMessage('🤝 引き分け!');
+            setMessage('ゲーム終了!');
           }
           if (onGameEnd && mode === 'vsCPU') {
             onGameEnd(toResult(newState.winner));
@@ -188,7 +199,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
             `${winEmoji} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
           );
         } else {
-          setMessage('🤝 引き分け!');
+          setMessage('ゲーム終了!');
         }
         if (onGameEnd && mode === 'vsCPU') {
           onGameEnd(toResult(newState.winner));

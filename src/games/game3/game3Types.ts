@@ -14,9 +14,9 @@ export type Player = 'fire' | 'water' | 'swirl';
 export const PLAYERS: Player[] = ['fire', 'water', 'swirl'];
 
 export const PLAYER_EMOJI: Record<Player, string> = {
-  fire: '1',
-  water: '2',
-  swirl: '3',
+  fire: '🔥',
+  water: '💧',
+  swirl: '🌀',
 };
 
 export const PLAYER_LABEL: Record<Player, string> = {
@@ -93,12 +93,15 @@ export interface Game3State {
   selectedBoardCell: number | null;
   /** The cell index of the last CPU action (for highlighting) */
   lastCpuCell: number | null;
+  /** Which player the human controls in vsCPU mode */
+  humanPlayer: Player;
 }
 
 // === Initial state factory ===
 export function createInitialGame3State(
   mode: Game3Mode = 'vsCPU',
   difficulty: Difficulty = 'normal',
+  humanPlayer: Player = 'fire',
 ): Game3State {
   return {
     board: Array.from({ length: 9 }, () => [] as StackLayer[]),
@@ -117,6 +120,7 @@ export function createInitialGame3State(
     selectedHandCoin: null,
     selectedBoardCell: null,
     lastCpuCell: null,
+    humanPlayer,
   };
 }
 

@@ -84,18 +84,34 @@ function evaluateBoard(state: Game2State, aiPlayer: Player): number {
 
 // ========== NORMAL AI (Heuristic) ==========
 
+/** Count total coins placed on the board */
+function countBoardCoins(state: Game2State): number {
+  let count = 0;
+  for (let i = 0; i < 9; i++) {
+    if (state.board[i].bottom) count++;
+    if (state.board[i].top) count++;
+  }
+  return count;
+}
+
 export function chooseActionNormal(state: Game2State, cpuCoinType: CoinType): GameAction | null {
   const actions = getAllActions(state, 'cpu');
   if (actions.length === 0) return null;
 
-  // Priority 1: Win immediately
-  for (const action of actions) {
-    const newState = applyAction(state, action, 'cpu', cpuCoinType);
-    const win = checkWinner(newState.board);
-    if (win && win.winner === 'cpu') return action;
+  const boardCoins = countBoardCoins(state);
+  const isEarlyGame = boardCoins < 5; // Early placement phase: fewer than 5 coins on board
+
+  // During early game, don't aggressively seek wins — let stacking mechanics develop
+  if (!isEarlyGame) {
+    // Priority 1: Win immediately (only after enough coins are placed)
+    for (const action of actions) {
+      const newState = applyAction(state, action, 'cpu', cpuCoinType);
+      const win = checkWinner(newState.board);
+      if (win && win.winner === 'cpu') return action;
+    }
   }
 
-  // Priority 2: Block opponent's winning move
+  // Priority 2: Block opponent's winning move (always important)
   const oppActions = getAllActions(state, 'player');
   for (const oppAction of oppActions) {
     // Simulate opponent; use a dummy coin type (doesn't affect logic)
@@ -115,14 +131,15 @@ export function chooseActionNormal(state: Game2State, cpuCoinType: CoinType): Ga
   }
 
   // Priority 3: Strategic — pick action with best heuristic score
+  // In early game, add more randomness so CPU doesn't play optimally
   let bestAction = actions[0];
   let bestScore = -Infinity;
+  const jitterRange = isEarlyGame ? 40 : 5; // Much more randomness in early game
 
   for (const action of actions) {
     const newState = applyAction(state, action, 'cpu', cpuCoinType);
     const score = evaluateBoard(newState, 'cpu');
-    // Small randomness to vary play
-    const jitter = Math.random() * 5;
+    const jitter = Math.random() * jitterRange;
     if (score + jitter > bestScore) {
       bestScore = score + jitter;
       bestAction = action;
