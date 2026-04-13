@@ -457,7 +457,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
                         ]}
                       >
                         <Text style={styles.coinNumberLarge}>
-                          {PLAYER_EMOJI[owner]}
+                          {num}
                         </Text>
                       </View>
                       {cell.length > 1 && (
