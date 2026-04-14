@@ -153,22 +153,16 @@ export function finalizeBoard(board: BoardState): void {
 }
 
 /**
- * Check winner after the game ends (standard Mancala rules).
- * When one side's pits are all empty, remaining coins on the OTHER side
- * go to that other player's goal. Then compare goals.
- *
- * Returns 'A', 'B', or 'draw'. Returns null if the game is not over.
+ * Check winner: 自陣のピットが全部なくなった方の勝ち。
+ * Returns 'A', 'B', or null if not over.
  */
 export function checkWinner(board: BoardState): Player | null {
-  if (!isGameOver(board)) return null;
+  const aEmpty = board.a[0] === 0 && board.a[1] === 0 && board.a[2] === 0;
+  const bEmpty = board.b[0] === 0 && board.b[1] === 0 && board.b[2] === 0;
 
-  // Finalize on a copy to determine winner without mutating input
-  const b = cloneBoard(board);
-  finalizeBoard(b);
-
-  // 引き分けなし: 同点の場合は後手(B)の勝ち（先手有利を相殺）
-  if (b.pitR > b.pitL) return 'A';
-  return 'B';
+  if (aEmpty) return 'A'; // A側が空 → Aの勝ち
+  if (bEmpty) return 'B'; // B側が空 → Bの勝ち
+  return null;
 }
 
 /**

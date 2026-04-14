@@ -134,5 +134,5 @@ export interface Game3Config {
 export const DEFAULT_GAME3_CONFIG: Game3Config = {
   mode: 'vsCPU',
   difficulty: 'normal',
-  cpuDelay: 5000,
+  cpuDelay: 3000,
 };

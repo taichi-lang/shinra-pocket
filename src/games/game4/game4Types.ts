@@ -71,9 +71,9 @@ export interface Game4State {
   message: string | null;
 }
 
-/** Initial board configuration: A side [2,3,4], B side [4,3,2] */
-export const INITIAL_PITS_A: [number, number, number] = [2, 3, 4];
-export const INITIAL_PITS_B: [number, number, number] = [4, 3, 2];
+/** Initial board configuration: A(自分) side [4,3,2], B(相手) side [2,3,4] */
+export const INITIAL_PITS_A: [number, number, number] = [4, 3, 2];
+export const INITIAL_PITS_B: [number, number, number] = [2, 3, 4];
 
 export function createInitialBoard(): BoardState {
   return {

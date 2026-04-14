@@ -25,7 +25,6 @@ import {
   checkWinner,
   getValidPits,
   opponent,
-  finalizeBoard,
   cloneBoard,
 } from './game4Logic';
 import { getAIMove } from './game4AI';
@@ -134,12 +133,9 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
 
       const winner = checkWinner(result.board);
       if (winner !== null) {
-        // Finalize: sweep remaining coins to respective goals
-        const finalBoard = cloneBoard(result.board);
-        finalizeBoard(finalBoard);
         setState((s) => ({
           ...s,
-          board: finalBoard,
+          board: result.board,
           winner,
           phase: 'finished',
         }));

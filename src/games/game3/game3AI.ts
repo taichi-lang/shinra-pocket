@@ -41,9 +41,60 @@ export function getAIAction(
   if (difficulty === 'hard') {
     return hardAI(state, actions);
   }
-  // CPU1(water)=攻撃的、CPU2(swirl)=防御的で異なる性格
+  // CPU1(water)=攻撃的+先読み、CPU2(swirl)=防御的+スタック重視で異なる性格
   const personality = state.currentPlayer === 'water' ? 'aggressive' : 'defensive';
+  // normalでも2手先読みして最善手を選ぶ
+  const lookaheadAction = shallowLookahead(state, actions);
+  if (lookaheadAction) return lookaheadAction;
   return normalAI(state, actions, personality);
+}
+
+// ==================================================================
+// Shallow lookahead: 2手先読みで勝ちに近い手を選ぶ
+// ==================================================================
+
+function shallowLookahead(
+  state: Game3State,
+  actions: Game3Action[],
+): Game3Action | null {
+  const me = state.currentPlayer;
+
+  // 即勝ちがあればそれを返す
+  for (const action of actions) {
+    const after = applyAction(state, action);
+    const result = checkWinner(after.board);
+    if (result && result.winner === me) return action;
+  }
+
+  // 2手先で勝てる手を探す（相手のベストレスポンスも考慮）
+  let bestAction: Game3Action | null = null;
+  let bestScore = -Infinity;
+
+  for (const action of actions) {
+    const after = applyAction(state, action);
+    const wr = checkWinner(after.board);
+    if (wr) continue; // 既にチェック済み
+
+    // この手のスコアを評価（自分のラインの充実度）
+    let score = 0;
+    for (const line of WIN_LINES) {
+      const myCount = line.filter(i => topOwner(after.board[i]) === me).length;
+      const emptyCount = line.filter(i => topOwner(after.board[i]) === null).length;
+      if (myCount === 2 && emptyCount >= 1) score += 10; // リーチ
+      if (myCount === 1 && emptyCount >= 2) score += 3;
+    }
+    // スタックのボーナス
+    if (action.type === 'place' && action.coinNumber >= 2) score += 2;
+    // ランダム性を少し追加
+    score += Math.random() * 2;
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestAction = action;
+    }
+  }
+
+  return bestScore > 5 ? bestAction : null; // スコアが十分高い時だけ使う
 }
 
 // ==================================================================
