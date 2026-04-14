@@ -99,24 +99,22 @@ const ja: Record<string, string> = {
   // Game 3: Three-Way
   'rule.game3.title': '🔱 三つ巴',
   'rule.game3.purpose': '【目的】3人でバトル！先に3つ並べた人の勝ち',
-  'rule.game3.step1': '① 3人のプレイヤー（🔴赤 🔵青 🟣紫）',
+  'rule.game3.step1': '① 3人のプレイヤー（🔥火 💧水 🌀渦）',
   'rule.game3.step2': '② 各プレイヤー6枚のコイン（①②③が2枚ずつ）',
   'rule.game3.step3': '③ 大きい数字で相手のコインの上に重ねられる',
   'rule.game3.step4': '④ 配置が終わったら移動フェーズ',
   'rule.game3.step5': '⑤ 3つ揃えた人の勝ち！',
+  'rule.game3.step6': '⚠️ 動けなくなったら負け（引き分けなし）',
   'rule.game3.cpuNote': '🤖 CPU2体が相手だよ',
 
   // Game 4: Patapata (Mancala)
   'rule.game4.title': '🫳 パタパタ',
-  'rule.game4.purpose': '【目的】ゴールにたくさんコインを集めよう！',
-  'rule.game4.step1': '① 自分の穴を1つ選ぶ',
+  'rule.game4.purpose': '【目的】自分の穴のコインを先に全部なくそう！',
+  'rule.game4.step1': '① 自分の穴を1つ選ぶ（自分: 4,3,2 / 相手: 2,3,4）',
   'rule.game4.step2': '② 中のコインを1個ずつ反時計回りにまく',
   'rule.game4.step2note': '⬇️ ぐるっと回る ⬇️',
   'rule.game4.step3': '③ 最後のコインがゴールに入ったらもう1回！',
-  'rule.game4.step4': '④ 自分の空の穴に最後のコインが入ったら',
-  'rule.game4.step4note': '→ 反対側の相手のコインもゲット！',
-  'rule.game4.step5': '⑤ どちらかの穴が全部空になったら終了',
-  'rule.game4.step5note': 'ゴールのコインが多い方が勝ち！',
+  'rule.game4.step4': '④ 自分の穴が全部空になったら勝ち！',
 
   // Game 5: Sun & Moon
   'rule.game5.title': '☀️ 日月の戦い',

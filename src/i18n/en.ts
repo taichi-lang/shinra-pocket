@@ -99,24 +99,22 @@ const en: Record<string, string> = {
   // Game 3: Three-Way
   'rule.game3.title': '🔱 Three-Way',
   'rule.game3.purpose': '【Goal】3-player battle! First to line up 3 wins',
-  'rule.game3.step1': '① 3 players (🔴 Red 🔵 Blue 🟣 Purple)',
+  'rule.game3.step1': '① 3 players (🔥 Fire 💧 Water 🌀 Swirl)',
   'rule.game3.step2': '② Each player has 6 coins (2 each of ①②③)',
   'rule.game3.step3': '③ Higher numbers can stack on opponent\'s coins',
   'rule.game3.step4': '④ After placing, it\'s the move phase',
   'rule.game3.step5': '⑤ Line up 3 to win!',
+  'rule.game3.step6': '⚠️ Can\'t move = you lose (no draws)',
   'rule.game3.cpuNote': '🤖 You play against 2 CPUs',
 
   // Game 4: Patapata (Mancala)
   'rule.game4.title': '🫳 Patapata',
-  'rule.game4.purpose': '【Goal】Collect the most coins in your goal!',
-  'rule.game4.step1': '① Choose one of your pits',
+  'rule.game4.purpose': '【Goal】Empty all your pits first to win!',
+  'rule.game4.step1': '① Choose one of your pits (You: 4,3,2 / Opponent: 2,3,4)',
   'rule.game4.step2': '② Sow coins one by one counterclockwise',
   'rule.game4.step2note': '⬇️ Around the board ⬇️',
   'rule.game4.step3': '③ Last coin lands in goal = extra turn!',
-  'rule.game4.step4': '④ Last coin lands in your empty pit...',
-  'rule.game4.step4note': '→ Capture opponent\'s coins across!',
-  'rule.game4.step5': '⑤ Game ends when one side is empty',
-  'rule.game4.step5note': 'Most coins in goal wins!',
+  'rule.game4.step4': '④ Empty all your pits = you win!',
 
   // Game 5: Sun & Moon
   'rule.game5.title': '☀️ Sun & Moon',

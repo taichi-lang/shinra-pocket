@@ -112,6 +112,7 @@ function Game3Rule() {
       <Text style={s.body}>{t('rule.game3.step3')}</Text>
       <Text style={s.body}>{t('rule.game3.step4')}</Text>
       <Text style={s.body}>{t('rule.game3.step5')}</Text>
+      <Text style={s.warn}>{t('rule.game3.step6')}</Text>
       <Text style={s.warn}>{t('rule.game3.cpuNote')}</Text>
     </>
   );
@@ -130,10 +131,10 @@ function Game4Rule() {
         <View style={s.mancalaGoal}><Text style={s.mancalaGoalText}>G</Text></View>
         <View>
           <View style={s.gridRow}>
-            <MiniCell t="4" /><MiniCell t="4" /><MiniCell t="4" />
+            <MiniCell t="2" /><MiniCell t="3" /><MiniCell t="4" />
           </View>
           <View style={s.gridRow}>
-            <MiniCell t="4" /><MiniCell t="4" /><MiniCell t="4" />
+            <MiniCell t="4" /><MiniCell t="3" /><MiniCell t="2" />
           </View>
         </View>
         <View style={s.mancalaGoal}><Text style={s.mancalaGoalText}>G</Text></View>
@@ -142,9 +143,6 @@ function Game4Rule() {
 
       <Text style={s.body}>{t('rule.game4.step3')}</Text>
       <Text style={s.body}>{t('rule.game4.step4')}</Text>
-      <Text style={s.note}>{t('rule.game4.step4note')}</Text>
-      <Text style={s.body}>{t('rule.game4.step5')}</Text>
-      <Text style={s.note}>{t('rule.game4.step5note')}</Text>
     </>
   );
 }
