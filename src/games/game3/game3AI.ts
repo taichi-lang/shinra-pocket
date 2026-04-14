@@ -41,7 +41,9 @@ export function getAIAction(
   if (difficulty === 'hard') {
     return hardAI(state, actions);
   }
-  return normalAI(state, actions);
+  // CPU1(water)=攻撃的、CPU2(swirl)=防御的で異なる性格
+  const personality = state.currentPlayer === 'water' ? 'aggressive' : 'defensive';
+  return normalAI(state, actions, personality);
 }
 
 // ==================================================================
@@ -49,9 +51,12 @@ export function getAIAction(
 // Priority: win -> block -> strategic stack -> random
 // ==================================================================
 
+type AIPersonality = 'aggressive' | 'defensive';
+
 function normalAI(
   state: Game3State,
   actions: Game3Action[],
+  personality: AIPersonality = 'aggressive',
 ): Game3Action {
   const me = state.currentPlayer;
 
@@ -68,16 +73,65 @@ function normalAI(
   const blockAction = findBlockAction(state, actions, me);
   if (blockAction) return blockAction;
 
-  // 3. Strategic stacking: cover an opponent's coin that's part of a potential line
-  const stackAction = findStrategicStack(state, actions, me);
-  if (stackAction) return stackAction;
+  if (personality === 'aggressive') {
+    // 攻撃型: スタック→大きい数字優先→中央寄り
+    const stackAction = findStrategicStack(state, actions, me);
+    if (stackAction) return stackAction;
 
-  // 4. Prefer center, then corners, then edges
-  const positionalAction = findPositionalAction(state, actions, me);
-  if (positionalAction) return positionalAction;
+    // 大きい数字を優先的に使う
+    const bigCoinAction = actions
+      .filter(a => a.type === 'place' && a.coinNumber === 3)
+      .find(a => {
+        const target = a.type === 'place' ? a.targetCell : 0;
+        return [4, 0, 2, 6, 8].includes(target);
+      });
+    if (bigCoinAction) return bigCoinAction;
 
-  // 5. Random
-  return actions[Math.floor(Math.random() * actions.length)];
+    const positionalAction = findPositionalAction(state, actions, me);
+    if (positionalAction) return positionalAction;
+  } else {
+    // 防御型: ライン妨害→端配置→小さい数字温存
+    // 相手のラインを崩すことを優先
+    const disruptAction = findDisruptAction(state, actions, me);
+    if (disruptAction) return disruptAction;
+
+    // 端を優先（中央を避ける）
+    const edgePriority = [1, 3, 5, 7, 0, 2, 6, 8, 4];
+    const placeActions = actions.filter(a => a.type === 'place');
+    for (const pos of edgePriority) {
+      const found = placeActions.find(a => a.type === 'place' && a.targetCell === pos);
+      if (found) return found;
+    }
+  }
+
+  // ランダム（同じ手が出ないよう毎回シャッフル）
+  const shuffled = [...actions].sort(() => Math.random() - 0.5);
+  return shuffled[0];
+}
+
+/** 防御型: 相手のラインを崩す手を探す */
+function findDisruptAction(
+  state: Game3State,
+  actions: Game3Action[],
+  me: Player,
+): Game3Action | null {
+  for (const line of WIN_LINES) {
+    for (const opp of PLAYERS.filter(p => p !== me)) {
+      const oppCount = line.filter(i => topOwner(state.board[i]) === opp).length;
+      if (oppCount >= 1) {
+        // 相手のラインに割り込む
+        for (const cellIdx of line) {
+          if (topOwner(state.board[cellIdx]) !== me && topOwner(state.board[cellIdx]) !== opp) {
+            const placeAction = actions.find(
+              a => a.type === 'place' && a.targetCell === cellIdx,
+            );
+            if (placeAction) return placeAction;
+          }
+        }
+      }
+    }
+  }
+  return null;
 }
 
 /** Check if any opponent can win on their next turn, and find actions to block */
