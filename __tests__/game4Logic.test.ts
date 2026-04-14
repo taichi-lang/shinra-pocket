@@ -124,12 +124,14 @@ describe('extra turn', () => {
     expect(result.board.pitR).toBe(1);
   });
 
-  it('grants extra turn for player B landing in pitL', () => {
-    // B sows from pit b2 which has 1 coin: distributes to pitL only
+  it('no extra turn for player B sowing 1 coin from b2 (unified cycle)', () => {
+    // Unified cycle: a0,a1,a2,pitR,b2,b1,b0,pitL
+    // B sows from b2 (index 4), 1 coin distributes to b1 (index 5)
+    // Last slot = b1, B's own pit = pitL → no extra turn
     const board = makeBoard([1, 1, 1], [0, 0, 1]);
     const result = sowSeeds(board, 'B', 2);
-    expect(result.extraTurn).toBe(true);
-    expect(result.board.pitL).toBe(1);
+    expect(result.extraTurn).toBe(false);
+    expect(result.board.b[1]).toBe(1); // coin landed on b1
   });
 
   it('no extra turn when last seed does not land in own pit', () => {
@@ -209,21 +211,20 @@ describe('cloneBoard', () => {
 describe('sowing wraps around the board', () => {
   it('player A sowing many seeds wraps past pitL back to a0', () => {
     // A sows from pit 0 with 8 coins -- should go all the way around
-    // cycle for A: a0, a1, a2, pitR, b2, b1, b0, pitL
+    // Unified cycle: a0, a1, a2, pitR, b2, b1, b0, pitL
     // distributes to: a1(+1), a2(+1), pitR(+1), b2(+1), b1(+1), b0(+1), pitL(+1), a0(+1)
-    // Last seed lands on a0 (own side, was empty -> now 1). Capture rule triggers:
-    //   opposite of a0 is b2, which has 1 seed -> capture 1+1=2 into pitR, a0=0, b2=0
+    // No capture rule — coins simply stay where they land.
     const board = makeBoard([8, 0, 0], [0, 0, 0]);
     const result = sowSeeds(board, 'A', 0);
-    expect(result.board.a[0]).toBe(0); // captured
+    expect(result.board.a[0]).toBe(1); // last seed lands here
     expect(result.board.a[1]).toBe(1);
     expect(result.board.a[2]).toBe(1);
-    expect(result.board.pitR).toBe(3); // 1 from sowing + 2 from capture
-    expect(result.board.b[2]).toBe(0); // captured
+    expect(result.board.pitR).toBe(1);
+    expect(result.board.b[2]).toBe(1);
     expect(result.board.b[1]).toBe(1);
     expect(result.board.b[0]).toBe(1);
     expect(result.board.pitL).toBe(1);
-    // last seed lands on own side a0 (not own pit/goal) -> no extra turn
+    // last seed lands on a0 (not own pit/goal pitR) -> no extra turn
     expect(result.extraTurn).toBe(false);
   });
 });

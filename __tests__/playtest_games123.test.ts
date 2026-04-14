@@ -633,9 +633,10 @@ describe('Game3 — Full Playtest Simulation', () => {
       state.hands[p] = { 1: 0, 2: 0, 3: 0 };
     }
 
-    // No one should have any action (no empty cells to move to, no hand coins)
+    // Draw was abolished — checkDraw always returns false now.
+    // If a player can't move, they lose (opponent wins).
     const draw = g3CheckDraw(state);
-    expect(draw).toBe(true);
+    expect(draw).toBe(false);
   });
 
   test('covering opponent coin in Game3 changes visible line owner', () => {

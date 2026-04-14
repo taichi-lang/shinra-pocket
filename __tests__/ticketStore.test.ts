@@ -29,6 +29,11 @@ jest.mock('../src/analytics/analyticsService', () => ({
   initAnalytics: jest.fn(),
 }));
 
+// Mock userProfile so isGuestUser returns false (logged-in user gets free tickets)
+jest.mock('../src/services/userProfile', () => ({
+  isGuestUser: jest.fn(() => Promise.resolve(false)),
+}));
+
 // Define __DEV__ for test environment
 (globalThis as any).__DEV__ = true;
 
@@ -118,9 +123,9 @@ describe('needsTicket', () => {
     expect(ticketStore.needsTicket('game2', 'normal', 'cpu')).toBe(false);
   });
 
-  it('cpu + hard costs a ticket', () => {
-    expect(ticketStore.needsTicket('game1', 'hard', 'cpu')).toBe(true);
-    expect(ticketStore.needsTicket('game3', 'hard', 'cpu')).toBe(true);
+  it('cpu + hard is free (no ticket required for any CPU mode)', () => {
+    expect(ticketStore.needsTicket('game1', 'hard', 'cpu')).toBe(false);
+    expect(ticketStore.needsTicket('game3', 'hard', 'cpu')).toBe(false);
   });
 
   it('local mode always costs a ticket', () => {
@@ -160,8 +165,9 @@ describe('canPlay', () => {
     for (let i = 0; i < FREE_DAILY_TICKETS; i++) {
       await ticketStore.consumeTicket();
     }
-    expect(ticketStore.canPlay('game1', 'hard', 'cpu')).toBe(false);
+    // cpu modes are always free now, so use local/online which still require tickets
     expect(ticketStore.canPlay('game1', 'easy', 'local')).toBe(false);
+    expect(ticketStore.canPlay('game1', 'normal', 'online')).toBe(false);
   });
 });
 

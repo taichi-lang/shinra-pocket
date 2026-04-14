@@ -248,7 +248,7 @@ describe('checkDraw', () => {
     expect(checkDraw(state)).toBe(false);
   });
 
-  it('returns true when all players have no actions', () => {
+  it('returns false even when all players have no actions (draw abolished)', () => {
     const state = createInitialGame3State();
     // Empty all hands
     for (const p of PLAYERS) {
@@ -258,7 +258,7 @@ describe('checkDraw', () => {
     for (let i = 0; i < 9; i++) {
       placeLayer(state.board, i, PLAYERS[i % 3], 1);
     }
-    expect(checkDraw(state)).toBe(true);
+    expect(checkDraw(state)).toBe(false);
   });
 });
 
