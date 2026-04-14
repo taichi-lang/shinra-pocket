@@ -6,8 +6,9 @@ dotenv.config();
 // Use DATABASE_URL if available (Render), otherwise fall back to individual vars
 // Determine SSL config: external Render URLs need SSL, internal ones don't
 const dbUrl = process.env.DATABASE_URL || "";
-const needsSsl = dbUrl.includes(".render.com:");  // external has .render.com:5432
-const sslConfig = needsSsl ? { rejectUnauthorized: false } : false;
+// External URLs need SSL. Internal URLs (ending with .internal) don't.
+const isInternal = dbUrl.includes(".internal");
+const sslConfig = dbUrl && !isInternal ? { rejectUnauthorized: false } : false;
 
 const poolConfig = process.env.DATABASE_URL
   ? {
