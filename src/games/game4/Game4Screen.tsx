@@ -344,18 +344,6 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
         {mode === 'cpu' && humanSide === 'A' ? 'あなた' : mode === 'cpu' ? 'CPU' : 'プレイヤーA'}
       </Text>
 
-      {/* Score display */}
-      <View style={styles.scoreRow}>
-        <View style={styles.scoreBox}>
-          <Text style={styles.scoreLabel}>{mode === 'local' ? 'プレイヤーAのスコア' : 'あなたのスコア'}</Text>
-          <Text style={styles.scoreValue}>{humanSide === 'A' ? state.board.pitR : state.board.pitL}</Text>
-        </View>
-        <View style={styles.scoreBox}>
-          <Text style={styles.scoreLabel}>{mode === 'local' ? 'プレイヤーBのスコア' : 'CPUのスコア'}</Text>
-          <Text style={styles.scoreValue}>{humanSide === 'A' ? state.board.pitL : state.board.pitR}</Text>
-        </View>
-      </View>
-
       {/* Buttons */}
       <View style={styles.buttonRow}>
         <TouchableOpacity onPress={handleReset} style={styles.button}>
@@ -401,6 +389,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     flexDirection: 'row',
