@@ -94,7 +94,7 @@ function shallowLookahead(
     }
   }
 
-  return bestScore > 5 ? bestAction : null; // スコアが十分高い時だけ使う
+  return bestAction; // 常に先読み結果を使う
 }
 
 // ==================================================================

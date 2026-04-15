@@ -117,8 +117,8 @@ export default function GameSelectScreen({ navigation, route }: Props) {
       return;
     }
 
-    // Game6 goes directly to the game screen (no coin select needed)
-    if (game.id === 'game6') {
+    // Game4, Game5, Game6 go directly to the game screen (no coin select needed)
+    if (game.id === 'game4' || game.id === 'game6') {
       navigation.navigate('Game', {
         coin: 'fire',
         difficulty: 'normal',

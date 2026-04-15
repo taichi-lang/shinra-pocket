@@ -141,16 +141,24 @@ export function getMovableCells(board: StackCell[], player: Player): number[] {
 
 /**
  * Returns valid destination cells for a move from `fromCell`.
- * Movement destination: empty cells only.
+ * Movement destination: empty cells OR cells where moving coin's number > top number (stack).
  */
 export function getValidMoveDestinations(
   board: StackCell[],
-  _fromCell: number,
+  fromCell: number,
 ): number[] {
+  const movingCoin = topLayer(board[fromCell]);
+  if (!movingCoin) return [];
   const dests: number[] = [];
   for (let i = 0; i < 9; i++) {
+    if (i === fromCell) continue;
     if (board[i].length === 0) {
       dests.push(i);
+    } else if (board[i].length < 3) {
+      const tn = topNumber(board[i]);
+      if (tn !== null && movingCoin.number > tn) {
+        dests.push(i);
+      }
     }
   }
   return dests;
