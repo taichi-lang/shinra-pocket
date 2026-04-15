@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || (() => { console.warn('[AUTH] JWT_SECRET not set, using random secret (tokens will not persist across restarts)'); return require('crypto').randomBytes(32).toString('hex'); })();
+export const JWT_SECRET = process.env.JWT_SECRET || (() => { console.warn('[AUTH] JWT_SECRET not set, using random secret (tokens will not persist across restarts)'); return require('crypto').randomBytes(32).toString('hex'); })();
 
 export interface AuthPayload {
   userId: string;

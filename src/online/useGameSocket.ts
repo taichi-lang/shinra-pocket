@@ -78,9 +78,10 @@ export function useGameSocket(options: UseGameSocketOptions = {}): UseGameSocket
 
   // --- Matchmaking ---
 
-  const joinQueue = useCallback(async (coin: string) => {
+  const joinQueue = useCallback(async (coin: string, gameType?: string) => {
     const profile = await getProfile();
     socketService.emit(SocketEvents.JOIN_QUEUE, {
+      gameType: gameType ?? 'game1',
       coin,
       displayName: profile.displayName,
       countryFlag: profile.countryFlag,

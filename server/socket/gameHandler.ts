@@ -11,7 +11,7 @@
 
 import { Server, Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import { AuthPayload } from "../middleware/auth";
+import { AuthPayload, JWT_SECRET as AUTH_JWT_SECRET } from "../middleware/auth";
 import { registerGameRoom, unregisterGameRoom } from "../middleware/antiCheat";
 import {
   createServerGameState,
@@ -26,12 +26,8 @@ import {
 // Config
 // ---------------------------------------------------------------------------
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.warn(
-    "[Socket] WARNING: JWT_SECRET is not set in environment variables"
-  );
-}
+// Use the same JWT_SECRET as auth middleware (ensures token compatibility)
+const JWT_SECRET = AUTH_JWT_SECRET;
 
 // ゲームの複雑さに応じた思考時間（オンライン対戦）
 const TURN_TIMEOUT_BY_GAME: Record<string, number> = {
