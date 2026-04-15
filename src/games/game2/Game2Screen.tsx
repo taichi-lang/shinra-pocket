@@ -506,14 +506,6 @@ export default function Game2Screen({
                 ? '敗北...'
                 : '引き分け'}
             </Text>
-            <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
-              <Text style={styles.resetBtnText}>もう一度</Text>
-            </TouchableOpacity>
-            {onBack && (
-              <TouchableOpacity style={styles.backBtn2} onPress={onBack}>
-                <Text style={styles.backBtn2Text}>戻る</Text>
-              </TouchableOpacity>
-            )}
           </View>
         </View>
       )}

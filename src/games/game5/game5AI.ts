@@ -126,7 +126,7 @@ function pickNormalMove(state: Game5State, aiSide: Side): Action {
 
 // ─── Hard AI (Minimax + Alpha-Beta) ───
 
-const MAX_DEPTH = 6;
+const MAX_DEPTH = 4;
 
 function minimax(
   state: Game5State,
