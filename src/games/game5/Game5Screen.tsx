@@ -60,6 +60,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
 
   const [timeLeft, setTimeLeft] = useState(TURN_TIME_LIMIT);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [defeatReason, setDefeatReason] = useState<string>('');
 
   const cpuSide: Side = playerSide === 'sun' ? 'moon' : 'sun';
   const isPlayerTurn =
@@ -86,6 +87,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
           if (timerRef.current) clearInterval(timerRef.current);
           setGameState(gs => {
             if (gs.phase === 'gameover') return gs;
+            setDefeatReason('時間切れ');
             return {
               ...gs,
               winner: gs.turn === 'sun' ? 'moon' : 'sun',
@@ -109,6 +111,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     const actions = getAllLegalActions(gameState, gameState.turn);
     if (actions.length === 0) {
       // Current player has no legal moves — they lose
+      setDefeatReason('動ける手がない');
       setGameState(prev => ({
         ...prev,
         winner: prev.turn === 'sun' ? 'moon' : 'sun',
@@ -275,6 +278,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
   const doReset = useCallback(() => {
     setGameState(createInitialState());
     setTimeLeft(TURN_TIME_LIMIT);
+    setDefeatReason('');
     aiThinking.current = false;
   }, []);
 
@@ -295,13 +299,23 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     ? 'あなたの番'
     : 'CPUの番';
 
+  // 敗因の自動判定
+  useEffect(() => {
+    if (gameState.phase !== 'gameover' || !gameState.winner) return;
+    if (defeatReason) return; // 既に設定済み
+    if (gameState.isCheck) {
+      setDefeatReason('王手詰み');
+    } else {
+      setDefeatReason('動ける手がない');
+    }
+  }, [gameState.phase, gameState.winner, gameState.isCheck, defeatReason]);
+
   const isTimeout = gameState.phase === 'gameover' && timeLeft <= 0;
-  const winnerLabel = isTimeout
-    ? '時間切れ — 負け'
-    : gameState.winner === playerSide
+  const isPlayerWin = gameState.winner === playerSide;
+  const winnerLabel = isPlayerWin
     ? '勝利！'
     : gameState.winner === cpuSide
-    ? '敗北...'
+    ? `敗北...（${defeatReason || ''}）`
     : '';
 
   return (

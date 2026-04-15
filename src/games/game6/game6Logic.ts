@@ -56,6 +56,9 @@ function generateFullGrid(config: DifficultyConfig): number[] | null {
       for (let c = 0; c < 3; c++) {
         if (colSum(c, 2) !== target) return false;
       }
+      // Verify diagonals
+      if (grid[0] + grid[4] + grid[8] !== target) return false;
+      if (grid[2] + grid[4] + grid[6] !== target) return false;
       return true;
     }
 
