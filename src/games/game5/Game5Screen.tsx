@@ -149,7 +149,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
         // No legal moves - shouldn't happen if checkmate detected properly
       }
       aiThinking.current = false;
-    }, 600);
+    }, 100);
 
     return () => {
       clearTimeout(timer);

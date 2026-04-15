@@ -51,7 +51,7 @@ function normalAI(board: BoardState, player: Player): number {
 
 // ---------- Hard AI (Minimax) ----------
 
-const MAX_DEPTH = 5;
+const MAX_DEPTH = 8;
 
 interface MinimaxResult {
   score: number;

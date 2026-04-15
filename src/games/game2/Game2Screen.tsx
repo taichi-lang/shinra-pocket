@@ -46,7 +46,7 @@ interface Game2ScreenProps {
   onBack?: () => void;
 }
 
-const CPU_DELAY = 300;
+const CPU_DELAY = 100;
 
 // Selection state for the new unified interaction
 type Selection =

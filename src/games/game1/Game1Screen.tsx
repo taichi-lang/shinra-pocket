@@ -41,7 +41,7 @@ interface Game1Props {
   coin2?: CoinType;
 }
 
-const CPU_DELAY = 300;
+const CPU_DELAY = 100;
 const PASS_DEVICE_DELAY = 2000;
 
 const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop }) => {

@@ -151,7 +151,7 @@ export function chooseActionNormal(state: Game2State, cpuCoinType: CoinType): Ga
 
 // ========== HARD AI (Minimax with Alpha-Beta) ==========
 
-const MAX_DEPTH = 4;
+const MAX_DEPTH = 6;
 
 function minimax(
   state: Game2State,

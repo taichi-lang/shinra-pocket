@@ -31,7 +31,7 @@ import { getAIMove } from './game4AI';
 import { MancalaBoard } from './components/MancalaBoard';
 import { isSubscriptionActive } from '../../monetize/iapService';
 
-const CPU_DELAY = 300;
+const CPU_DELAY = 100;
 const SOW_STEP_DELAY = 500;
 
 interface Game4ScreenProps {
