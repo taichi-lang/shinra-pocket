@@ -162,8 +162,8 @@ export function needsTicket(
   // Game6 is a standalone puzzle — no ticket cost
   if (gameId === 'game6') return false;
 
-  // CPU battles are always free (including hard difficulty)
-  if (mode === 'cpu') {
+  // CPU normal is free, CPU hard costs a ticket
+  if (mode === 'cpu' && difficulty === 'normal') {
     return false;
   }
 
