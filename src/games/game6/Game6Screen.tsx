@@ -579,7 +579,7 @@ const styles = StyleSheet.create({
 
   // --- Sum indicators ---
   sumBadge: {
-    width: 36,
+    width: CELL_SIZE,
     height: 36,
     borderRadius: 18,
     backgroundColor: 'rgba(255,255,255,0.04)',
