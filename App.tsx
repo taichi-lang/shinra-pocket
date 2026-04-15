@@ -56,6 +56,7 @@ const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<string>('Splash');
+  const [currentParams, setCurrentParams] = useState<Record<string, unknown>>({});
   const [setupDone, setSetupDone] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -70,6 +71,7 @@ export default function App() {
       const route = navigationRef.getCurrentRoute();
       if (route?.name) {
         setCurrentScreen(route.name);
+        setCurrentParams((route.params as Record<string, unknown>) ?? {});
       }
     }
   }, []);
@@ -113,7 +115,7 @@ export default function App() {
           </Stack.Navigator>
         </NavigationContainer>
         {currentScreen !== 'Splash' && (
-          <ErrorReportButton screenName={currentScreen} />
+          <ErrorReportButton screenName={currentScreen} screenParams={currentParams} />
         )}
       </View>
     </ErrorBoundary>

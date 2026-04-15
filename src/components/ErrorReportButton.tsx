@@ -19,9 +19,10 @@ import { t } from '../i18n';
 
 interface ErrorReportButtonProps {
   screenName: string;
+  screenParams?: Record<string, unknown>;
 }
 
-export default function ErrorReportButton({ screenName }: ErrorReportButtonProps) {
+export default function ErrorReportButton({ screenName, screenParams }: ErrorReportButtonProps) {
   const [visible, setVisible] = useState(false);
   const [description, setDescription] = useState('');
   const [sending, setSending] = useState(false);
@@ -41,10 +42,21 @@ export default function ErrorReportButton({ screenName }: ErrorReportButtonProps
       const osVersion = String(Platform.Version);
       const deviceInfoStr = `${osLabel} ${osVersion} | ${width}x${height}`;
 
+      // 詳細な状況情報を自動収集
+      const params = screenParams ?? {};
+      const gameId = params.gameId ?? '';
+      const mode = params.mode ?? '';
+      const difficulty = params.difficulty ?? '';
+      const contextParts = [screenName];
+      if (gameId) contextParts.push(`ゲーム:${gameId}`);
+      if (mode) contextParts.push(`モード:${mode}`);
+      if (difficulty) contextParts.push(`難易度:${difficulty}`);
+      const context = contextParts.join(' / ');
+
       const body = {
         playerId,
-        screenName,
-        description: description.trim(),
+        screenName: context,
+        description: `【状況】${context}\n【内容】${description.trim()}`,
         deviceInfo: deviceInfoStr,
         timestamp: new Date().toISOString(),
         appVersion: '1.0.0',
