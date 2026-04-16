@@ -38,6 +38,9 @@ import { chooseAIAction } from './game2AI';
 import StackCellView from './components/StackCellView';
 import CoinStack from './components/CoinStack';
 import { isSubscriptionActive } from '../../monetize/iapService';
+import { usePreloadSounds } from '../../sound/useSoundEffect';
+import { playSound } from '../../sound/audioService';
+import { SFX_MAP } from '../../sound/soundMap';
 
 interface Game2ScreenProps {
   playerCoin: CoinType;
@@ -69,6 +72,9 @@ export default function Game2Screen({
   const [message, setMessage] = useState<string>('コインを選んで配置しよう');
 
   const isProcessing = useRef(false);
+
+  // Sound effects
+  usePreloadSounds(['coinPlace', 'coinMove', 'victory', 'defeat', 'turnChange', 'error']);
 
   // ---- Derived ----
   const {
@@ -109,6 +115,8 @@ export default function Game2Screen({
         setHighlightedCells([]);
         setSelection({ type: 'none' });
         setMessage(winResult.winner === 'player' ? 'あなたの勝ち!' : 'CPUの勝ち...');
+        if (winResult.winner === 'player') playSound('victory', { volume: SFX_MAP.victory.volume });
+        else playSound('defeat', { volume: SFX_MAP.defeat.volume });
         return;
       }
 
@@ -243,9 +251,11 @@ export default function Game2Screen({
     // === If a hand coin is selected, try to place ===
     if (selection.type === 'hand') {
       if (highlightedCells.includes(index)) {
+        playSound('coinPlace', { volume: SFX_MAP.coinPlace.volume });
         const newState = placeFromHand(state, 'player', selection.coinNumber, index, playerCoin);
         endTurn({ ...newState, turn: 'player' });
       } else {
+        playSound('error', { volume: SFX_MAP.error.volume });
         setMessage('そこには置けません');
       }
       return;
@@ -262,6 +272,7 @@ export default function Game2Screen({
 
       // Tapping a valid move target → move
       if (highlightedCells.includes(index)) {
+        playSound('coinMove', { volume: SFX_MAP.coinMove.volume });
         const newState = moveOnBoard(state, selection.boardIndex, index);
         endTurn({ ...newState, turn: 'player' });
         return;

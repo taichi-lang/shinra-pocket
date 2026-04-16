@@ -29,6 +29,9 @@ import Board from './components/Board';
 import Timer from './components/Timer';
 import PhaseIndicator from './components/PhaseIndicator';
 import Coin from './components/Coin';
+import { usePreloadSounds } from '../../sound/useSoundEffect';
+import { playSound } from '../../sound/audioService';
+import { SFX_MAP } from '../../sound/soundMap';
 
 // Navigation types matching App.tsx RootStackParamList
 type Game1Params = {
@@ -64,6 +67,9 @@ const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop })
 
   const timer = useGame1Timer(DEFAULT_TIMER_CONFIG);
 
+  // Sound effects
+  usePreloadSounds(['coinPlace', 'coinMove', 'victory', 'defeat', 'turnChange', 'timerWarning', 'gameStart']);
+
   // Reset all state when route params change (re-entering from CoinSelect/Result)
   useEffect(() => {
     setGameState(createInitialGameState());
@@ -91,6 +97,8 @@ const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop })
     if (result && !gameOverNavigated.current) {
       gameOverNavigated.current = true;
       timer.stopTimer();
+      if (result === 'player') playSound('victory', { volume: SFX_MAP.victory.volume });
+      else if (result === 'cpu') playSound('defeat', { volume: SFX_MAP.defeat.volume });
       const timeout = setTimeout(() => {
         navigation.replace('Result', {
           result,
@@ -210,9 +218,14 @@ const Game1Screen: React.FC<Game1Props> = ({ mode: modeProp, coin2: coin2Prop })
         if (!prev.active) return prev;
         if (!isLocal && prev.turn !== 'player') return prev;
         if (prev.phase === 'place') {
-          return handlePlace(prev, index, isLocal);
+          const next = handlePlace(prev, index, isLocal);
+          if (next !== prev) playSound('coinPlace', { volume: SFX_MAP.coinPlace.volume });
+          return next;
         } else {
-          return handleSelect(prev, index, isLocal);
+          const next = handleSelect(prev, index, isLocal);
+          if (next !== prev && next.selected === null) playSound('coinMove', { volume: SFX_MAP.coinMove.volume });
+          else if (next !== prev) playSound('uiTap', { volume: SFX_MAP.uiTap.volume });
+          return next;
         }
       });
     },

@@ -9,6 +9,9 @@ import {
   Dimensions,
 } from 'react-native';
 import { COLORS, SIZES, FONTS } from '../../utils/theme';
+import { usePreloadSounds } from '../../sound/useSoundEffect';
+import { playSound } from '../../sound/audioService';
+import { SFX_MAP } from '../../sound/soundMap';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Game6State,
@@ -295,6 +298,9 @@ const Game6Screen: React.FC<Game6ScreenProps> = ({ onBack }) => {
   const [started, setStarted] = useState(false);
   const [state, setState] = useState<Game6State | null>(null);
 
+  // Sound effects
+  usePreloadSounds(['uiTap', 'combo', 'error', 'reward', 'levelUp', 'countdown321']);
+
   // Timer
   useEffect(() => {
     if (!state || state.phase !== 'playing') return;
@@ -319,6 +325,7 @@ const Game6Screen: React.FC<Game6ScreenProps> = ({ onBack }) => {
   }, []);
 
   const handleNumberSelect = useCallback((n: number) => {
+    playSound('uiTap', { volume: SFX_MAP.uiTap.volume });
     setState(prev => {
       if (!prev || prev.selectedCell === null) return prev;
       return placeNumber(prev, prev.selectedCell, n);
@@ -333,7 +340,13 @@ const Game6Screen: React.FC<Game6ScreenProps> = ({ onBack }) => {
   }, []);
 
   const handleSubmit = useCallback(() => {
-    setState(prev => (prev ? submitAnswer(prev) : prev));
+    setState(prev => {
+      if (!prev) return prev;
+      const next = submitAnswer(prev);
+      if (next.phase === 'correct') playSound('combo', { volume: SFX_MAP.combo.volume });
+      else if (next.phase === 'wrong') playSound('error', { volume: SFX_MAP.error.volume });
+      return next;
+    });
   }, []);
 
   const handleHint = useCallback(() => {

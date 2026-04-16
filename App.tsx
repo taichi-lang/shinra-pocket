@@ -22,6 +22,7 @@ import ErrorReportButton from './src/components/ErrorReportButton';
 import { initAnalytics } from './src/analytics/analyticsService';
 import { initCrashReporter } from './src/analytics/crashReporter';
 import { initTicketStore } from './src/monetize/ticketStore';
+import { initAudio } from './src/sound/audioService';
 import { isSetupComplete } from './src/services/userProfile';
 import { CoinType } from './src/game/types';
 
@@ -63,6 +64,7 @@ export default function App() {
     initCrashReporter();
     initAnalytics();
     initTicketStore();
+    initAudio();
     isSetupComplete().then((done) => setSetupDone(done));
   }, []);
 

@@ -118,14 +118,14 @@ describe('needsTicket', () => {
     expect(ticketStore.needsTicket('game6', 'normal', 'local')).toBe(false);
   });
 
-  it('cpu + easy/normal is free', () => {
-    expect(ticketStore.needsTicket('game1', 'easy', 'cpu')).toBe(false);
+  it('cpu + normal is free', () => {
+    expect(ticketStore.needsTicket('game1', 'normal', 'cpu')).toBe(false);
     expect(ticketStore.needsTicket('game2', 'normal', 'cpu')).toBe(false);
   });
 
-  it('cpu + hard is free (no ticket required for any CPU mode)', () => {
-    expect(ticketStore.needsTicket('game1', 'hard', 'cpu')).toBe(false);
-    expect(ticketStore.needsTicket('game3', 'hard', 'cpu')).toBe(false);
+  it('cpu + hard costs a ticket', () => {
+    expect(ticketStore.needsTicket('game1', 'hard', 'cpu')).toBe(true);
+    expect(ticketStore.needsTicket('game3', 'hard', 'cpu')).toBe(true);
   });
 
   it('local mode always costs a ticket', () => {

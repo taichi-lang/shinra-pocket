@@ -30,6 +30,9 @@ import {
 import { getAIMove } from './game4AI';
 import { MancalaBoard } from './components/MancalaBoard';
 import { isSubscriptionActive } from '../../monetize/iapService';
+import { usePreloadSounds } from '../../sound/useSoundEffect';
+import { playSound } from '../../sound/audioService';
+import { SFX_MAP } from '../../sound/soundMap';
 
 const CPU_DELAY = 100;
 const SOW_STEP_DELAY = 500;
@@ -57,6 +60,9 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
   const [inputLocked, setInputLocked] = useState(false);
   const messageAnim = useRef(new Animated.Value(0)).current;
   const isMounted = useRef(true);
+
+  // Sound effects
+  usePreloadSounds(['coinPlace', 'victory', 'defeat', 'turnChange', 'combo']);
 
   useEffect(() => {
     return () => {
@@ -133,6 +139,10 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
 
       const winner = checkWinner(result.board);
       if (winner !== null) {
+        if (mode === 'cpu') {
+          if (winner === humanSide) playSound('victory', { volume: SFX_MAP.victory.volume });
+          else playSound('defeat', { volume: SFX_MAP.defeat.volume });
+        }
         setState((s) => ({
           ...s,
           board: result.board,
@@ -144,6 +154,7 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
       }
 
       if (result.extraTurn) {
+        playSound('combo', { volume: SFX_MAP.combo.volume });
         showMessage('もう一回!');
         setState((s) => ({
           ...s,
@@ -210,6 +221,7 @@ const Game4Screen: React.FC<Game4ScreenProps> = ({
       const pits = player === 'A' ? state.board.a : state.board.b;
       if (pits[pitIndex] === 0) return;
 
+      playSound('coinPlace', { volume: SFX_MAP.coinPlace.volume });
       executeMoveFromBoard(state.board, player, pitIndex);
     },
     [inputLocked, state, mode, humanSide, executeMoveFromBoard],

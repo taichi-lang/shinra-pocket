@@ -10,6 +10,9 @@ import { logScreenView } from '../analytics/analyticsService';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from '../i18n';
 import { isSubscriptionActive } from '../monetize/iapService';
+import { usePreloadSounds } from '../sound/useSoundEffect';
+import { playSound } from '../sound/audioService';
+import { SFX_MAP } from '../sound/soundMap';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
@@ -28,12 +31,15 @@ export default function ResultScreen({ navigation, route }: Props) {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
+  // Sound effects
+  usePreloadSounds(['victory', 'defeat', 'reward']);
+
   useEffect(() => {
     logScreenView('Result');
 
-    // Fire haptic based on result
-    if (result === 'player') hapticSuccess();
-    else if (result === 'cpu') hapticError();
+    // Fire haptic + sound based on result
+    if (result === 'player') { hapticSuccess(); playSound('victory', { volume: SFX_MAP.victory.volume }); }
+    else if (result === 'cpu') { hapticError(); playSound('defeat', { volume: SFX_MAP.defeat.volume }); }
     else if (result === 'timeout') hapticWarning();
 
     Animated.sequence([

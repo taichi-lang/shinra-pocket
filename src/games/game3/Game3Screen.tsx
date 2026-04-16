@@ -43,6 +43,9 @@ import {
 } from './game3Logic';
 import { getAIAction } from './game3AI';
 import type { CoinType } from '../../game/types';
+import { usePreloadSounds } from '../../sound/useSoundEffect';
+import { playSound } from '../../sound/audioService';
+import { SFX_MAP } from '../../sound/soundMap';
 
 // ------------------------------------------------------------------
 // Props
@@ -83,6 +86,9 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
   const [showTurnSwitch, setShowTurnSwitch] = useState(false);
   const [message, setMessage] = useState<string>('');
   const cpuTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Sound effects
+  usePreloadSounds(['coinPlace', 'coinMove', 'victory', 'defeat', 'turnChange']);
 
   // ------------------------------------------------------------------
   // Start game
@@ -195,6 +201,8 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
         if (newState.winner) {
           const winResult = toResult(newState.winner);
           const winEmoji = winResult === 'player' ? '🏆' : '😢';
+          if (winResult === 'player') playSound('victory', { volume: SFX_MAP.victory.volume });
+          else playSound('defeat', { volume: SFX_MAP.defeat.volume });
           setMessage(
             `${winEmoji} ${PLAYER_LABEL[newState.winner]}の勝ち!`,
           );
@@ -244,6 +252,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
       if (selectedHandCoin !== null) {
         const validTargets = getValidPlacements(board, selectedHandCoin);
         if (validTargets.includes(cellIdx)) {
+          playSound('coinPlace', { volume: SFX_MAP.coinPlace.volume });
           const action: Game3Action = {
             type: 'place',
             coinNumber: selectedHandCoin,
@@ -270,6 +279,7 @@ export default function Game3Screen({ coin, difficulty: propDifficulty, onGameEn
         }
         const validDests = getValidMoveDestinations(board, selectedBoardCell);
         if (validDests.includes(cellIdx)) {
+          playSound('coinMove', { volume: SFX_MAP.coinMove.volume });
           const action: Game3Action = {
             type: 'move',
             fromCell: selectedBoardCell,

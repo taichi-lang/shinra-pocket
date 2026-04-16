@@ -33,6 +33,9 @@ import { getAIMove } from './game5AI';
 import ShogiBoard from './components/ShogiBoard';
 import HandPieces from './components/HandPieces';
 import { isSubscriptionActive } from '../../monetize/iapService';
+import { usePreloadSounds } from '../../sound/useSoundEffect';
+import { playSound } from '../../sound/audioService';
+import { SFX_MAP } from '../../sound/soundMap';
 
 const TURN_TIME_LIMIT = 30; // seconds per turn
 
@@ -62,6 +65,9 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [defeatReason, setDefeatReason] = useState<string>('');
 
+  // Sound effects
+  usePreloadSounds(['coinPlace', 'coinMove', 'victory', 'defeat', 'timerWarning', 'turnChange']);
+
   const cpuSide: Side = playerSide === 'sun' ? 'moon' : 'sun';
   const isPlayerTurn =
     mode === 'local' || gameState.turn === playerSide;
@@ -82,6 +88,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
 
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
+        if (prev === 6) playSound('timerWarning', { volume: SFX_MAP.timerWarning.volume });
         if (prev <= 1) {
           // Time's up — current player loses
           if (timerRef.current) clearInterval(timerRef.current);
@@ -112,6 +119,8 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
     if (actions.length === 0) {
       // Current player has no legal moves — they lose
       setDefeatReason('動ける手がない');
+      if (gameState.turn === playerSide) playSound('defeat', { volume: SFX_MAP.defeat.volume });
+      else playSound('victory', { volume: SFX_MAP.victory.volume });
       setGameState(prev => ({
         ...prev,
         winner: prev.turn === 'sun' ? 'moon' : 'sun',
@@ -175,6 +184,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
           p => p.row === pos.row && p.col === pos.col
         );
         if (isValidDrop) {
+          playSound('coinPlace', { volume: SFX_MAP.coinPlace.volume });
           setGameState(prev => dropPiece(prev, selectedHandPiece, pos));
           return;
         }
@@ -194,6 +204,7 @@ export const Game5Screen: React.FC<Game5ScreenProps> = ({
           p => p.row === pos.row && p.col === pos.col
         );
         if (isValidTarget) {
+          playSound('coinMove', { volume: SFX_MAP.coinMove.volume });
           setGameState(prev => movePiece(prev, selectedPos, pos));
           return;
         }
