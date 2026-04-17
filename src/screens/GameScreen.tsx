@@ -3,6 +3,8 @@ import { Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../App';
 import { logEvent } from '../analytics/analyticsService';
+import { playBGM, stopBGM } from '../sound/audioService';
+import { BGM_MAP, BGMName } from '../sound/soundMap';
 import Game1Screen from '../games/game1/Game1Screen';
 import Game2Screen from '../games/game2/Game2Screen';
 import Game3Screen from '../games/game3/Game3Screen';
@@ -19,6 +21,17 @@ export default function GameScreen({ navigation, route }: Props) {
   useEffect(() => {
     startTime.current = Date.now();
     logEvent('game_start', { gameId, difficulty, mode });
+
+    // Start BGM for this game
+    const bgmKey: BGMName = gameId === 'game1' ? 'game1_coinboard'
+      : gameId === 'game6' ? 'game6_quiz'
+      : (gameId as BGMName);
+    const bgmDef = BGM_MAP[bgmKey];
+    if (bgmDef?.source) {
+      playBGM(bgmKey, bgmDef.source, 500);
+    }
+
+    return () => { stopBGM(300); };
   }, [gameId, difficulty]);
 
   const handleGameEnd = (result: 'player' | 'cpu' | 'draw' | 'timeout') => {

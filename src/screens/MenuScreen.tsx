@@ -15,6 +15,8 @@ import { lightTap, mediumTap } from '../utils/haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getTotalTickets } from '../monetize/ticketStore';
 import { t } from '../i18n';
+import { playBGM, stopBGM } from '../sound/audioService';
+import { BGM_MAP } from '../sound/soundMap';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Menu'>;
 
@@ -43,6 +45,10 @@ export default function MenuScreen({ navigation }: Props) {
   useFocusEffect(
     useCallback(() => {
       setTickets(getTotalTickets());
+      // Play lobby BGM when menu is focused
+      const bgm = BGM_MAP.lobby;
+      if (bgm?.source) playBGM('lobby', bgm.source, 800);
+      return () => { stopBGM(300); };
     }, [])
   );
   const ticketLabel = tickets === Infinity ? '∞' : `${tickets}${t('menu.tickets') || '枚'}`;

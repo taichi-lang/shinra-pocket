@@ -26,4 +26,20 @@ See: https://soundeffect-lab.info/agreement/
 | sfx/countdown.mp3 | electronic-countdown1.mp3 | カウントダウン電子音 |
 
 ## BGM (Background Music)
-BGM files are placeholders awaiting CEO-provided assets.
+All BGM tracks are sourced from **魔王魂** (https://maou.audio/).
+
+License: Free for commercial use. Credit required: "音楽：魔王魂"
+See: https://maou.audio/rule/
+
+### File sources:
+| File | Source | Description |
+|------|--------|-------------|
+| bgm/lobby.mp3 | maou_bgm_healing17.mp3 | ヒーリング17「人魚の目覚め」 |
+| bgm/game1_coinboard.mp3 | maou_bgm_8bit29.mp3 | 8bit29「子猫のもんたのクッキー屋さん」 |
+| bgm/game2.mp3 | maou_loop_bgm_fantasy12.mp3 | ファンタジー12「戦術的構想」ループ版 |
+| bgm/game3.mp3 | maou_loop_bgm_neorock82.mp3 | ネオロック82 ループ版 |
+| bgm/game4.mp3 | maou_game_village10.mp3 | 村10「暖かい村の曲」 |
+| bgm/game5.mp3 | maou_loop_bgm_ethnic32.mp3 | 民族32「初詣」ループ版（和風） |
+| bgm/game6_quiz.mp3 | maou_loop_bgm_cyber44.mp3 | サイバー44 ループ版 |
+| bgm/battle.mp3 | maou_bgm_neorock78.mp3 | ネオロック78 |
+| bgm/results.mp3 | maou_game_jingle05.mp3 | ジングル05「勝利。ループ。」 |

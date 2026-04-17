@@ -11,8 +11,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { t } from '../i18n';
 import { isSubscriptionActive } from '../monetize/iapService';
 import { usePreloadSounds } from '../sound/useSoundEffect';
-import { playSound } from '../sound/audioService';
-import { SFX_MAP } from '../sound/soundMap';
+import { playSound, playBGM, stopBGM } from '../sound/audioService';
+import { SFX_MAP, BGM_MAP } from '../sound/soundMap';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Result'>;
 
@@ -42,6 +42,10 @@ export default function ResultScreen({ navigation, route }: Props) {
     else if (result === 'cpu') { hapticError(); playSound('defeat', { volume: SFX_MAP.defeat.volume }); }
     else if (result === 'timeout') hapticWarning();
 
+    // Play results BGM
+    const bgm = BGM_MAP.results;
+    if (bgm?.source) playBGM('results', bgm.source, 300);
+
     Animated.sequence([
       Animated.spring(scaleAnim, {
         toValue: 1,
@@ -55,6 +59,8 @@ export default function ResultScreen({ navigation, route }: Props) {
         useNativeDriver: true,
       }),
     ]).start();
+
+    return () => { stopBGM(200); };
   }, []);
 
   return (

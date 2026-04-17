@@ -278,6 +278,16 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* Credits */}
+        <View style={styles.versionContainer}>
+          <Text style={styles.versionText}>
+            SE: 効果音ラボ
+          </Text>
+          <Text style={styles.versionText}>
+            音楽: 魔王魂
+          </Text>
+        </View>
+
         {/* App Version */}
         <View style={styles.versionContainer}>
           <Text style={styles.versionText}>
