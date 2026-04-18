@@ -31,12 +31,14 @@ const JWT_SECRET = AUTH_JWT_SECRET;
 
 // ゲームの複雑さに応じた思考時間（オンライン対戦）
 const TURN_TIMEOUT_BY_GAME: Record<string, number> = {
-  game1: 5_000,    // 三目並べ: 5秒
-  game2: 10_000,   // 一騎打ち: 10秒
-  game4: 10_000,   // パタパタ: 10秒
-  game5: 15_000,   // 日月の戦い: 15秒
+  game1: 15_000,   // 三目並べ: 15秒（旧5秒はラグで時間切れが多発したため余裕を持たせる）
+  game2: 15_000,   // 一騎打ち: 15秒
+  game4: 15_000,   // パタパタ: 15秒
+  game5: 20_000,   // 日月の戦い: 20秒
 };
-const DEFAULT_TURN_TIMEOUT_MS = 10_000;
+const DEFAULT_TURN_TIMEOUT_MS = 15_000;
+// 初手のターンタイマー開始を遅延させる（両クライアントの接続/レンダ完了を待つ）
+const FIRST_TURN_GRACE_MS = 3_000;
 const MATCHMAKING_INTERVAL_MS = 2_000;
 const QUEUE_STALE_MS = 5 * 60 * 1000; // 5 minutes
 const RATING_INITIAL_RANGE = 100;
@@ -356,10 +358,15 @@ function startGame(io: Server, room: GameRoom): void {
     players: playersArray,
     currentTurn: state.currentTurn,
     state,
+    graceMs: FIRST_TURN_GRACE_MS,
   });
 
-  // Start turn timer
-  startTurnTimer(io, room);
+  // 両クライアントの接続確認/レンダ完了を待ってからタイマー開始
+  setTimeout(() => {
+    if (rooms.has(room.roomId)) {
+      startTurnTimer(io, room);
+    }
+  }, FIRST_TURN_GRACE_MS);
 
   console.log(`[Game] Started ${room.gameType} in room ${room.roomId}`);
 }
