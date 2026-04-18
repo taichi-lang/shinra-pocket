@@ -302,6 +302,7 @@
   <div class="tab" data-tab="maintenance" onclick="switchTab('maintenance')">メンテナンス</div>
   <div class="tab" data-tab="codes" onclick="switchTab('codes')">シリアルコード</div>
   <div class="tab" data-tab="reports" onclick="switchTab('reports')">エラー報告</div>
+  <div class="tab" data-tab="matchmaking" onclick="switchTab('matchmaking')">マッチング監視</div>
 </div>
 
 <!-- Content -->
@@ -531,6 +532,49 @@
     </div>
   </div>
 
+  <!-- Matchmaking Panel -->
+  <div class="panel" id="panel-matchmaking">
+    <div class="section">
+      <h3>マッチング中のプレイヤー</h3>
+      <div class="search-bar">
+        <button class="btn btn-primary" onclick="loadMatchmaking()">更新</button>
+        <label style="margin-left:16px; color:#aaa;">
+          <input type="checkbox" id="mmAutoRefresh" checked onchange="toggleMmAutoRefresh()"> 自動更新(2秒ごと)
+        </label>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>プレイヤー名</th>
+            <th>UserID</th>
+            <th>ゲーム種別</th>
+            <th>レート</th>
+            <th>待機時間</th>
+          </tr>
+        </thead>
+        <tbody id="matchmakingQueueBody">
+          <tr><td colspan="5" style="text-align:center;color:#666">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="section">
+      <h3>進行中のルーム</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>RoomID</th>
+            <th>ゲーム種別</th>
+            <th>参加人数</th>
+            <th>経過時間</th>
+          </tr>
+        </thead>
+        <tbody id="matchmakingRoomsBody">
+          <tr><td colspan="4" style="text-align:center;color:#666">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 
 <!-- Toast -->
@@ -617,6 +661,62 @@
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
     document.getElementById(`panel-${tab}`).classList.add('active');
+    if (tab === 'matchmaking') {
+      loadMatchmaking();
+      startMmAutoRefresh();
+    } else {
+      stopMmAutoRefresh();
+    }
+  }
+
+  // ── Matchmaking monitoring ──
+  let mmInterval = null;
+  async function loadMatchmaking() {
+    const data = await apiFetch('/matchmaking');
+    if (!data || data.error) {
+      document.getElementById('matchmakingQueueBody').innerHTML =
+        '<tr><td colspan="5" style="text-align:center;color:#f66">エンドポイント未デプロイ(Render側)</td></tr>';
+      return;
+    }
+    const qBody = document.getElementById('matchmakingQueueBody');
+    if (!data.queue || data.queue.length === 0) {
+      qBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888">キューに誰もいません</td></tr>';
+    } else {
+      qBody.innerHTML = data.queue.map(e =>
+        `<tr><td>${escapeHtml(e.displayName || e.username)}</td>` +
+        `<td style="font-family:monospace;font-size:11px;">${escapeHtml(e.userId.slice(0, 12))}...</td>` +
+        `<td>${escapeHtml(e.gameType)}</td>` +
+        `<td>${e.rating}</td>` +
+        `<td>${e.waitSeconds}秒</td></tr>`
+      ).join('');
+    }
+    const rBody = document.getElementById('matchmakingRoomsBody');
+    if (!data.rooms || data.rooms.length === 0) {
+      rBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#888">進行中のルームなし</td></tr>';
+    } else {
+      rBody.innerHTML = data.rooms.map(r =>
+        `<tr><td style="font-family:monospace;font-size:11px;">${escapeHtml(r.roomId)}</td>` +
+        `<td>${escapeHtml(r.gameType)}</td>` +
+        `<td>${r.playerCount}人</td>` +
+        `<td>${r.ageSeconds}秒</td></tr>`
+      ).join('');
+    }
+  }
+  function startMmAutoRefresh() {
+    if (!document.getElementById('mmAutoRefresh')?.checked) return;
+    stopMmAutoRefresh();
+    mmInterval = setInterval(loadMatchmaking, 2000);
+  }
+  function stopMmAutoRefresh() {
+    if (mmInterval) { clearInterval(mmInterval); mmInterval = null; }
+  }
+  function toggleMmAutoRefresh() {
+    if (document.getElementById('mmAutoRefresh').checked) startMmAutoRefresh();
+    else stopMmAutoRefresh();
+  }
+  function escapeHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c =>
+      ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
   }
 
   // ── Stats ──
