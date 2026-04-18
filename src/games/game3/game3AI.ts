@@ -41,52 +41,109 @@ export function getAIAction(
   if (difficulty === 'hard') {
     return hardAI(state, actions);
   }
-  // CPU1(water)=攻撃的+先読み、CPU2(swirl)=防御的+スタック重視で異なる性格
-  const personality = state.currentPlayer === 'water' ? 'aggressive' : 'defensive';
-  // normalでも2手先読みして最善手を選ぶ
-  const lookaheadAction = shallowLookahead(state, actions);
-  if (lookaheadAction) return lookaheadAction;
-  return normalAI(state, actions, personality);
-}
-
-// ==================================================================
-// Shallow lookahead: 2手先読みで勝ちに近い手を選ぶ
-// ==================================================================
-
-function shallowLookahead(
-  state: Game3State,
-  actions: Game3Action[],
-): Game3Action | null {
   const me = state.currentPlayer;
 
-  // 即勝ちがあればそれを返す
+  // 1. 自分の即勝ち
   for (const action of actions) {
     const after = applyAction(state, action);
     const result = checkWinner(after.board);
     if (result && result.winner === me) return action;
   }
 
-  // 2手先で勝てる手を探す（相手のベストレスポンスも考慮）
+  // 2. 相手の即勝ちをブロック（最優先）
+  const blockAction = findBlockAction(state, actions, me);
+  if (blockAction) return blockAction;
+
+  // CPU1(water)=攻撃的、CPU2(swirl)=防御的で異なる性格
+  const personality: AIPersonality = me === 'water' ? 'aggressive' : 'defensive';
+
+  // 3. 安全性チェック+フォーク検出付きの評価で最善手を選ぶ
+  const scoredAction = scoredLookahead(state, actions, me, personality);
+  if (scoredAction) return scoredAction;
+
+  return normalAI(state, actions, personality);
+}
+
+// ==================================================================
+// Scored lookahead:
+//   - 相手に即勝ちを許す手を避ける（安全性）
+//   - 自分のフォーク（2リーチ以上）を優先
+//   - ラインの充実度を評価
+// ==================================================================
+
+function scoredLookahead(
+  state: Game3State,
+  actions: Game3Action[],
+  me: Player,
+  personality: AIPersonality,
+): Game3Action | null {
+  const opponents = PLAYERS.filter(p => p !== me);
+
   let bestAction: Game3Action | null = null;
   let bestScore = -Infinity;
 
   for (const action of actions) {
     const after = applyAction(state, action);
     const wr = checkWinner(after.board);
-    if (wr) continue; // 既にチェック済み
+    if (wr) continue; // 即勝ちは getAIAction で処理済み
 
-    // この手のスコアを評価（自分のラインの充実度）
     let score = 0;
+
+    // --- 安全性: 相手に即勝ちを許す手は大減点 ---
+    let givesOppWin = false;
+    for (const opp of opponents) {
+      const oppActions = getAllActions(after.board, after.hands[opp], opp);
+      const simState = cloneState(after);
+      simState.currentPlayer = opp;
+      for (const oa of oppActions) {
+        const afterOpp = applyAction(simState, oa);
+        const r2 = checkWinner(afterOpp.board);
+        if (r2 && r2.winner === opp) {
+          givesOppWin = true;
+          break;
+        }
+      }
+      if (givesOppWin) break;
+    }
+    if (givesOppWin) score -= 200;
+
+    // --- 自分のライン評価 + フォーク検出 ---
+    let myReaches = 0;
     for (const line of WIN_LINES) {
       const myCount = line.filter(i => topOwner(after.board[i]) === me).length;
       const emptyCount = line.filter(i => topOwner(after.board[i]) === null).length;
-      if (myCount === 2 && emptyCount >= 1) score += 10; // リーチ
-      if (myCount === 1 && emptyCount >= 2) score += 3;
+      if (myCount === 2 && emptyCount >= 1) {
+        score += 15;
+        myReaches++;
+      } else if (myCount === 1 && emptyCount >= 2) {
+        score += 3;
+      }
     }
-    // スタックのボーナス
-    if (action.type === 'place' && action.coinNumber >= 2) score += 2;
-    // ランダム性を少し追加
-    score += Math.random() * 2;
+    // フォーク: 同時に2本以上リーチを作れば防ぎきれない
+    if (myReaches >= 2) score += 40;
+
+    // --- 相手のリーチ妨害 ---
+    for (const line of WIN_LINES) {
+      for (const opp of opponents) {
+        const oppCount = line.filter(i => topOwner(after.board[i]) === opp).length;
+        const emptyCount = line.filter(i => topOwner(after.board[i]) === null).length;
+        if (oppCount === 2 && emptyCount >= 1) score -= 12;
+      }
+    }
+
+    // --- 性格ボーナス ---
+    if (personality === 'aggressive') {
+      // 攻撃型: スタック・大きい数字を好む
+      if (action.type === 'place' && action.coinNumber >= 2) score += 3;
+      if (topOwner(after.board[4]) === me) score += 4; // 中央支配
+    } else {
+      // 防御型: 小さい数字を温存、端配置を好む
+      if (action.type === 'place' && action.coinNumber === 1) score += 2;
+      if (action.type === 'place' && [1, 3, 5, 7].includes(action.targetCell)) score += 2;
+    }
+
+    // 同じ局面で同じ手にならないよう微弱ランダム
+    score += Math.random() * 1.5;
 
     if (score > bestScore) {
       bestScore = score;
@@ -94,7 +151,7 @@ function shallowLookahead(
     }
   }
 
-  return bestAction; // 常に先読み結果を使う
+  return bestAction;
 }
 
 // ==================================================================
@@ -299,6 +356,17 @@ function hardAI(
   const me = state.currentPlayer;
   const myIdx = playerIndex(me);
 
+  // 即勝ちは探索せず即採用
+  for (const action of actions) {
+    const after = applyAction(state, action);
+    const result = checkWinner(after.board);
+    if (result && result.winner === me) return action;
+  }
+
+  // 相手の即勝ちをブロック（探索より優先）
+  const blockAction = findBlockAction(state, actions, me);
+  if (blockAction) return blockAction;
+
   let bestAction = actions[0];
   let bestScore = -Infinity;
 
@@ -381,6 +449,7 @@ function terminalScore(winner: Player): ScoreTuple {
 
 function evaluate(state: Game3State): ScoreTuple {
   const scores: ScoreTuple = [0, 0, 0];
+  const reachCount: Record<Player, number> = { fire: 0, water: 0, swirl: 0 };
 
   for (const line of WIN_LINES) {
     const owners = line.map(i => topOwner(state.board[i]));
@@ -394,13 +463,27 @@ function evaluate(state: Game3State): ScoreTuple {
       if (oppCount === 0) {
         // Line has only my coins or empty
         if (myCount === 3) scores[pIdx] += 100;
-        else if (myCount === 2) scores[pIdx] += 10;
-        else if (myCount === 1) scores[pIdx] += 2;
+        else if (myCount === 2) {
+          scores[pIdx] += 12;
+          reachCount[player]++;
+        } else if (myCount === 1) scores[pIdx] += 2;
       } else if (myCount === 0 && emptyCount === 0) {
         // Line is blocked from me, slight negative
         scores[pIdx] -= 1;
       }
     }
+  }
+
+  // フォーク: 2本以上のリーチは大ボーナス（防ぎきれない）
+  for (const player of PLAYERS) {
+    if (reachCount[player] >= 2) {
+      scores[playerIndex(player)] += 25 * (reachCount[player] - 1);
+    }
+  }
+
+  // 手番プレイヤーのリーチは次に勝てるので追加評価
+  if (reachCount[state.currentPlayer] >= 1) {
+    scores[playerIndex(state.currentPlayer)] += 8;
   }
 
   // Bonus: control center
