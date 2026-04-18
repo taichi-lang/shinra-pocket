@@ -18,6 +18,7 @@ import { getTotalTickets, getTicketState } from '../monetize/ticketStore';
 import { restorePurchases, isSubscriptionActive } from '../monetize/iapService';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { setLocale, getCurrentLocale, t } from '../i18n';
+import { CONFIG } from '../config';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -32,8 +33,8 @@ const SNS_LINKS = [
 
 const APP_VERSION = '1.0.0';
 // プライバシーポリシー・利用規約URL（サーバーから配信）
-const PRIVACY_POLICY_URL = 'https://shinrapocket.up.railway.app/legal/privacy';
-const TERMS_URL = 'https://shinrapocket.up.railway.app/legal/terms';
+const PRIVACY_POLICY_URL = `${CONFIG.SERVER_URL}/legal/privacy`;
+const TERMS_URL = `${CONFIG.SERVER_URL}/legal/terms`;
 
 const STORAGE_KEY_BGM = '@shinra_bgm_enabled';
 const STORAGE_KEY_SE = '@shinra_se_enabled';
