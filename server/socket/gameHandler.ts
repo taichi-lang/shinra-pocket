@@ -122,6 +122,41 @@ const userToSocket: Map<string, string> = new Map(); // oderId -> socketId (late
 
 let matchmakingTimer: ReturnType<typeof setInterval> | null = null;
 
+// --- Debug accessors for admin dashboard ---
+export function getQueueSnapshot(): Array<{
+  userId: string;
+  username: string;
+  displayName: string;
+  gameType: string;
+  rating: number;
+  waitSeconds: number;
+}> {
+  const now = Date.now();
+  return Array.from(matchmakingQueue.values()).map((e) => ({
+    userId: e.userId,
+    username: e.username,
+    displayName: e.displayName,
+    gameType: e.gameType,
+    rating: e.rating,
+    waitSeconds: Math.floor((now - e.joinedAt) / 1000),
+  }));
+}
+
+export function getRoomsSnapshot(): Array<{
+  roomId: string;
+  gameType: string;
+  playerCount: number;
+  ageSeconds: number;
+}> {
+  const now = Date.now();
+  return Array.from(rooms.values()).map((r) => ({
+    roomId: r.roomId,
+    gameType: r.gameType,
+    playerCount: r.players.size,
+    ageSeconds: Math.floor((now - r.createdAt) / 1000),
+  }));
+}
+
 // ---------------------------------------------------------------------------
 // Auth
 // ---------------------------------------------------------------------------

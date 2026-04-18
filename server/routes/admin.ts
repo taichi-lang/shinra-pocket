@@ -31,6 +31,22 @@ function requireAdminKey(req: Request, res: Response, next: NextFunction): void 
 
 router.use(requireAdminKey);
 
+// ─── GET /matchmaking — Current queue + rooms snapshot ──
+router.get("/matchmaking", (_req: Request, res: Response) => {
+  try {
+    // Late import to avoid circular deps at load time
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getQueueSnapshot, getRoomsSnapshot } = require("../socket/gameHandler");
+    res.json({
+      queue: getQueueSnapshot(),
+      rooms: getRoomsSnapshot(),
+    });
+  } catch (err) {
+    console.error("[Admin] Matchmaking snapshot error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // ─── GET /stats — App statistics ────────────────────────
 router.get("/stats", async (_req: Request, res: Response) => {
   try {
